@@ -1,10 +1,11 @@
 import "./App.css";
-import RegisterForm from "./components/RegisterForm";
+import RegisteredList from "./components/RegisteredList";
 
 function App() {
   return (
     <>
-      <RegisterForm />
+      {/* <RegisterForm /> */}
+      <RegisteredList />
     </>
   );
 }

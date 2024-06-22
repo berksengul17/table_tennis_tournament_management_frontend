@@ -3,7 +3,7 @@
   flex-direction: column;
   align-items: center;
   /* margin-top yapınca niye body de kayıyor öğren  */
-  padding-top: 100px;
+  padding-top: 2rem;
 }
 
 .title {

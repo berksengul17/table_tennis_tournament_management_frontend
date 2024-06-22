@@ -1,16 +1,8 @@
 import { SubmitHandler, useForm } from "react-hook-form";
+import { PlayerInfo } from "../../type";
 import styles from "./index.module.css";
 
-type Inputs = {
-  firstName: string;
-  lastName: string;
-  gender: string;
-  email: string;
-  phoneNumber: string;
-  birthDate: Date;
-  ageCategory: string;
-  city: string;
-};
+type Inputs = Omit<PlayerInfo, "id">;
 
 const RequiredLabel = ({
   htmlFor,
@@ -33,7 +25,6 @@ function RegisterForm() {
   const {
     register,
     handleSubmit,
-    watch,
     formState: { errors },
   } = useForm<Inputs>({
     defaultValues: {
