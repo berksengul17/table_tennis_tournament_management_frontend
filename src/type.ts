@@ -1,4 +1,4 @@
-export type PlayerInfo = {
+export type Player = {
   id: string;
   firstName: string;
   lastName: string;
@@ -9,3 +9,5 @@ export type PlayerInfo = {
   ageCategory: string;
   city: string;
 };
+
+export type PlayerInputs = Omit<Player, "id">;

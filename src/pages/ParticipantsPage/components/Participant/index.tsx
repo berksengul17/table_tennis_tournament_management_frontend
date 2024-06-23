@@ -1,7 +1,7 @@
-import { PlayerInfo } from "../../type";
+import { Player } from "../../../../type";
 import styles from "./index.module.css";
 
-function RegisteredListItem({ item }: { item: PlayerInfo }) {
+function Participant({ item }: { item: Player }) {
   return (
     <div className={styles.item}>
       <p>
@@ -20,4 +20,4 @@ function RegisteredListItem({ item }: { item: PlayerInfo }) {
   );
 }
 
-export default RegisteredListItem;
+export default Participant;

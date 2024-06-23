@@ -1,32 +1,15 @@
 import { SubmitHandler, useForm } from "react-hook-form";
-import { PlayerInfo } from "../../type";
+import { register as registerPlayer } from "../../api/playerApi.ts";
+import { PlayerInputs } from "../../type";
+import RequiredLabel from "./components/RequiredLabel/index.tsx";
 import styles from "./index.module.css";
 
-type Inputs = Omit<PlayerInfo, "id">;
-
-const RequiredLabel = ({
-  htmlFor,
-  text,
-  required,
-}: {
-  htmlFor: string;
-  text: string;
-  required: boolean;
-}) => {
-  return (
-    <label htmlFor={htmlFor}>
-      {text}
-      {required && <span style={{ color: "red" }}>*</span>}
-    </label>
-  );
-};
-
-function RegisterForm() {
+function RegisterPage() {
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<Inputs>({
+  } = useForm<PlayerInputs>({
     defaultValues: {
       firstName: "",
       lastName: "",
@@ -39,7 +22,9 @@ function RegisterForm() {
     },
   });
 
-  const onSubmit: SubmitHandler<Inputs> = (data) => console.log(data);
+  const onSubmit: SubmitHandler<PlayerInputs> = async (data: PlayerInputs) => {
+    await registerPlayer(data);
+  };
 
   return (
     <div className={styles.container}>
@@ -118,10 +103,10 @@ function RegisterForm() {
             {...register("ageCategory", { required: true })}
             id="ageCategory"
           >
-            <option value="forty-fifty">40-49</option>
-            <option value="fifty-sixty">50-59</option>
-            <option value="sixty-seventy">60-69</option>
-            <option value="seventy-plus">70+</option>
+            <option value="0">40-49</option>
+            <option value="1">50-59</option>
+            <option value="2">60-69</option>
+            <option value="3">70+</option>
           </select>
         </div>
 
@@ -136,4 +121,4 @@ function RegisterForm() {
   );
 }
 
-export default RegisterForm;
+export default RegisterPage;

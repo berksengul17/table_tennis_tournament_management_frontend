@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import styles from "./index.module.css";
 
-function NotFound() {
+function NotFoundPage() {
   return (
     <div className={styles.container}>
       <span style={{ marginBottom: "2rem" }}>404 Not Found</span>
@@ -10,4 +10,4 @@ function NotFound() {
   );
 }
 
-export default NotFound;
+export default NotFoundPage;
