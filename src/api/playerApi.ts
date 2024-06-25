@@ -40,6 +40,17 @@ export const getCategorizedParticipants = async () => {
   }
 };
 
+export const distributeToTables = async (totalTables: number) => {
+  try {
+    const response = await axios.get(`${API_URL}/distribute`, {
+      params: { totalTables: totalTables },
+    });
+    return response.data;
+  } catch (error: unknown | AxiosError) {
+    handleAxiosError(error);
+  }
+};
+
 const handleAxiosError = (error: unknown | AxiosError) => {
   if (axios.isAxiosError(error)) {
     if (error.response) {

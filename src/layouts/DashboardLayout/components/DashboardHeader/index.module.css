@@ -1,0 +1,9 @@
+.container {
+  display: flex;
+  justify-content: flex-end;
+  padding: 1rem;
+}
+
+.btn {
+  margin-left: 1rem;
+}

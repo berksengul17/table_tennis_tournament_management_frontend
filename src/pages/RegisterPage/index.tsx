@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { register as registerPlayer } from "../../api/playerApi.ts";
 import { PlayerInputs } from "../../type";
@@ -5,11 +6,7 @@ import RequiredLabel from "./components/RequiredLabel/index.tsx";
 import styles from "./index.module.css";
 
 function RegisterPage() {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<PlayerInputs>({
+  const { register, handleSubmit, reset, formState } = useForm<PlayerInputs>({
     defaultValues: {
       firstName: "",
       lastName: "",
@@ -25,6 +22,12 @@ function RegisterPage() {
   const onSubmit: SubmitHandler<PlayerInputs> = async (data: PlayerInputs) => {
     await registerPlayer(data);
   };
+
+  useEffect(() => {
+    if (formState.isSubmitSuccessful) {
+      reset();
+    }
+  }, [formState, reset]);
 
   return (
     <div className={styles.container}>

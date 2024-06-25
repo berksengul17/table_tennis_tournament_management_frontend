@@ -1,0 +1,19 @@
+.navbar {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin: 1.5rem 5rem;
+}
+
+.link {
+  text-decoration: none;
+  color: black;
+}
+
+.active {
+  color: red;
+}
+
+.pending {
+  color: "yellow";
+}

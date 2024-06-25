@@ -1,11 +1,11 @@
-import "./App.css";
-import RegisteredList from "./components/RegisteredList";
+import { Outlet } from "react-router-dom";
+import Header from "./components/Header";
 
 function App() {
   return (
     <>
-      {/* <RegisterForm /> */}
-      <RegisteredList />
+      <Header />
+      <Outlet />
     </>
   );
 }

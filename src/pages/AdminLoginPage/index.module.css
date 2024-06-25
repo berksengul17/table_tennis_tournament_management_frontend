@@ -1,0 +1,17 @@
+.container {
+  display: flex;
+  height: 100%;
+  justify-content: center;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.form label {
+  margin-right: 0.5rem;
+}
