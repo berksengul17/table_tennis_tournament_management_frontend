@@ -1,0 +1,12 @@
+.tableContainer {
+  display: flex;
+  flex-direction: column;
+  margin-top: 2rem;
+}
+
+.tableHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}

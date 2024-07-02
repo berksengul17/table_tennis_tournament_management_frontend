@@ -11,36 +11,26 @@
   margin-bottom: 1rem;
 }
 
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 20px;
-  width: 100%;
-  padding: 0 20px;
-  box-sizing: border-box;
+.tableContainer {
+  display: inline-flex;
+  flex-direction: column;
+  margin-bottom: 2rem;
 }
 
-.table {
-  background-color: white;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  padding: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-.table h3 {
-  margin-top: 0;
-  font-size: 20px;
-  color: #555;
+.tableHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 1rem;
 }
 
-ul {
-  list-style-type: none;
-  padding: 0;
+.tableTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
 }
 
-li {
-  font-size: 16px;
-  color: #666;
+.ageCategoryHeader {
+  font-weight: bold;
+  background-color: #f0f0f0;
+  text-align: center;
 }

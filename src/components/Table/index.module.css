@@ -1,0 +1,21 @@
+.usersTable {
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+}
+
+.usersTableCell {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+  min-width: fit-content;
+}
+
+.tableHeader {
+  font-weight: 600;
+}
+
+.ageCategoryHeader {
+  font-weight: bold;
+  background-color: #f0f0f0;
+  text-align: center;
+}

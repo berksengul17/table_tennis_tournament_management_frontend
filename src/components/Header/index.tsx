@@ -29,6 +29,9 @@ const Header = () => (
       <li>
         <HeaderLink to="/participants" text="Katılımcılar" />
       </li>
+      <li>
+        <HeaderLink to="/groups" text="Gruplar" />
+      </li>
     </ul>
   </nav>
 );
