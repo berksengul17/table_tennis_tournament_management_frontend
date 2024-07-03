@@ -67,13 +67,13 @@ function ParticipantsTable() {
 
   return (
     participants && (
-      <div>
+      <>
         <div className={styles.header}>
           <h1>Katılımcılar</h1>
           <h3>Katılımcı Sayısı: {participants.length}</h3>
         </div>
         <Table<Player> columns={columns} data={participants} />;
-      </div>
+      </>
     )
   );
 }

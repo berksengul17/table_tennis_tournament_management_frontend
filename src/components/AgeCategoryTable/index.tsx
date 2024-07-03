@@ -106,7 +106,7 @@ function AgeCategoryTable() {
   }, []);
 
   return (
-    <div>
+    <>
       {renderTabs()}
       {Object.keys(AGE_CATEGORY).map((_, index) => (
         <CustomTabPanel key={index} value={activeTab} index={index}>
@@ -126,7 +126,7 @@ function AgeCategoryTable() {
           />
         </CustomTabPanel>
       ))}
-    </div>
+    </>
   );
 }
 

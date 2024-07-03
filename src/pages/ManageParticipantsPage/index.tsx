@@ -1,23 +1,23 @@
 import { useState } from "react";
 import AgeCategoryTable from "../../components/AgeCategoryTable";
-import GroupsTable from "../../components/GroupsTable";
+import Groups from "../../components/Groups";
 import ParticipantsTable from "../../components/ParticipantsTable";
 import styles from "./index.module.css";
 
 function ManageParticipantsPage() {
   const [showAgeCategoryTable, setShowAgeCategoryTable] =
     useState<boolean>(false);
-  const [showGroupsTable, setShowGroupsTable] = useState<boolean>(false);
+  const [showGroups, setShowGroups] = useState<boolean>(false);
 
   return (
     <div className={styles.container}>
       {showAgeCategoryTable ? (
-        showGroupsTable ? (
-          <GroupsTable />
+        showGroups ? (
+          <Groups />
         ) : (
           <>
             <button
-              onClick={() => setShowGroupsTable(true)}
+              onClick={() => setShowGroups(true)}
               style={{ marginBottom: "1rem" }}
             >
               Gruplara Ayır
