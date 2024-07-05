@@ -1,9 +1,59 @@
 .container {
   display: flex;
-  justify-content: flex-end;
-  padding: 1rem;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background-color: #f8f8f8;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.logoContainer {
+  display: flex;
+  align-items: center;
+}
+
+.logo {
+  width: 70px;
+  object-fit: cover;
+  margin-right: 1rem;
+}
+
+.logoText {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: rgb(28, 21, 101);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+}
+
+.adminName {
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: black;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-right: 1rem;
 }
 
 .btn {
-  margin-left: 1rem;
+  background-color: #ff4d4d;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  border-radius: 5px;
+}
+
+.btn:hover {
+  background-color: #ff1a1a;
 }

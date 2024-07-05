@@ -40,3 +40,14 @@ export const getAllGroups = async (): Promise<Group[]> => {
 
   return [];
 };
+
+export const saveGroups = async (groups: Group[]): Promise<Group[]> => {
+  try {
+    const response = await axios.post(`${API_URL}/save`, groups);
+    return response.data;
+  } catch (error: unknown | AxiosError) {
+    handleAxiosError(error);
+  }
+
+  return [];
+};

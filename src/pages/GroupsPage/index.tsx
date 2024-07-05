@@ -3,7 +3,11 @@ import Tabs from "@mui/material/Tabs";
 import React, { useCallback, useEffect, useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-import { createGroupsForAgeCategory, getAllGroups } from "../../api/groupApi";
+import {
+  createGroupsForAgeCategory,
+  getAllGroups,
+  saveGroups,
+} from "../../api/groupApi";
 import { useAuth } from "../../context/AuthProvider";
 import { AGE_CATEGORY, Group } from "../../type";
 import GroupCard from "./components/GroupCard";
@@ -15,13 +19,14 @@ const CustomTabPanel = ({
   index,
   children,
 }: { value: number; index: number } & React.PropsWithChildren<{}>) => {
-  return <>{value === index && children}</>;
+  return <div style={{ width: "50%" }}>{value === index && children}</div>;
 };
 
 const GroupsPage: React.FC = () => {
   const { isAdminDashboard } = useAuth();
   const [groups, setGroups] = useState<Group[]>([]);
   const [activeTab, setActiveTab] = useState<number>(0);
+  const [showSaveButton, setShowSaveButton] = useState<boolean>(true);
 
   const renderTabs = () => {
     const tabs = [];
@@ -143,6 +148,11 @@ const GroupsPage: React.FC = () => {
     [isAdminDashboard]
   );
 
+  const handleSave = async () => {
+    setGroups(await saveGroups(groups));
+    setShowSaveButton(false);
+  };
+
   if (groups.length === 0) {
     return <p className={styles.noGroup}>Gruplar henüz oluşturulmadı.</p>;
   }
@@ -163,6 +173,9 @@ const GroupsPage: React.FC = () => {
                     0
                   )}
               </p>
+              {showSaveButton && (
+                <button onClick={handleSave}>Değişiklikleri Kaydet</button>
+              )}
             </div>
             <div className={styles.groupContainer}>
               {groups
