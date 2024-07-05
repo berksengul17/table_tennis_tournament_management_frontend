@@ -1,7 +1,7 @@
 import { useState } from "react";
 import AgeCategoryTable from "../../components/AgeCategoryTable";
-import Groups from "../../components/Groups";
 import ParticipantsTable from "../../components/ParticipantsTable";
+import Groups from "../GroupsPage/components/Groups";
 import styles from "./index.module.css";
 
 function ManageParticipantsPage() {
