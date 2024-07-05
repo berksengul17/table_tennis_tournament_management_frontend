@@ -1,12 +1,13 @@
 import { useRef } from "react";
 import { useDrag, useDrop } from "react-dnd";
+import { useAuth } from "../../../../context/AuthProvider";
 import { Group, Player } from "../../../../type";
 
 type GroupMemberProps = {
   participant: Player;
   group: Group;
   index: number;
-  moveParticipantInGroup: (
+  moveParticipantInGroup?: (
     groupId: number,
     dragIndex: number,
     hoverIndex: number
@@ -19,8 +20,8 @@ const GroupMember: React.FC<GroupMemberProps> = ({
   index,
   moveParticipantInGroup,
 }) => {
+  const { isAdminDashboard } = useAuth();
   const ref = useRef<HTMLParagraphElement>(null);
-
   const [{ isDragging }, drag] = useDrag({
     type: "participant",
     item: { id: participant.id, group, index },
@@ -57,7 +58,7 @@ const GroupMember: React.FC<GroupMemberProps> = ({
         return;
       }
 
-      moveParticipantInGroup(group.id, dragIndex, hoverIndex);
+      moveParticipantInGroup?.(group.id, dragIndex, hoverIndex);
       item.index = hoverIndex;
     },
   });
@@ -65,7 +66,10 @@ const GroupMember: React.FC<GroupMemberProps> = ({
   drag(drop(ref));
 
   return (
-    <p ref={ref} style={{ opacity: isDragging ? 0.5 : 1 }}>
+    <p
+      ref={isAdminDashboard ? ref : null}
+      style={{ opacity: isDragging ? 0.5 : 1 }}
+    >
       {participant.firstName} {participant.lastName} - {participant.rating}
     </p>
   );

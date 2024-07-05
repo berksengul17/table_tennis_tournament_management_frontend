@@ -1,0 +1,15 @@
+.header {
+  display: flex;
+  align-items: center;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+.groupContainer {
+  width: 50%;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 2rem;
+  align-items: stretch;
+  margin-top: 2rem;
+}

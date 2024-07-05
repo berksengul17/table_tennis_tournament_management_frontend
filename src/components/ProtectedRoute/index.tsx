@@ -3,16 +3,18 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthProvider";
 
 function ProtectedRoute({ children }: PropsWithChildren) {
-  const { admin } = useAuth();
+  const { admin, isAdminDashboard, setAdminDashboard } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log("admin", admin);
-
     if (admin === null) {
       navigate("/");
+    } else {
+      setAdminDashboard(true);
     }
-  }, [admin, navigate]);
+
+    return () => setAdminDashboard(false);
+  }, [admin, isAdminDashboard, navigate]);
 
   return children;
 }

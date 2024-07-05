@@ -1,7 +1,7 @@
 import { useState } from "react";
 import AgeCategoryTable from "../../components/AgeCategoryTable";
 import ParticipantsTable from "../../components/ParticipantsTable";
-import Groups from "../GroupsPage/components/Groups";
+import AdminGroupsPage from "../GroupsPage";
 import styles from "./index.module.css";
 
 function ManageParticipantsPage() {
@@ -13,7 +13,7 @@ function ManageParticipantsPage() {
     <div className={styles.container}>
       {showAgeCategoryTable ? (
         showGroups ? (
-          <Groups />
+          <AdminGroupsPage />
         ) : (
           <>
             <button

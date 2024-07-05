@@ -7,6 +7,8 @@ type Admin = {
 
 type AuthContextProps = {
   admin: Admin | null;
+  isAdminDashboard: boolean;
+  setAdminDashboard: React.Dispatch<React.SetStateAction<boolean>>;
   login: (username: string, password: string) => void;
   logout: () => void;
 };
@@ -18,6 +20,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     const storedAdmin = localStorage.getItem("admin");
     return storedAdmin ? JSON.parse(storedAdmin) : null;
   });
+  const [isAdminDashboard, setAdminDashboard] = useState<boolean>(false);
 
   const login = (username: string, password: string) => {
     if (username === "admin" && password === "admin") {
@@ -32,7 +35,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     localStorage.removeItem("admin");
   };
 
-  const value = { admin, login, logout };
+  const value = { admin, isAdminDashboard, setAdminDashboard, login, logout };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

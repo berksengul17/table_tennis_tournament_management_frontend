@@ -6,12 +6,12 @@ import styles from "./index.module.css";
 type GroupCardProps = {
   group: Group;
   ordinal: number;
-  moveParticipant: (
+  moveParticipant?: (
     participantId: string,
     fromGroup: Group,
     toGroup: Group
   ) => void;
-  moveParticipantInGroup: (
+  moveParticipantInGroup?: (
     groupId: number,
     dragIndex: number,
     hoverIndex: number
@@ -27,7 +27,7 @@ const GroupCard: React.FC<GroupCardProps> = ({
   const [{ isOver }, drop] = useDrop({
     accept: "participant",
     drop: (item: { id: string; group: Group }) =>
-      moveParticipant(item.id, item.group, group),
+      moveParticipant?.(item.id, item.group, group),
     collect: (monitor) => ({
       isOver: !!monitor.isOver(),
     }),
