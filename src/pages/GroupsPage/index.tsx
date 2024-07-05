@@ -143,44 +143,50 @@ const GroupsPage: React.FC = () => {
     [isAdminDashboard]
   );
 
+  if (groups.length === 0) {
+    return <p className={styles.noGroup}>Gruplar henüz oluşturulmadı.</p>;
+  }
+
   return (
     <DndProvider backend={HTML5Backend}>
-      {renderTabs()}
-      {Object.keys(AGE_CATEGORY).map((_, index) => (
-        <CustomTabPanel key={index} value={activeTab} index={index}>
-          <div className={styles.header}>
-            <p>
-              Toplam Katılımcı Sayısı:{" "}
+      <div className={styles.container}>
+        {renderTabs()}
+        {Object.keys(AGE_CATEGORY).map((_, index) => (
+          <CustomTabPanel key={index} value={activeTab} index={index}>
+            <div className={styles.header}>
+              <p>
+                Toplam Katılımcı Sayısı:{" "}
+                {groups
+                  .filter((group) => group.ageCategory === index)
+                  .reduce(
+                    (acc, group) => acc + (group.participants?.length ?? 0),
+                    0
+                  )}
+              </p>
+            </div>
+            <div className={styles.groupContainer}>
               {groups
                 .filter((group) => group.ageCategory === index)
-                .reduce(
-                  (acc, group) => acc + (group.participants?.length ?? 0),
-                  0
-                )}
-            </p>
-          </div>
-          <div className={styles.groupContainer}>
-            {groups
-              .filter((group) => group.ageCategory === index)
-              .map((group, index) => (
-                <GroupCard
-                  key={group.id}
-                  group={group}
-                  ordinal={index + 1}
-                  moveParticipant={
-                    isAdminDashboard ? moveParticipant : undefined
-                  }
-                  moveParticipantInGroup={
-                    isAdminDashboard ? moveParticipantInGroup : undefined
-                  }
-                />
-              ))}
-            {isAdminDashboard && (
-              <NewGroupDropArea createNewGroup={createNewGroup} />
-            )}
-          </div>
-        </CustomTabPanel>
-      ))}
+                .map((group, index) => (
+                  <GroupCard
+                    key={group.id}
+                    group={group}
+                    ordinal={index + 1}
+                    moveParticipant={
+                      isAdminDashboard ? moveParticipant : undefined
+                    }
+                    moveParticipantInGroup={
+                      isAdminDashboard ? moveParticipantInGroup : undefined
+                    }
+                  />
+                ))}
+              {isAdminDashboard && (
+                <NewGroupDropArea createNewGroup={createNewGroup} />
+              )}
+            </div>
+          </CustomTabPanel>
+        ))}
+      </div>
     </DndProvider>
   );
 };

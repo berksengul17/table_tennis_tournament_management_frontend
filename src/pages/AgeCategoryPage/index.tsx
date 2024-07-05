@@ -6,8 +6,8 @@ import {
   createAgeCategories,
   getAgeCategories,
 } from "../../api/ageCategoryApi";
+import Table from "../../components/Table";
 import { AGE_CATEGORY, AgeCategory, Player } from "../../type";
-import Table from "../Table";
 import styles from "./index.module.css";
 
 const CustomTabPanel = ({
@@ -20,7 +20,11 @@ const CustomTabPanel = ({
 
 const columnHelper = createColumnHelper<Player>();
 
-function AgeCategoryTable() {
+function AgeCategoryPage({
+  setShowGroups,
+}: {
+  setShowGroups: React.Dispatch<React.SetStateAction<boolean>>;
+}) {
   const [ageCategories, setAgeCategories] = useState<AgeCategory[]>([]);
   const [activeTab, setActiveTab] = useState<number>(0);
   const columns = useMemo(
@@ -106,7 +110,7 @@ function AgeCategoryTable() {
   }, []);
 
   return (
-    <>
+    <div className={styles.container}>
       {renderTabs()}
       {Object.keys(AGE_CATEGORY).map((_, index) => (
         <CustomTabPanel key={index} value={activeTab} index={index}>
@@ -118,16 +122,17 @@ function AgeCategoryTable() {
                   ? ageCategories[index].participants?.length ?? 0
                   : 0}
               </p>
+              <button onClick={() => setShowGroups(true)}>Gruplara Ayır</button>
             </div>
+            <Table<Player>
+              columns={columns}
+              data={ageCategories[index] && ageCategories[index].participants}
+            />
           </div>
-          <Table<Player>
-            columns={columns}
-            data={ageCategories[index] && ageCategories[index].participants}
-          />
         </CustomTabPanel>
       ))}
-    </>
+    </div>
   );
 }
 
-export default AgeCategoryTable;
+export default AgeCategoryPage;

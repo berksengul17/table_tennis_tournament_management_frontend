@@ -1,88 +1,32 @@
 .container {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
   padding-top: 2rem;
+  width: 80%;
+  margin: auto;
 }
 
 .container h1 {
   font-size: 2rem;
-  margin-bottom: 1rem;
 }
 
-.usersTable {
-  width: 80%;
-  border-collapse: collapse;
-  margin-bottom: 1rem;
-}
-
-.usersTableCell {
-  border: 1px solid #dddddd;
-  text-align: left;
-  padding: 8px;
-  min-width: fit-content;
-}
-
-.tableHeader {
-  font-weight: 600;
-}
-
-/* index.module.css */
-/* .container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
-  background-color: #f7f7f7;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-h1 {
-  text-align: center;
-  margin-bottom: 20px;
-  font-size: 28px;
-  color: #333;
-}
-
-h2 {
-  margin-top: 20px;
-  font-size: 24px;
-  color: #555;
-}
-
-button {
-  padding: 10px 20px;
-  background-color: #4caf50;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-button:hover {
-  background-color: #45a049;
-}
-
-.Participant {
-  padding: 10px;
-  margin-bottom: 10px;
-  background-color: white;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.Participant > div {
+.header {
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 1rem;
 }
 
-.Participant div span {
-  font-size: 14px;
-  color: #666;
-} */
+.headerContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.categoryButton {
+  margin-top: 1rem;
+  margin-left: auto;
+}

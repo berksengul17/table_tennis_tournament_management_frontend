@@ -1,3 +1,11 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+}
+
 .header {
   display: flex;
   align-items: center;
@@ -12,4 +20,11 @@
   gap: 2rem;
   align-items: stretch;
   margin-top: 2rem;
+}
+
+.noGroup {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.5rem;
 }

@@ -1,8 +1,7 @@
 import { useState } from "react";
-import AgeCategoryTable from "../../components/AgeCategoryTable";
-import ParticipantsTable from "../../components/ParticipantsTable";
-import AdminGroupsPage from "../GroupsPage";
-import styles from "./index.module.css";
+import AgeCategoryPage from "../AgeCategoryPage";
+import GroupsPage from "../GroupsPage";
+import ParticipantsPage from "../ParticipantsPage";
 
 function ManageParticipantsPage() {
   const [showAgeCategoryTable, setShowAgeCategoryTable] =
@@ -10,33 +9,17 @@ function ManageParticipantsPage() {
   const [showGroups, setShowGroups] = useState<boolean>(false);
 
   return (
-    <div className={styles.container}>
+    <>
       {showAgeCategoryTable ? (
         showGroups ? (
-          <AdminGroupsPage />
+          <GroupsPage />
         ) : (
-          <>
-            <button
-              onClick={() => setShowGroups(true)}
-              style={{ marginBottom: "1rem" }}
-            >
-              Gruplara Ayır
-            </button>
-            <AgeCategoryTable />
-          </>
+          <AgeCategoryPage setShowGroups={setShowGroups} />
         )
       ) : (
-        <>
-          <button
-            onClick={() => setShowAgeCategoryTable(true)}
-            style={{ marginBottom: "1rem" }}
-          >
-            Yaş Kategorilerine Ayır
-          </button>
-          <ParticipantsTable />
-        </>
+        <ParticipantsPage setShowAgeCategoryTable={setShowAgeCategoryTable} />
       )}
-    </div>
+    </>
   );
 }
 

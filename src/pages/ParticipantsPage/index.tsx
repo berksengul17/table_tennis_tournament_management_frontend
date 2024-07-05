@@ -1,32 +1,19 @@
-import {
-  createColumnHelper,
-  flexRender,
-  getCoreRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
-import { useEffect, useMemo, useState } from "react";
+import { createColumnHelper } from "@tanstack/react-table";
+import React, { useEffect, useMemo, useState } from "react";
 import { getParticipants } from "../../api/playerApi";
-import { Player } from "../../type";
+import Table from "../../components/Table";
+import { useAuth } from "../../context/AuthProvider";
+import { AGE_CATEGORY, Player } from "../../type";
 import styles from "./index.module.css";
-
-const convertIntToAgeCategory = (intCategory: number) => {
-  switch (intCategory) {
-    case 0:
-      return "40-49";
-    case 1:
-      return "50-59";
-    case 2:
-      return "60-69";
-    case 3:
-      return "70+";
-  }
-};
-
-const fallbackData: Player[] = [];
 
 const columnHelper = createColumnHelper<Player>();
 
-function ParticipantsPage() {
+function ParticipantPage({
+  setShowAgeCategoryTable,
+}: {
+  setShowAgeCategoryTable: React.Dispatch<React.SetStateAction<boolean>>;
+}) {
+  const { isAdminDashboard } = useAuth();
   const [participants, setParticipants] = useState<Player[]>([]);
   const columns = useMemo(
     () => [
@@ -53,7 +40,7 @@ function ParticipantsPage() {
       columnHelper.accessor("birthDate", {
         header: "Doğum Tarihi",
         cell: (info) => {
-          const date = new Date(info.getValue());
+          const date = new Date(info.getValue() as string);
           return date.toLocaleDateString("en-GB");
         },
       }),
@@ -67,7 +54,7 @@ function ParticipantsPage() {
       }),
       columnHelper.accessor("ageCategory", {
         header: "Yaş Kategorisi",
-        cell: (info) => convertIntToAgeCategory(info.getValue()),
+        cell: (info) => Object.values(AGE_CATEGORY)[info.getValue()],
       }),
       columnHelper.accessor("rating", {
         header: "Puan",
@@ -76,64 +63,35 @@ function ParticipantsPage() {
     ],
     []
   );
-  const table = useReactTable({
-    data: participants ?? fallbackData,
-    columns: columns,
-    getCoreRowModel: getCoreRowModel(),
-  });
 
   useEffect(() => {
+    // fetch participants
     (async () => {
-      try {
-        setParticipants(await getParticipants());
-      } catch (error) {
-        console.error("Failed to load participants:", error);
-      }
+      setParticipants(await getParticipants());
     })();
   }, []);
 
   return (
-    <div className={styles.container}>
-      <h1>Katılımcılar</h1>
-      <>
-        <span style={{ marginBottom: "2rem" }}>
-          Toplam katılımcı sayısı: {participants.length}
-        </span>
-        <table className={styles.usersTable}>
-          <thead>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <th
-                    key={header.id}
-                    className={`${styles.usersTableCell} ${styles.tableHeader}`}
-                  >
-                    <div>
-                      {flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
-                    </div>
-                  </th>
-                ))}
-              </tr>
-            ))}
-          </thead>
-          <tbody>
-            {table.getRowModel().rows.map((row) => (
-              <tr key={row.id}>
-                {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id} className={styles.usersTableCell}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </>
-    </div>
+    participants && (
+      <div className={styles.container}>
+        <div className={styles.header}>
+          <div className={styles.headerContent}>
+            <h1>Katılımcılar</h1>
+            <h3>Katılımcı Sayısı: {participants.length}</h3>
+          </div>
+          {isAdminDashboard && (
+            <button
+              onClick={() => setShowAgeCategoryTable(true)}
+              className={styles.categoryButton}
+            >
+              Yaş Kategorilerine Ayır
+            </button>
+          )}
+        </div>
+        <Table<Player> columns={columns} data={participants} />
+      </div>
+    )
   );
 }
 
-export default ParticipantsPage;
+export default ParticipantPage;
