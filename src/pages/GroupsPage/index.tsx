@@ -56,7 +56,9 @@ const GroupsPage: React.FC = () => {
     })();
   }, [isAdminDashboard]);
 
-  useEffect(() => {}, [groups]);
+  useEffect(() => {
+    console.log("Groups updated:", groups);
+  }, [groups]);
 
   const moveParticipant = useCallback(
     (participantId: string, fromGroup: Group, toGroup: Group) => {

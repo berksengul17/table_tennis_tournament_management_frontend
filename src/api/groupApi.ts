@@ -43,7 +43,13 @@ export const getAllGroups = async (): Promise<Group[]> => {
 
 export const saveGroups = async (groups: Group[]): Promise<Group[]> => {
   try {
-    const response = await axios.post(`${API_URL}/save`, groups);
+    const response = await axios.post(
+      `${API_URL}/save`,
+      groups.map((g) => {
+        const { id, ...rest } = g;
+        return rest;
+      })
+    );
     return response.data;
   } catch (error: unknown | AxiosError) {
     handleAxiosError(error);
