@@ -26,8 +26,11 @@ const GroupCard: React.FC<GroupCardProps> = ({
 }) => {
   const [{ isOver }, drop] = useDrop({
     accept: "participant",
-    drop: (item: { id: string; group: Group }) =>
-      moveParticipant?.(item.id, item.group, group),
+    drop: (item: { id: string; group: Group }) => {
+      if (item && item.id) {
+        moveParticipant?.(item.id, item.group, group);
+      }
+    },
     collect: (monitor) => ({
       isOver: !!monitor.isOver(),
     }),
@@ -40,15 +43,18 @@ const GroupCard: React.FC<GroupCardProps> = ({
         className={styles.card}
         style={{ backgroundColor: isOver ? "lightblue" : "white" }}
       >
-        {group.participants?.map((participant, index) => (
-          <GroupMember
-            key={participant.id}
-            participant={participant}
-            group={group}
-            index={index}
-            moveParticipantInGroup={moveParticipantInGroup}
-          />
-        ))}
+        {group.participants?.map(
+          (participant, index) =>
+            participant && (
+              <GroupMember
+                key={participant.id}
+                participant={participant}
+                group={group}
+                index={index}
+                moveParticipantInGroup={moveParticipantInGroup}
+              />
+            )
+        )}
       </div>
     </div>
   );

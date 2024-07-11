@@ -66,12 +66,16 @@ const GroupMember: React.FC<GroupMemberProps> = ({
   drag(drop(ref));
 
   return (
-    <p
-      ref={isAdminDashboard ? ref : null}
-      style={{ opacity: isDragging ? 0.5 : 1 }}
-    >
-      {participant.firstName} {participant.lastName} - {participant.rating}
-    </p>
+    <>
+      {participant && (
+        <p
+          ref={isAdminDashboard ? ref : null}
+          style={{ opacity: isDragging ? 0.5 : 1 }}
+        >
+          {participant.firstName} {participant.lastName} - {participant.rating}
+        </p>
+      )}
+    </>
   );
 };
 

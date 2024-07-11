@@ -12,7 +12,9 @@ const NewGroupDropArea: React.FC<NewGroupDropAreaProps> = ({
   const [, drop] = useDrop({
     accept: "participant",
     drop: (item: { id: string; group: Group; index: number }) => {
-      createNewGroup(item);
+      if (item && item.id) {
+        createNewGroup(item);
+      }
     },
   });
 

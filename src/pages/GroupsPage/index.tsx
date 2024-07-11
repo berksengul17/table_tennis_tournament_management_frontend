@@ -26,7 +26,6 @@ const GroupsPage: React.FC = () => {
   const { isAdminDashboard } = useAuth();
   const [groups, setGroups] = useState<Group[]>([]);
   const [activeTab, setActiveTab] = useState<number>(0);
-  const [showSaveButton, setShowSaveButton] = useState<boolean>(true);
 
   const renderTabs = () => {
     const tabs = [];
@@ -57,6 +56,8 @@ const GroupsPage: React.FC = () => {
     })();
   }, [isAdminDashboard]);
 
+  useEffect(() => {}, [groups]);
+
   const moveParticipant = useCallback(
     (participantId: string, fromGroup: Group, toGroup: Group) => {
       if (fromGroup.id === toGroup.id) {
@@ -67,21 +68,26 @@ const GroupsPage: React.FC = () => {
         const newGroups = prevGroups
           .map((group) => {
             if (group.id === fromGroup.id) {
+              if (!group.participants) {
+                return group;
+              }
               return {
                 ...group,
-                participants: group.participants.filter(
-                  (p) => p.id !== participantId
-                ),
+                participants: group.participants
+                  .filter((p) => p && p.id !== participantId)
+                  .filter(Boolean),
               };
             }
             if (group.id === toGroup.id) {
               const participant = fromGroup.participants.find(
-                (p) => p.id === participantId
+                (p) => p && p.id === participantId
               );
               if (participant) {
                 return {
                   ...group,
-                  participants: [...group.participants, participant],
+                  participants: [...group.participants, participant].filter(
+                    Boolean
+                  ),
                 };
               }
             }
@@ -104,7 +110,9 @@ const GroupsPage: React.FC = () => {
           participants.splice(hoverIndex, 0, draggedParticipant);
 
           return prevGroups.map((g) =>
-            g.id === groupId ? { ...g, participants } : g
+            g.id === groupId
+              ? { ...g, participants: participants.filter(Boolean) }
+              : g
           );
         }
         return prevGroups;
@@ -116,10 +124,19 @@ const GroupsPage: React.FC = () => {
   const createNewGroup = useCallback(
     (item: { id: string; group: Group; index: number }) => {
       setGroups((prevGroups) => {
+        // Check if item and necessary properties are defined
+        if (!item || !item.group || !item.group.participants || !item.id) {
+          console.error("Item or its properties are undefined:", item);
+          return prevGroups;
+        }
+
         const participant = item.group.participants.find(
-          (p) => p.id === item.id
+          (p) => p && p.id === item.id
         );
+
+        // Check if participant is defined
         if (!participant) {
+          console.error("Participant not found in group:", item.id, item.group);
           return prevGroups;
         }
 
@@ -128,16 +145,16 @@ const GroupsPage: React.FC = () => {
           group.id === item.group.id
             ? {
                 ...group,
-                participants: group.participants.filter(
-                  (p) => p.id !== item.id
-                ),
+                participants: group.participants
+                  .filter((p) => p && p.id !== item.id)
+                  .filter(Boolean),
               }
             : group
         );
 
         // Create new group with the participant
         const newGroup: Group = {
-          id: prevGroups.length + 1, // Or use a better ID generation strategy
+          id: prevGroups[prevGroups.length - 1].id + 1, // Or use a better ID generation strategy
           ageCategory: item.group.ageCategory,
           participants: [participant],
         };
@@ -149,8 +166,8 @@ const GroupsPage: React.FC = () => {
   );
 
   const handleSave = async () => {
+    console.log("Saving groups:", groups);
     setGroups(await saveGroups(groups));
-    setShowSaveButton(false);
   };
 
   if (groups.length === 0) {
@@ -173,26 +190,30 @@ const GroupsPage: React.FC = () => {
                     0
                   )}
               </p>
-              {showSaveButton && (
+              {isAdminDashboard && (
                 <button onClick={handleSave}>Değişiklikleri Kaydet</button>
               )}
             </div>
             <div className={styles.groupContainer}>
               {groups
                 .filter((group) => group.ageCategory === index)
-                .map((group, index) => (
-                  <GroupCard
-                    key={group.id}
-                    group={group}
-                    ordinal={index + 1}
-                    moveParticipant={
-                      isAdminDashboard ? moveParticipant : undefined
-                    }
-                    moveParticipantInGroup={
-                      isAdminDashboard ? moveParticipantInGroup : undefined
-                    }
-                  />
-                ))}
+                .map(
+                  (group, index) =>
+                    group &&
+                    group.id && (
+                      <GroupCard
+                        key={group.id}
+                        group={group}
+                        ordinal={index + 1}
+                        moveParticipant={
+                          isAdminDashboard ? moveParticipant : undefined
+                        }
+                        moveParticipantInGroup={
+                          isAdminDashboard ? moveParticipantInGroup : undefined
+                        }
+                      />
+                    )
+                )}
               {isAdminDashboard && (
                 <NewGroupDropArea createNewGroup={createNewGroup} />
               )}
