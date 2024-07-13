@@ -8,10 +8,10 @@ import styles from "./index.module.css";
 
 const columnHelper = createColumnHelper<Player>();
 
-function ParticipantPage({
+function ParticipantsPage({
   setShowAgeCategoryTable,
 }: {
-  setShowAgeCategoryTable: React.Dispatch<React.SetStateAction<boolean>>;
+  setShowAgeCategoryTable?: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   const { isAdminDashboard } = useAuth();
   const [participants, setParticipants] = useState<Player[]>([]);
@@ -81,7 +81,7 @@ function ParticipantPage({
           </div>
           {isAdminDashboard && (
             <button
-              onClick={() => setShowAgeCategoryTable(true)}
+              onClick={() => setShowAgeCategoryTable?.(true)}
               className={styles.categoryButton}
             >
               Yaş Kategorilerine Ayır
@@ -94,4 +94,4 @@ function ParticipantPage({
   );
 }
 
-export default ParticipantPage;
+export default ParticipantsPage;

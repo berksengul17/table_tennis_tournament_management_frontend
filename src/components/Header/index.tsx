@@ -37,6 +37,9 @@ const Header = () => (
       <li>
         <HeaderLink to="/groups" text="Gruplar" />
       </li>
+      <li>
+        <HeaderLink to="/bracket" text="Fikstür" />
+      </li>
     </ul>
   </nav>
 );

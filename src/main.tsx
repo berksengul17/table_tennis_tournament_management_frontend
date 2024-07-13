@@ -6,6 +6,7 @@ import { AuthProvider } from "./context/AuthProvider";
 import "./index.css";
 import DashboardLayout from "./layouts/DashboardLayout";
 import AdminLoginPage from "./pages/AdminLoginPage";
+import BracketPage from "./pages/BracketPage/index.tsx";
 import GroupsPage from "./pages/GroupsPage/index.tsx";
 import Homepage from "./pages/Homepage/index.tsx";
 import ManageParticipantsPage from "./pages/ManageParticipantsPage/index.tsx";
@@ -34,6 +35,10 @@ const router = createBrowserRouter([
       {
         path: "groups",
         element: <GroupsPage />,
+      },
+      {
+        path: "bracket",
+        element: <BracketPage />,
       },
     ],
   },
