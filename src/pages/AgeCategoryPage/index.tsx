@@ -66,7 +66,10 @@ function AgeCategoryPage({
       }),
       columnHelper.accessor("ageCategory", {
         header: "Yaş Kategorisi",
-        cell: (info) => Object.values(AGE_CATEGORY)[info.getValue()],
+        cell: (info) => {
+          console.log(info.getValue());
+          return Object.values(AGE_CATEGORY)[info.getValue().category];
+        },
       }),
       columnHelper.accessor("rating", {
         header: "Puan",

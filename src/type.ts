@@ -6,13 +6,15 @@ export type Player = {
   email: string;
   phoneNumber: string;
   birthDate: string;
-  ageCategory: number;
+  ageCategory: AgeCategory;
   city: string;
   rating: number;
   groupId?: number;
 };
 
-export type PlayerInputs = Omit<Player, "id">;
+export type PlayerInputs = Omit<Player, "id" | "ageCategory"> & {
+  ageCategory: string;
+};
 
 export type AgeCategory = {
   id: number;

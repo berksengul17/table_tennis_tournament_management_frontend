@@ -2,18 +2,25 @@ import { useEffect } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { register as registerPlayer } from "../../api/playerApi.ts";
 import { PlayerInputs } from "../../type";
+import { emailRegex } from "../../utils.ts";
 import RequiredLabel from "./components/RequiredLabel/index.tsx";
 import styles from "./index.module.css";
 
 function RegisterPage() {
-  const { register, handleSubmit, reset, formState } = useForm<PlayerInputs>({
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState,
+    formState: { isSubmitSuccessful, errors },
+  } = useForm<PlayerInputs>({
     defaultValues: {
       firstName: "",
       lastName: "",
       gender: "",
       email: "",
       phoneNumber: "",
-      birthDate: new Date(),
+      birthDate: "",
       ageCategory: "",
       city: "",
     },
@@ -24,7 +31,7 @@ function RegisterPage() {
   };
 
   useEffect(() => {
-    if (formState.isSubmitSuccessful) {
+    if (isSubmitSuccessful) {
       reset();
     }
   }, [formState, reset]);
@@ -48,7 +55,19 @@ function RegisterPage() {
 
         <div className={styles.inputContainer}>
           <RequiredLabel htmlFor="email" text="Email" required />
-          <input {...register("email", { required: true })} id="email" />
+          <input
+            {...register("email", {
+              required: true,
+              pattern: {
+                value: emailRegex,
+                message: "Geçerli bir email adresi giriniz.",
+              },
+            })}
+            id="email"
+          />
+          {errors.email && (
+            <p style={{ color: "red" }}>{errors.email.message}</p>
+          )}
         </div>
 
         <div className={styles.inputContainer}>
@@ -68,7 +87,7 @@ function RegisterPage() {
         <div className={styles.inputContainer}>
           <RequiredLabel htmlFor="gender" text="Cinsiyet" required />
           <div style={{ display: "flex" }}>
-            <div style={{ marginRight: "1rem" }}>
+            <div className={styles.radioContainer}>
               <input
                 {...register("gender", { required: true })}
                 type="radio"
@@ -78,7 +97,7 @@ function RegisterPage() {
               <label htmlFor="male">Erkek</label>
             </div>
 
-            <div>
+            <div className={styles.radioContainer}>
               <input
                 {...register("gender", { required: true })}
                 type="radio"

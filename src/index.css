@@ -10,6 +10,11 @@
   box-sizing: border-box;
 }
 
+html {
+  font-size: 12px !important;
+  background-color: #f9f9f9;
+}
+
 /* http://meyerweb.com/eric/tools/css/reset/ 
    v2.0 | 20110126
    License: none (public domain)
