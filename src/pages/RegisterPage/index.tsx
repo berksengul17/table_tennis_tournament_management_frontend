@@ -26,6 +26,13 @@ function RegisterPage() {
     },
   });
 
+  const handlePhoneChange = (e: any) => {
+    const length = e.target.value.length;
+    if (length === 3 || length === 7 || length === 10) {
+      e.target.value += " ";
+    }
+  };
+
   const onSubmit: SubmitHandler<PlayerInputs> = async (data: PlayerInputs) => {
     await registerPlayer(data);
   };
@@ -77,10 +84,14 @@ function RegisterPage() {
             required
           />
           <input
-            {...register("phoneNumber", { required: true })}
+            {...register("phoneNumber", {
+              required: true,
+              onChange: handlePhoneChange,
+            })}
             id="phoneNumber"
             type="tel"
             pattern="[0-9]{3} [0-9]{3} [0-9]{2} [0-9]{2}"
+            placeholder="5XX XXX XX XX"
           />
         </div>
 

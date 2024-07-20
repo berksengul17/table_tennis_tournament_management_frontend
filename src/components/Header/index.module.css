@@ -9,22 +9,21 @@
 
 .logoContainer {
   display: flex;
+  gap: 10px;
   align-items: center;
 }
 
 .logo {
   width: 70px;
   object-fit: cover;
-  margin-right: 1rem;
 }
 
 .logoText {
-  font-size: 1.2rem;
+  font-size: 1rem;
   font-weight: bold;
   color: rgb(28, 21, 101);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  text-align: center;
 }
 
 .navbarLinks {
