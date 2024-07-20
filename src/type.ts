@@ -35,3 +35,18 @@ export enum AGE_CATEGORY {
   SIXTY_FIVE_TO_SIXTY_NINE = "65-69",
   SEVENTY_PLUS = "70+",
 }
+
+export type Seed = {
+  id: number;
+  participants: Player[];
+};
+
+export type Round = {
+  id: number;
+  seeds: Seed[];
+};
+
+export type TournamentData = {
+  id: number;
+  rounds: Round[];
+};

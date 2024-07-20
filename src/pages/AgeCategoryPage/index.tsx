@@ -1,11 +1,10 @@
-import Tab from "@mui/material/Tab";
-import Tabs from "@mui/material/Tabs";
 import { createColumnHelper } from "@tanstack/react-table";
 import { PropsWithChildren, useEffect, useMemo, useState } from "react";
 import {
   createAgeCategories,
   getAgeCategories,
 } from "../../api/ageCategoryApi";
+import AgeCategoryTabs from "../../components/AgeCategoryTabs";
 import Table from "../../components/Table";
 import { AGE_CATEGORY, AgeCategory, Player } from "../../type";
 import styles from "./index.module.css";
@@ -27,6 +26,7 @@ function AgeCategoryPage({
 }) {
   const [ageCategories, setAgeCategories] = useState<AgeCategory[]>([]);
   const [activeTab, setActiveTab] = useState<number>(0);
+
   const columns = useMemo(
     () => [
       columnHelper.accessor("id", {
@@ -79,20 +79,6 @@ function AgeCategoryPage({
     []
   );
 
-  const renderTabs = () => {
-    const tabs = [];
-
-    for (let i = 0; i < Object.keys(AGE_CATEGORY).length; i++) {
-      tabs.push(<Tab key={i} label={Object.values(AGE_CATEGORY)[i]} />);
-    }
-
-    return (
-      <Tabs value={activeTab} onChange={(_e, newTab) => setActiveTab(newTab)}>
-        {tabs}
-      </Tabs>
-    );
-  };
-
   useEffect(() => {
     console.log("age category use effect");
     // fetch participants
@@ -114,7 +100,7 @@ function AgeCategoryPage({
 
   return (
     <div className={styles.container}>
-      {renderTabs()}
+      <AgeCategoryTabs activeTab={activeTab} setActiveTab={setActiveTab} />
       {Object.keys(AGE_CATEGORY).map((_, index) => (
         <CustomTabPanel key={index} value={activeTab} index={index}>
           <div className={styles.tableContainer}>

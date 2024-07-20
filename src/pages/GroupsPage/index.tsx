@@ -1,5 +1,3 @@
-import Tab from "@mui/material/Tab";
-import Tabs from "@mui/material/Tabs";
 import React, { useCallback, useEffect, useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
@@ -8,6 +6,7 @@ import {
   getAllGroups,
   saveGroups,
 } from "../../api/groupApi";
+import AgeCategoryTabs from "../../components/AgeCategoryTabs";
 import { useAuth } from "../../context/AuthProvider";
 import { AGE_CATEGORY, Group } from "../../type";
 import GroupCard from "./components/GroupCard";
@@ -26,20 +25,6 @@ const GroupsPage: React.FC = () => {
   const { isAdminDashboard } = useAuth();
   const [groups, setGroups] = useState<Group[]>([]);
   const [activeTab, setActiveTab] = useState<number>(0);
-
-  const renderTabs = () => {
-    const tabs = [];
-
-    for (let i = 0; i < Object.keys(AGE_CATEGORY).length; i++) {
-      tabs.push(<Tab key={i} label={Object.values(AGE_CATEGORY)[i]} />);
-    }
-
-    return (
-      <Tabs value={activeTab} onChange={(_e, newTab) => setActiveTab(newTab)}>
-        {tabs}
-      </Tabs>
-    );
-  };
 
   useEffect(() => {
     // Fetch participants
@@ -179,7 +164,7 @@ const GroupsPage: React.FC = () => {
   return (
     <DndProvider backend={HTML5Backend}>
       <div className={styles.container}>
-        {renderTabs()}
+        <AgeCategoryTabs activeTab={activeTab} setActiveTab={setActiveTab} />
         {Object.keys(AGE_CATEGORY).map((_, index) => (
           <CustomTabPanel key={index} value={activeTab} index={index}>
             <div className={styles.header}>
