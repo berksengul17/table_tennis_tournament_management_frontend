@@ -16,7 +16,7 @@ export const register = async (participant: ParticipantInputs) => {
 
 export const getParticipants = async () => {
   try {
-    const response = await axios.get(`${API_URL}/participants`);
+    const response = await axios.get(`${API_URL}/get-all-participants`);
     return response.data;
   } catch (error: unknown | AxiosError) {
     handleAxiosError(error);

@@ -6,7 +6,7 @@ export type Participant = {
   email: string;
   phoneNumber: string;
   birthDate: string;
-  ageCategory: AgeCategory;
+  ageCategory?: AgeCategory;
   city: string;
   rating: number;
   groupId?: number;
@@ -36,17 +36,17 @@ export enum AGE_CATEGORY {
   SEVENTY_PLUS = "70+",
 }
 
-export type Seed = {
+export type ISeed = {
   id: number;
   participants: Participant[];
 };
 
-export type Round = {
+export type IRound = {
   id: number;
-  seeds: Seed[];
+  seeds: ISeed[];
 };
 
-export type TournamentData = {
+export type IBracket = {
   id: number;
-  rounds: Round[];
+  rounds: IRound[];
 };

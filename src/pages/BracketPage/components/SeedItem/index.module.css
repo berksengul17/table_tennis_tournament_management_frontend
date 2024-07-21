@@ -1,0 +1,9 @@
+.seedItem {
+  display: flex;
+  align-items: center;
+}
+
+.seedItem input {
+  margin-left: auto;
+  text-align: center;
+}

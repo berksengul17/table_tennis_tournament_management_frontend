@@ -1,0 +1,15 @@
+.seed {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* .seedPlayer {
+  border-bottom: 1px solid black;
+} */
+
+/* .seedPlayer:nth-child(odd)::after {
+  display: flex;
+  content: "";
+  border-bottom: 1px solid black;
+} */
