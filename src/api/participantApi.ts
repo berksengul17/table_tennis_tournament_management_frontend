@@ -1,12 +1,12 @@
 import axios, { AxiosError } from "axios";
-import { PlayerInputs } from "../type";
+import { ParticipantInputs } from "../type";
 import { handleAxiosError } from "../utils";
 
-const API_URL = "http://localhost:8081/api/player";
+const API_URL = "http://localhost:8081/api/participant";
 
-export const register = async (player: PlayerInputs) => {
+export const register = async (participant: ParticipantInputs) => {
   try {
-    const response = await axios.post(`${API_URL}/register`, player);
+    const response = await axios.post(`${API_URL}/register`, participant);
 
     return response.data;
   } catch (error: unknown | AxiosError) {

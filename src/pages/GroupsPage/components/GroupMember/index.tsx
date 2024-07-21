@@ -1,10 +1,10 @@
 import { useRef } from "react";
 import { useDrag, useDrop } from "react-dnd";
 import { useAuth } from "../../../../context/AuthProvider";
-import { Group, Player } from "../../../../type";
+import { Group, Participant } from "../../../../type";
 
 type GroupMemberProps = {
-  participant: Player;
+  participant: Participant;
   group: Group;
   index: number;
   moveParticipantInGroup?: (

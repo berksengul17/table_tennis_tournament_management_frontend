@@ -1,7 +1,7 @@
-import { Player } from "../../type";
+import { Participant } from "../../type";
 import styles from "./index.module.css";
 
-function Participant({ item }: { item: Player }) {
+function Participant({ item }: { item: Participant }) {
   return (
     <div className={styles.item}>
       <p>

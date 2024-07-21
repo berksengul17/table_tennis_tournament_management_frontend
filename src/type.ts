@@ -1,4 +1,4 @@
-export type Player = {
+export type Participant = {
   id: string;
   firstName: string;
   lastName: string;
@@ -12,20 +12,20 @@ export type Player = {
   groupId?: number;
 };
 
-export type PlayerInputs = Omit<Player, "id" | "ageCategory"> & {
+export type ParticipantInputs = Omit<Participant, "id" | "ageCategory"> & {
   ageCategory: string;
 };
 
 export type AgeCategory = {
   id: number;
   category: number;
-  participants: Player[];
+  participants: Participant[];
 };
 
 export type Group = {
   id: number;
   ageCategory: number;
-  participants: Player[];
+  participants: Participant[];
 };
 
 export enum AGE_CATEGORY {
@@ -38,7 +38,7 @@ export enum AGE_CATEGORY {
 
 export type Seed = {
   id: number;
-  participants: Player[];
+  participants: Participant[];
 };
 
 export type Round = {

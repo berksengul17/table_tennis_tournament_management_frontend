@@ -6,7 +6,7 @@ import {
 } from "../../api/ageCategoryApi";
 import AgeCategoryTabs from "../../components/AgeCategoryTabs";
 import Table from "../../components/Table";
-import { AGE_CATEGORY, AgeCategory, Player } from "../../type";
+import { AGE_CATEGORY, AgeCategory, Participant } from "../../type";
 import styles from "./index.module.css";
 
 const CustomTabPanel = ({
@@ -17,7 +17,7 @@ const CustomTabPanel = ({
   return <>{value === index && children}</>;
 };
 
-const columnHelper = createColumnHelper<Player>();
+const columnHelper = createColumnHelper<Participant>();
 
 function AgeCategoryPage({
   setShowGroups,
@@ -113,7 +113,7 @@ function AgeCategoryPage({
               </p>
               <button onClick={() => setShowGroups(true)}>Gruplara Ayır</button>
             </div>
-            <Table<Player>
+            <Table<Participant>
               columns={columns}
               data={ageCategories[index] && ageCategories[index].participants}
             />

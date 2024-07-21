@@ -1,12 +1,12 @@
 import { createColumnHelper } from "@tanstack/react-table";
 import React, { useEffect, useMemo, useState } from "react";
-import { getParticipants } from "../../api/playerApi";
+import { getParticipants } from "../../api/participantApi";
 import Table from "../../components/Table";
 import { useAuth } from "../../context/AuthProvider";
-import { AGE_CATEGORY, Player } from "../../type";
+import { AGE_CATEGORY, Participant } from "../../type";
 import styles from "./index.module.css";
 
-const columnHelper = createColumnHelper<Player>();
+const columnHelper = createColumnHelper<Participant>();
 
 function ParticipantsPage({
   setShowAgeCategoryTable,
@@ -14,7 +14,7 @@ function ParticipantsPage({
   setShowAgeCategoryTable?: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   const { isAdminDashboard } = useAuth();
-  const [participants, setParticipants] = useState<Player[]>([]);
+  const [participants, setParticipants] = useState<Participant[]>([]);
   const columns = useMemo(
     () => [
       columnHelper.accessor("id", {
@@ -88,7 +88,7 @@ function ParticipantsPage({
             </button>
           )}
         </div>
-        <Table<Player> columns={columns} data={participants} />
+        <Table<Participant> columns={columns} data={participants} />
       </div>
     )
   );

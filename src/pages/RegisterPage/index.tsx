@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { register as registerPlayer } from "../../api/playerApi.ts";
-import { PlayerInputs } from "../../type";
+import { register as registerParticipant } from "../../api/participantApi.ts";
+import { ParticipantInputs } from "../../type";
 import { emailRegex } from "../../utils.ts";
 import RequiredLabel from "./components/RequiredLabel/index.tsx";
 import styles from "./index.module.css";
@@ -13,7 +13,7 @@ function RegisterPage() {
     reset,
     formState,
     formState: { isSubmitSuccessful, errors },
-  } = useForm<PlayerInputs>({
+  } = useForm<ParticipantInputs>({
     defaultValues: {
       firstName: "",
       lastName: "",
@@ -33,8 +33,10 @@ function RegisterPage() {
     }
   };
 
-  const onSubmit: SubmitHandler<PlayerInputs> = async (data: PlayerInputs) => {
-    await registerPlayer(data);
+  const onSubmit: SubmitHandler<ParticipantInputs> = async (
+    data: ParticipantInputs
+  ) => {
+    await registerParticipant(data);
   };
 
   useEffect(() => {
