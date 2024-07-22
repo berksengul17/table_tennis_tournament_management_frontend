@@ -54,7 +54,7 @@ function ParticipantsPage({
       }),
       columnHelper.accessor("ageCategory", {
         header: "Yaş Kategorisi",
-        cell: (info) => Object.values(AGE_CATEGORY)[info.getValue().category],
+        cell: (info) => Object.values(AGE_CATEGORY)[info.getValue()!.category],
       }),
       columnHelper.accessor("rating", {
         header: "Puan",

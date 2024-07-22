@@ -1,13 +1,26 @@
-import React, { useState } from "react";
+import React from "react";
 import { Participant } from "../../../../type";
 import styles from "./index.module.css";
 
-function SeedItem({ participant }: { participant: Participant }) {
-  const [score, setScore] = useState<string>("");
+type SeedItemProps = {
+  participant: Participant;
+  scoreIndex: number;
+  scores: string[];
+  setScores: React.Dispatch<React.SetStateAction<string[]>>;
+};
 
+function SeedItem({
+  participant,
+  scoreIndex,
+  scores,
+  setScores,
+}: SeedItemProps) {
   const onScoreChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // change any non-digit character to empty string
-    setScore(e.target.value.replace(/\D/g, ""));
+    setScores((prevScores) => {
+      prevScores[scoreIndex] = e.target.value.replace(/\D/g, "");
+      return [...prevScores];
+    });
   };
   return (
     <div className={styles.seedItem}>
@@ -18,7 +31,7 @@ function SeedItem({ participant }: { participant: Participant }) {
         type="text"
         size={1}
         maxLength={1}
-        value={score}
+        value={scores[scoreIndex]}
         onChange={onScoreChange}
       />
     </div>

@@ -1,17 +1,18 @@
-import { ISeed } from "../../../../type";
+import { IRound } from "../../../../type";
 import Seed from "../Seed";
 import styles from "./index.module.css";
 
-function Round({ title, seeds }: { title: string; seeds: ISeed[] }) {
+function Round({ round }: { round: IRound }) {
   return (
-    <>
-      <h2 style={{ marginBottom: "5rem", fontWeight: "bold" }}>{title}</h2>
-      <div className={styles.round}>
-        {seeds.map((seed) => (
-          <Seed key={seed.id} participants={seed.participants} />
-        ))}
-      </div>
-    </>
+    <div className={styles.round}>
+      {round.seeds.map((seed) => (
+        <Seed
+          key={seed.id}
+          participants={seed.participants}
+          roundId={round.id}
+        />
+      ))}
+    </div>
   );
 }
 

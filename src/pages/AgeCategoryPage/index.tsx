@@ -68,7 +68,7 @@ function AgeCategoryPage({
         header: "Yaş Kategorisi",
         cell: (info) => {
           console.log(info.getValue());
-          return Object.values(AGE_CATEGORY)[info.getValue().category];
+          return Object.values(AGE_CATEGORY)[info.getValue()!.category];
         },
       }),
       columnHelper.accessor("rating", {

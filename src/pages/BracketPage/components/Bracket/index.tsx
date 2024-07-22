@@ -1,21 +1,24 @@
+import { useEffect, useState } from "react";
+import { useBracket } from "../../../../context/BracketProvider";
 import { IRound } from "../../../../type";
 import Round from "../Round";
+import styles from "./index.module.css";
 
-function Bracket({ rounds }: { rounds: IRound[] }) {
-  if (!rounds) {
-    return <div>Loading...</div>;
-  }
+function Bracket() {
+  const { brackets, activeBracket } = useBracket();
+  const [rounds, setRounds] = useState<IRound[]>([]);
+
+  useEffect(() => {
+    console.log("brackets[activeBracket]", brackets[activeBracket]);
+    if (brackets[activeBracket]) {
+      console.log("brackets", brackets[activeBracket]);
+      setRounds(brackets[activeBracket].rounds);
+    }
+  }, [brackets, activeBracket]);
 
   return (
-    <div style={{ padding: "5rem" }}>
-      {rounds &&
-        rounds.map((round, index) => (
-          <Round
-            key={round.id}
-            title={`Round ${index + 1}`}
-            seeds={round.seeds}
-          />
-        ))}
+    <div className={styles.bracket}>
+      {rounds && rounds.map((round) => <Round key={round.id} round={round} />)}
     </div>
   );
 }
