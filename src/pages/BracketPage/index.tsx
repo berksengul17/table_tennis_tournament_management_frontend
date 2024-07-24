@@ -16,13 +16,21 @@ const BracketPageContent = () => {
   const { activeBracket, setActiveBracket } = useBracket();
 
   return (
-    <>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+        marginTop: "2rem",
+      }}
+    >
       <AgeCategoryTabs
         activeTab={activeBracket}
         setActiveTab={setActiveBracket}
       />
       <Bracket />
-    </>
+    </div>
   );
 };
 

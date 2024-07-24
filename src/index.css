@@ -6,7 +6,9 @@
   -moz-osx-font-smoothing: grayscale; */
 }
 
-* {
+*,
+*::after,
+*::before {
   box-sizing: border-box;
 }
 

@@ -12,44 +12,53 @@ function Seed({
   participants: Participant[];
   roundId: number;
 }) {
-  const { brackets, setBrackets, activeBracket } = useBracket();
+  const { brackets, setBrackets, activeBracket, isFinal } = useBracket();
   const [scores, setScores] = useState<string[]>(["", ""]);
+
+  const getParticipant = (index: number): Participant | null => {
+    return participants && participants[index] ? participants[index] : null;
+  };
 
   useEffect(() => {
     (async () => {
       if (scores.length === 2 && !scores.includes("")) {
         const index = scores.findIndex((score) => score === "3");
-        const updatedBracket = await advanceToNextRound(
-          participants[index].id,
-          brackets[activeBracket].id,
-          roundId
-        );
-        console.log("updated bracket", updatedBracket);
+        if (!isFinal(roundId)) {
+          const updatedBracket = await advanceToNextRound(
+            participants[index].id,
+            brackets[activeBracket].id,
+            roundId
+          );
 
-        if (index !== -1)
-          setBrackets((prevBrackets) => {
-            const newBrackets = [...prevBrackets];
-            newBrackets[activeBracket] = updatedBracket;
-            return newBrackets;
-          });
+          if (index !== -1)
+            setBrackets((prevBrackets) => {
+              const newBrackets = [...prevBrackets];
+              newBrackets[activeBracket] = updatedBracket;
+              return newBrackets;
+            });
+        }
       }
     })();
   }, [scores]);
 
   return (
-    participants && (
+    <div className={styles.seedContainer}>
       <div className={styles.seed}>
-        {participants.map((participant, index) => (
-          <SeedItem
-            key={participant.id}
-            participant={participant}
-            scoreIndex={index}
-            scores={scores}
-            setScores={setScores}
-          />
-        ))}
+        <SeedItem
+          participant={getParticipant(0)}
+          scoreIndex={0}
+          scores={scores}
+          setScores={setScores}
+        />
+        <div className={styles.line}></div>
+        <SeedItem
+          participant={getParticipant(1)}
+          scoreIndex={1}
+          scores={scores}
+          setScores={setScores}
+        />
       </div>
-    )
+    </div>
   );
 }
 

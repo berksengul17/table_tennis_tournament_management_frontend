@@ -1,6 +1,6 @@
 .round {
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: space-around;
   gap: 5rem;
 }

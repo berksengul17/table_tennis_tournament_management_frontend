@@ -13,6 +13,7 @@ type BracketContextProps = {
   activeBracket: number;
   setBrackets: React.Dispatch<React.SetStateAction<IBracket[]>>;
   setActiveBracket: React.Dispatch<React.SetStateAction<number>>;
+  isFinal: (roundId: number) => boolean;
 };
 
 const BracketContext = createContext<BracketContextProps | undefined>(
@@ -23,8 +24,16 @@ export const BracketProvider = ({ children }: PropsWithChildren) => {
   const [brackets, setBrackets] = useState<IBracket[]>([]);
   const [activeBracket, setActiveBracket] = useState<number>(0);
 
+  const isFinal = (roundId: number): boolean => {
+    const rounds = brackets[activeBracket].rounds;
+    if (rounds[rounds.length - 1].id === roundId) {
+      return true;
+    }
+
+    return false;
+  };
+
   useEffect(() => {
-    console.log("useeffect");
     (async () => {
       let bracket = await getWinnersBracket(activeBracket);
       if (bracket == null) {
@@ -43,7 +52,13 @@ export const BracketProvider = ({ children }: PropsWithChildren) => {
 
   return (
     <BracketContext.Provider
-      value={{ brackets, activeBracket, setBrackets, setActiveBracket }}
+      value={{
+        brackets,
+        activeBracket,
+        setBrackets,
+        setActiveBracket,
+        isFinal,
+      }}
     >
       {children}
     </BracketContext.Provider>

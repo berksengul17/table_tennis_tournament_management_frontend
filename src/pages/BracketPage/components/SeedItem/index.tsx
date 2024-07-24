@@ -3,7 +3,7 @@ import { Participant } from "../../../../type";
 import styles from "./index.module.css";
 
 type SeedItemProps = {
-  participant: Participant;
+  participant: Participant | null;
   scoreIndex: number;
   scores: string[];
   setScores: React.Dispatch<React.SetStateAction<string[]>>;
@@ -22,18 +22,23 @@ function SeedItem({
       return [...prevScores];
     });
   };
+
   return (
     <div className={styles.seedItem}>
-      <span>
-        {participant.firstName} {participant.lastName}
-      </span>
-      <input
-        type="text"
-        size={1}
-        maxLength={1}
-        value={scores[scoreIndex]}
-        onChange={onScoreChange}
-      />
+      {!participant ? null : (
+        <>
+          <span>
+            {participant.firstName} {participant.lastName}
+          </span>
+          <input
+            type="text"
+            size={1}
+            maxLength={1}
+            value={scores[scoreIndex]}
+            onChange={onScoreChange}
+          />
+        </>
+      )}
     </div>
   );
 }
