@@ -1,5 +1,9 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
+import {
+  getAgeListByCategory,
+  getAllCategories,
+} from "../../api/ageCategoryApi.ts";
 import { register as registerParticipant } from "../../api/participantApi.ts";
 import { ParticipantInputs } from "../../type";
 import { emailRegex } from "../../utils.ts";
@@ -7,9 +11,15 @@ import RequiredLabel from "./components/RequiredLabel/index.tsx";
 import styles from "./index.module.css";
 
 function RegisterPage() {
+  const [categories, setCategories] = useState<string[]>([]);
+  const [filteredCategories, setFilteredCategories] =
+    useState<string[]>(categories);
+  const [currentCategoryIndex, setCurrentCategoryIndex] = useState<number>(0);
+  const [ageList, setAgeList] = useState<string[]>([]);
   const {
     register,
     handleSubmit,
+    setValue,
     reset,
     formState,
     formState: { isSubmitSuccessful, errors },
@@ -20,8 +30,10 @@ function RegisterPage() {
       gender: "",
       email: "",
       phoneNumber: "",
+      category: "",
       birthDate: "",
-      ageCategory: "",
+      pair: "",
+      age: "",
       city: "",
     },
   });
@@ -33,11 +45,71 @@ function RegisterPage() {
     }
   };
 
+  const handleGenderChange = (e: any) => {
+    setFilteredCategories(
+      categories.filter((c) => c.includes(e.target.value) || c === "Karışık")
+    );
+  };
+
+  // when birthdate change automatically update age category
+  const handleBirthDateChange = (e: any) => {
+    const age = calculateAge(e.target.value);
+
+    for (let i = 0; i < ageList.length; i++) {
+      const ageRange = ageList[i].split("-").map((a) => {
+        if (a.includes("+")) {
+          a = a.slice(0, -1);
+        }
+
+        return parseInt(a);
+      });
+
+      if (
+        age >= ageRange[0] &&
+        (ageRange[1] === undefined || age <= ageRange[1])
+      ) {
+        setValue("age", i.toString());
+      }
+    }
+  };
+
+  const calculateAge = (date: string) => {
+    const today = new Date();
+    const birthDate = new Date(date);
+
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDifference = today.getMonth() - birthDate.getMonth();
+
+    // If the current month is before the birth month or it's the birth month but the day hasn't passed yet, subtract 1 year
+    if (
+      monthDifference < 0 ||
+      (monthDifference === 0 && today.getDate() < birthDate.getDate())
+    ) {
+      age--;
+    }
+
+    return age;
+  };
+
   const onSubmit: SubmitHandler<ParticipantInputs> = async (
     data: ParticipantInputs
   ) => {
     await registerParticipant(data);
   };
+
+  useEffect(() => {
+    (async () => {
+      const categories = await getAllCategories();
+      setCategories(categories);
+      setFilteredCategories(categories);
+    })();
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      setAgeList(await getAgeListByCategory(currentCategoryIndex));
+    })();
+  }, [currentCategoryIndex]);
 
   useEffect(() => {
     if (isSubmitSuccessful) {
@@ -48,110 +120,145 @@ function RegisterPage() {
   return (
     <div className={styles.container}>
       <h1 className={styles.title}>Kayıt Formu</h1>
-      <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
-        <div className={styles.inputContainer}>
-          <RequiredLabel htmlFor="firstName" text="Adı" required />
-          <input
-            {...register("firstName", { required: true })}
-            id="firstName"
-          />
-        </div>
+      {filteredCategories.length > 0 && (
+        <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
+          <div className={styles.inputContainer}>
+            <RequiredLabel htmlFor="firstName" text="Adı" required />
+            <input
+              {...register("firstName", { required: true })}
+              id="firstName"
+            />
+          </div>
 
-        <div className={styles.inputContainer}>
-          <RequiredLabel htmlFor="lastName" text="Soyadı" required />
-          <input {...register("lastName", { required: true })} id="lastName" />
-        </div>
+          <div className={styles.inputContainer}>
+            <RequiredLabel htmlFor="lastName" text="Soyadı" required />
+            <input
+              {...register("lastName", { required: true })}
+              id="lastName"
+            />
+          </div>
 
-        <div className={styles.inputContainer}>
-          <RequiredLabel htmlFor="email" text="Email" required />
-          <input
-            {...register("email", {
-              required: true,
-              pattern: {
-                value: emailRegex,
-                message: "Geçerli bir email adresi giriniz.",
-              },
-            })}
-            id="email"
-          />
-          {errors.email && (
-            <p style={{ color: "red" }}>{errors.email.message}</p>
-          )}
-        </div>
+          <div className={styles.inputContainer}>
+            <RequiredLabel htmlFor="email" text="Email" required />
+            <input
+              {...register("email", {
+                required: true,
+                pattern: {
+                  value: emailRegex,
+                  message: "Geçerli bir email adresi giriniz.",
+                },
+              })}
+              id="email"
+            />
+            {errors.email && (
+              <p style={{ color: "red" }}>{errors.email.message}</p>
+            )}
+          </div>
 
-        <div className={styles.inputContainer}>
-          <RequiredLabel
-            htmlFor="phoneNumber"
-            text="Telefon Numarası"
-            required
-          />
-          <input
-            {...register("phoneNumber", {
-              required: true,
-              onChange: handlePhoneChange,
-            })}
-            id="phoneNumber"
-            type="tel"
-            pattern="[0-9]{3} [0-9]{3} [0-9]{2} [0-9]{2}"
-            placeholder="5XX XXX XX XX"
-          />
-        </div>
+          <div className={styles.inputContainer}>
+            <RequiredLabel
+              htmlFor="phoneNumber"
+              text="Telefon Numarası"
+              required
+            />
+            <input
+              {...register("phoneNumber", {
+                required: true,
+                onChange: handlePhoneChange,
+              })}
+              id="phoneNumber"
+              type="tel"
+              pattern="[0-9]{3} [0-9]{3} [0-9]{2} [0-9]{2}"
+              placeholder="5XX XXX XX XX"
+            />
+          </div>
 
-        <div className={styles.inputContainer}>
-          <RequiredLabel htmlFor="gender" text="Cinsiyet" required />
-          <div style={{ display: "flex" }}>
-            <div className={styles.radioContainer}>
-              <input
-                {...register("gender", { required: true })}
-                type="radio"
-                id="male"
-                value="Erkek"
-              />
-              <label htmlFor="male">Erkek</label>
-            </div>
+          <div className={styles.inputContainer}>
+            <RequiredLabel htmlFor="gender" text="Cinsiyet" required />
+            <div style={{ display: "flex" }}>
+              <div className={styles.radioContainer}>
+                <input
+                  {...register("gender", { required: true })}
+                  type="radio"
+                  id="male"
+                  value="Erkek"
+                />
+                <label htmlFor="male">Erkek</label>
+              </div>
 
-            <div className={styles.radioContainer}>
-              <input
-                {...register("gender", { required: true })}
-                type="radio"
-                id="female"
-                value="Kadın"
-              />
-              <label htmlFor="female">Kadın</label>
+              <div className={styles.radioContainer}>
+                <input
+                  {...register("gender", {
+                    required: true,
+                    onChange: handleGenderChange,
+                  })}
+                  type="radio"
+                  id="female"
+                  value="Kadın"
+                />
+                <label htmlFor="female">Kadın</label>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className={styles.inputContainer}>
-          <RequiredLabel htmlFor="birthDate" text="Doğum Tarihi" required />
-          <input
-            {...register("birthDate", { required: true })}
-            id="birthDate"
-            type="date"
-          />
-        </div>
+          <div className={styles.inputContainer}>
+            <RequiredLabel htmlFor="category" text="Kategori" required />
 
-        <div className={styles.inputContainer}>
-          <RequiredLabel htmlFor="ageCategory" text="Yaş Grubu" required />
+            <select
+              {...register("category", {
+                required: true,
+                onChange: (e) =>
+                  setCurrentCategoryIndex(parseInt(e.target.value)),
+              })}
+              id="category"
+            >
+              {filteredCategories.map((category, index) => (
+                <option key={index} value={index}>
+                  {category}
+                </option>
+              ))}
+            </select>
+          </div>
 
-          <select
-            {...register("ageCategory", { required: true })}
-            id="ageCategory"
-          >
-            <option value="0">40-49</option>
-            <option value="1">50-59</option>
-            <option value="2">60-69</option>
-            <option value="3">70+</option>
-          </select>
-        </div>
+          <div className={styles.inputContainer}>
+            <RequiredLabel htmlFor="birthDate" text="Doğum Tarihi" required />
+            <input
+              {...register("birthDate", {
+                required: true,
+                onBlur: handleBirthDateChange,
+              })}
+              id="birthDate"
+              type="date"
+            />
+          </div>
 
-        <div className={styles.inputContainer}>
-          <RequiredLabel htmlFor="city" text="Katılınan Şehir" required />
-          <input {...register("city", { required: true })} id="city" />
-        </div>
+          {filteredCategories[currentCategoryIndex].includes("Çift") && (
+            <div className={styles.inputContainer}>
+              <RequiredLabel htmlFor="pair" text="Çift Adı" required />
+              <input {...register("pair", { required: true })} id="pair" />
+            </div>
+          )}
 
-        <input type="submit" value={"Kaydol"} />
-      </form>
+          <div className={styles.inputContainer}>
+            <RequiredLabel htmlFor="ageCategory" text="Yaş Grubu" required />
+
+            <select {...register("age", { required: true })} id="age">
+              {ageList.map((age, index) => (
+                <option key={index} value={index}>
+                  {age}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className={styles.inputContainer}>
+            <RequiredLabel htmlFor="city" text="Katılınan Şehir" required />
+            <input {...register("city", { required: true })} id="city" />
+          </div>
+
+          <input type="submit" value={"Kaydol"} />
+        </form>
+      )}
     </div>
   );
 }
