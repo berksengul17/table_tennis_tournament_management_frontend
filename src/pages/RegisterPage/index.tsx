@@ -10,6 +10,11 @@ import { emailRegex } from "../../utils.ts";
 import RequiredLabel from "./components/RequiredLabel/index.tsx";
 import styles from "./index.module.css";
 
+const genderOptions = [
+  { value: "0", label: "Erkek", categories: ["Erkek", "Karışık"] },
+  { value: "1", label: "Kadın", categories: ["Kadın", "Karışık"] },
+];
+
 function RegisterPage() {
   const [categories, setCategories] = useState<string[]>([]);
   const [filteredCategories, setFilteredCategories] =
@@ -19,6 +24,7 @@ function RegisterPage() {
   const {
     register,
     handleSubmit,
+    getValues,
     setValue,
     reset,
     formState,
@@ -32,7 +38,7 @@ function RegisterPage() {
       phoneNumber: "",
       category: "",
       birthDate: "",
-      pair: "",
+      pairName: "",
       age: "",
       city: "",
     },
@@ -45,12 +51,22 @@ function RegisterPage() {
     }
   };
 
-  const handleGenderChange = (e: any) => {
-    setFilteredCategories(
-      categories.filter((c) => c.includes(e.target.value) || c === "Karışık")
+  const handleGenderChange = async (e: any) => {
+    const selectedGender = genderOptions.find(
+      (option) => option.value === e.target.value
     );
-  };
+    if (selectedGender) {
+      setFilteredCategories(
+        categories.filter((c) =>
+          selectedGender.categories.some((category) => c.includes(category))
+        )
+      );
 
+      setAgeList(
+        await getAgeListByCategory(selectedGender.value, currentCategoryIndex)
+      );
+    }
+  };
   // when birthdate change automatically update age category
   const handleBirthDateChange = (e: any) => {
     const age = calculateAge(e.target.value);
@@ -107,7 +123,10 @@ function RegisterPage() {
 
   useEffect(() => {
     (async () => {
-      setAgeList(await getAgeListByCategory(currentCategoryIndex));
+      const gender = getValues("gender");
+      if (gender) {
+        setAgeList(await getAgeListByCategory(gender, currentCategoryIndex));
+      }
     })();
   }, [currentCategoryIndex]);
 
@@ -176,28 +195,20 @@ function RegisterPage() {
           <div className={styles.inputContainer}>
             <RequiredLabel htmlFor="gender" text="Cinsiyet" required />
             <div style={{ display: "flex" }}>
-              <div className={styles.radioContainer}>
-                <input
-                  {...register("gender", { required: true })}
-                  type="radio"
-                  id="male"
-                  value="Erkek"
-                />
-                <label htmlFor="male">Erkek</label>
-              </div>
-
-              <div className={styles.radioContainer}>
-                <input
-                  {...register("gender", {
-                    required: true,
-                    onChange: handleGenderChange,
-                  })}
-                  type="radio"
-                  id="female"
-                  value="Kadın"
-                />
-                <label htmlFor="female">Kadın</label>
-              </div>
+              {genderOptions.map((option) => (
+                <div key={option.value} className={styles.radioContainer}>
+                  <input
+                    {...register("gender", {
+                      required: true,
+                      onChange: handleGenderChange,
+                    })}
+                    type="radio"
+                    id={option.value}
+                    value={option.value}
+                  />
+                  <label htmlFor={option.value}>{option.label}</label>
+                </div>
+              ))}
             </div>
           </div>
 
@@ -207,8 +218,10 @@ function RegisterPage() {
             <select
               {...register("category", {
                 required: true,
-                onChange: (e) =>
-                  setCurrentCategoryIndex(parseInt(e.target.value)),
+                onChange: (e) => {
+                  console.log(e.target.value);
+                  setCurrentCategoryIndex(parseInt(e.target.value));
+                },
               })}
               id="category"
             >
@@ -234,8 +247,11 @@ function RegisterPage() {
 
           {filteredCategories[currentCategoryIndex].includes("Çift") && (
             <div className={styles.inputContainer}>
-              <RequiredLabel htmlFor="pair" text="Çift Adı" required />
-              <input {...register("pair", { required: true })} id="pair" />
+              <RequiredLabel htmlFor="pairName" text="Çift Adı" required />
+              <input
+                {...register("pairName", { required: true })}
+                id="pairName"
+              />
             </div>
           )}
 

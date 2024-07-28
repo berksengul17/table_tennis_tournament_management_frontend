@@ -38,11 +38,12 @@ export const getAllCategories = async (): Promise<string[]> => {
 };
 
 export const getAgeListByCategory = async (
+  gender: string,
   category: number
 ): Promise<string[]> => {
   try {
     const response = await axios.get(`${API_URL}/get-age-list`, {
-      params: { category },
+      params: { gender, category },
     });
     return response.data;
   } catch (error: unknown | AxiosError) {

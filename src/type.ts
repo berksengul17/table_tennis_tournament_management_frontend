@@ -14,7 +14,7 @@ export type Participant = {
 
 export type ParticipantInputs = Omit<Participant, "id" | "ageCategory"> & {
   category: string;
-  pair: string;
+  pairName: string;
   age: string;
 };
 
