@@ -1,12 +1,12 @@
 import { createColumnHelper } from "@tanstack/react-table";
 import React, { useEffect, useMemo, useState } from "react";
-import { getParticipants } from "../../api/participantApi";
+import { getParticipants } from "../../api/participantAgeCategoryApi";
 import Table from "../../components/Table";
 import { useAuth } from "../../context/AuthProvider";
-import { AGE_CATEGORY, Participant } from "../../type";
+import { ParticipantAgeCategoryDTO } from "../../type";
 import styles from "./index.module.css";
 
-const columnHelper = createColumnHelper<Participant>();
+const columnHelper = createColumnHelper<ParticipantAgeCategoryDTO>();
 
 function ParticipantsPage({
   setShowAgeCategoryTable,
@@ -14,15 +14,13 @@ function ParticipantsPage({
   setShowAgeCategoryTable?: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   const { isAdminDashboard } = useAuth();
-  const [participants, setParticipants] = useState<Participant[]>([]);
+  const [participants, setParticipants] = useState<ParticipantAgeCategoryDTO[]>(
+    []
+  );
   const columns = useMemo(
     () => [
-      columnHelper.accessor("id", {
-        header: "No.",
-        cell: (info) => info.getValue(),
-      }),
-      columnHelper.accessor("firstName", {
-        header: "Ad",
+      columnHelper.accessor((row) => `${row.firstName} ${row.lastName}`, {
+        header: "Ad-Soyad",
         cell: (info) => info.getValue(),
       }),
       columnHelper.accessor("lastName", {
@@ -52,9 +50,17 @@ function ParticipantsPage({
         header: "Katıldığı Şehir",
         cell: (info) => info.getValue(),
       }),
-      columnHelper.accessor("ageCategory", {
-        header: "Yaş Kategorisi",
-        cell: (info) => Object.values(AGE_CATEGORY)[info.getValue()!.category],
+      columnHelper.accessor("category", {
+        header: "Kategorisi",
+        cell: (info) => info.getValue(),
+      }),
+      columnHelper.accessor("age", {
+        header: "Yaş",
+        cell: (info) => info.getValue(),
+      }),
+      columnHelper.accessor("pairName", {
+        header: "Eşi",
+        cell: (info) => info.getValue(),
       }),
       columnHelper.accessor("rating", {
         header: "Puan",
@@ -88,7 +94,10 @@ function ParticipantsPage({
             </button>
           )}
         </div>
-        <Table<Participant> columns={columns} data={participants} />
+        <Table<ParticipantAgeCategoryDTO>
+          columns={columns}
+          data={participants}
+        />
       </div>
     )
   );

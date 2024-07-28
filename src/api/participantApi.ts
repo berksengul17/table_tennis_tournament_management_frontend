@@ -13,16 +13,6 @@ export const register = async (participant: ParticipantInputs) => {
     handleAxiosError(error);
   }
 };
-
-export const getParticipants = async () => {
-  try {
-    const response = await axios.get(`${API_URL}/get-all-participants`);
-    return response.data;
-  } catch (error: unknown | AxiosError) {
-    handleAxiosError(error);
-  }
-};
-
 // export const getParticipants = async () => {
 //   try {
 //     const response = await axios.get(`${API_URL}/participants`);

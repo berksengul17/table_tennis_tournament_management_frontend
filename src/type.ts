@@ -6,13 +6,12 @@ export type Participant = {
   email: string;
   phoneNumber: string;
   birthDate: string;
-  ageCategory?: AgeCategory;
   city: string;
   rating: number;
   groupId?: number;
 };
 
-export type ParticipantInputs = Omit<Participant, "id" | "ageCategory"> & {
+export type ParticipantInputs = Omit<Participant, "id"> & {
   category: string;
   pairName: string;
   age: string;
@@ -21,8 +20,14 @@ export type ParticipantInputs = Omit<Participant, "id" | "ageCategory"> & {
 export type AgeCategory = {
   id: number;
   category: number;
-  participants: Participant[];
+  age: number;
 };
+
+export type ParticipantAgeCategoryDTO = {
+  id: number;
+  pairName: string;
+} & Omit<Participant, "id"> &
+  Omit<AgeCategory, "id">;
 
 export type Group = {
   id: number;
