@@ -2,6 +2,7 @@ import ReactDOM from "react-dom/client";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import App from "./App.tsx";
 import ProtectedRoute from "./components/ProtectedRoute";
+import { AgeCategoryProvider } from "./context/AgeCategoryProvider.tsx";
 import { AuthProvider } from "./context/AuthProvider";
 import "./index.css";
 import DashboardLayout from "./layouts/DashboardLayout";
@@ -76,6 +77,8 @@ const router = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <AuthProvider>
-    <RouterProvider router={router} />
+    <AgeCategoryProvider>
+      <RouterProvider router={router} />
+    </AgeCategoryProvider>
   </AuthProvider>
 );

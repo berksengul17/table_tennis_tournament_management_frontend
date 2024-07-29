@@ -1,10 +1,8 @@
 import { useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
-import {
-  getAgeListByCategory,
-  getAllCategories,
-} from "../../api/ageCategoryApi.ts";
+import { getAgeListByCategoryAndGender } from "../../api/ageCategoryApi.ts";
 import { register as registerParticipant } from "../../api/participantApi.ts";
+import { useAgeCategory } from "../../context/AgeCategoryProvider.tsx";
 import { ParticipantInputs } from "../../type";
 import { emailRegex } from "../../utils.ts";
 import RequiredLabel from "./components/RequiredLabel/index.tsx";
@@ -16,11 +14,10 @@ const genderOptions = [
 ];
 
 function RegisterPage() {
-  const [categories, setCategories] = useState<string[]>([]);
+  const { categories, ageList, setAgeList } = useAgeCategory();
   const [filteredCategories, setFilteredCategories] =
     useState<string[]>(categories);
   const [currentCategoryIndex, setCurrentCategoryIndex] = useState<number>(0);
-  const [ageList, setAgeList] = useState<string[]>([]);
   const {
     register,
     handleSubmit,
@@ -63,7 +60,10 @@ function RegisterPage() {
       );
 
       setAgeList(
-        await getAgeListByCategory(selectedGender.value, currentCategoryIndex)
+        await getAgeListByCategoryAndGender(
+          selectedGender.value,
+          currentCategoryIndex
+        )
       );
     }
   };
@@ -114,18 +114,16 @@ function RegisterPage() {
   };
 
   useEffect(() => {
-    (async () => {
-      const categories = await getAllCategories();
-      setCategories(categories);
-      setFilteredCategories(categories);
-    })();
+    setFilteredCategories(categories);
   }, []);
 
   useEffect(() => {
     (async () => {
       const gender = getValues("gender");
       if (gender) {
-        setAgeList(await getAgeListByCategory(gender, currentCategoryIndex));
+        setAgeList(
+          await getAgeListByCategoryAndGender(gender, currentCategoryIndex)
+        );
       }
     })();
   }, [currentCategoryIndex]);

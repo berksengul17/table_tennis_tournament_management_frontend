@@ -1,40 +1,34 @@
 import { createColumnHelper } from "@tanstack/react-table";
-import { PropsWithChildren, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   createAgeCategories,
   getAgeCategories,
 } from "../../api/ageCategoryApi";
+import { getParticipants } from "../../api/participantAgeCategoryApi";
 import AgeCategoryTabs from "../../components/AgeCategoryTabs";
+import CategoryTabs from "../../components/CategoryTabs";
 import Table from "../../components/Table";
-import { AGE_CATEGORY, AgeCategory, Participant } from "../../type";
+import { AgeCategory, ParticipantAgeCategoryDTO } from "../../type";
 import styles from "./index.module.css";
 
-const CustomTabPanel = ({
-  value,
-  index,
-  children,
-}: { value: number; index: number } & PropsWithChildren) => {
-  return <>{value === index && children}</>;
-};
-
-const columnHelper = createColumnHelper<Participant>();
+const columnHelper = createColumnHelper<ParticipantAgeCategoryDTO>();
 
 function AgeCategoryPage({
   setShowGroups,
 }: {
   setShowGroups: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
+  const [participants, setParticipants] = useState<ParticipantAgeCategoryDTO[]>(
+    []
+  );
   const [ageCategories, setAgeCategories] = useState<AgeCategory[]>([]);
-  const [activeTab, setActiveTab] = useState<number>(0);
+  const [categoryActiveTab, setCategoryActiveTab] = useState<number>(0);
+  const [ageActiveTab, setAgeActiveTab] = useState<number>(0);
 
   const columns = useMemo(
     () => [
-      columnHelper.accessor("id", {
-        header: "No.",
-        cell: (info) => info.getValue(),
-      }),
-      columnHelper.accessor("firstName", {
-        header: "Ad",
+      columnHelper.accessor((row) => `${row.firstName} ${row.lastName}`, {
+        header: "Ad-Soyad",
         cell: (info) => info.getValue(),
       }),
       columnHelper.accessor("lastName", {
@@ -64,12 +58,17 @@ function AgeCategoryPage({
         header: "Katıldığı Şehir",
         cell: (info) => info.getValue(),
       }),
-      columnHelper.accessor("ageCategory", {
-        header: "Yaş Kategorisi",
-        cell: (info) => {
-          console.log(info.getValue());
-          return Object.values(AGE_CATEGORY)[info.getValue()!.category];
-        },
+      columnHelper.accessor("category", {
+        header: "Kategorisi",
+        cell: (info) => info.getValue(),
+      }),
+      columnHelper.accessor("age", {
+        header: "Yaş",
+        cell: (info) => info.getValue(),
+      }),
+      columnHelper.accessor("pairName", {
+        header: "Eşi",
+        cell: (info) => info.getValue(),
       }),
       columnHelper.accessor("rating", {
         header: "Puan",
@@ -80,13 +79,10 @@ function AgeCategoryPage({
   );
 
   useEffect(() => {
-    console.log("age category use effect");
     // fetch participants
     (async () => {
       let categories = await getAgeCategories();
-      console.log("categories", categories);
       if (categories.length == 0) {
-        console.log("creating categories");
         categories = await createAgeCategories();
       }
 
@@ -98,28 +94,35 @@ function AgeCategoryPage({
     };
   }, []);
 
+  useEffect(() => {
+    console.log(categoryActiveTab, ageActiveTab);
+
+    (async () => {
+      setParticipants(await getParticipants(categoryActiveTab, ageActiveTab));
+    })();
+  }, [categoryActiveTab, ageActiveTab]);
+
   return (
     <div className={styles.container}>
-      <AgeCategoryTabs activeTab={activeTab} setActiveTab={setActiveTab} />
-      {Object.keys(AGE_CATEGORY).map((_, index) => (
-        <CustomTabPanel key={index} value={activeTab} index={index}>
-          <div className={styles.tableContainer}>
-            <div className={styles.tableHeader}>
-              <p>
-                Toplam Katılımcı Sayısı:{" "}
-                {ageCategories[index]
-                  ? ageCategories[index].participants?.length ?? 0
-                  : 0}
-              </p>
-              <button onClick={() => setShowGroups(true)}>Gruplara Ayır</button>
-            </div>
-            <Table<Participant>
-              columns={columns}
-              data={ageCategories[index] && ageCategories[index].participants}
-            />
-          </div>
-        </CustomTabPanel>
-      ))}
+      <CategoryTabs
+        activeTab={categoryActiveTab}
+        setActiveTab={setCategoryActiveTab}
+      />
+      <AgeCategoryTabs
+        activeTab={ageActiveTab}
+        setActiveTab={setAgeActiveTab}
+      />
+      <div className={styles.tableContainer}>
+        <div className={styles.tableHeader}>
+          <p>Toplam Katılımcı Sayısı: {participants.length}</p>
+          <button onClick={() => setShowGroups(true)}>Gruplara Ayır</button>
+        </div>
+        <Table<ParticipantAgeCategoryDTO>
+          columns={columns}
+          data={participants}
+          setData={setParticipants}
+        />
+      </div>
     </div>
   );
 }

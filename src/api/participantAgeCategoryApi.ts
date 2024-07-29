@@ -4,11 +4,14 @@ import { handleAxiosError } from "../utils";
 
 const API_URL = "http://localhost:8081/api/participant-age-category";
 
-export const getParticipants = async (): Promise<
-  ParticipantAgeCategoryDTO[]
-> => {
+export const getParticipants = async (
+  categoryVal?: number,
+  ageVal?: number
+): Promise<ParticipantAgeCategoryDTO[]> => {
   try {
-    const response = await axios.get(`${API_URL}/get-participants`);
+    const response = await axios.get(`${API_URL}/get-participants`, {
+      params: { categoryVal, ageVal },
+    });
     return response.data;
   } catch (error: unknown | AxiosError) {
     handleAxiosError(error);

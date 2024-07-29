@@ -23,10 +23,6 @@ function ParticipantsPage({
         header: "Ad-Soyad",
         cell: (info) => info.getValue(),
       }),
-      columnHelper.accessor("lastName", {
-        header: "Soyad",
-        cell: (info) => info.getValue(),
-      }),
       columnHelper.accessor("email", {
         header: "Email",
         cell: (info) => info.getValue(),
