@@ -8,6 +8,8 @@ import { getParticipants } from "../../api/participantAgeCategoryApi";
 import AgeCategoryTabs from "../../components/AgeCategoryTabs";
 import CategoryTabs from "../../components/CategoryTabs";
 import Table from "../../components/Table";
+import TableEditCell from "../../components/TableEditCell";
+import { useAgeCategory } from "../../context/AgeCategoryProvider";
 import { AgeCategory, ParticipantAgeCategoryDTO } from "../../type";
 import styles from "./index.module.css";
 
@@ -18,6 +20,7 @@ function AgeCategoryPage({
 }: {
   setShowGroups: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
+  const { categories, ageList } = useAgeCategory();
   const [participants, setParticipants] = useState<ParticipantAgeCategoryDTO[]>(
     []
   );
@@ -29,50 +32,79 @@ function AgeCategoryPage({
     () => [
       columnHelper.accessor((row) => `${row.firstName} ${row.lastName}`, {
         header: "Ad-Soyad",
-        cell: (info) => info.getValue(),
-      }),
-      columnHelper.accessor("lastName", {
-        header: "Soyad",
-        cell: (info) => info.getValue(),
+        meta: {
+          type: "text",
+        },
       }),
       columnHelper.accessor("email", {
         header: "Email",
-        cell: (info) => info.getValue(),
+        meta: {
+          type: "text",
+        },
       }),
       columnHelper.accessor("gender", {
         header: "Cinsiyet",
-        cell: (info) => info.getValue(),
+        meta: {
+          type: "select",
+          options: [
+            { value: "0", label: "Erkek" },
+            { value: "1", label: "Kadın" },
+          ],
+        },
       }),
       columnHelper.accessor("birthDate", {
         header: "Doğum Tarihi",
-        cell: (info) => {
-          const date = new Date(info.getValue() as string);
-          return date.toLocaleDateString("en-GB");
+        meta: {
+          type: "date",
         },
       }),
       columnHelper.accessor("phoneNumber", {
         header: "Telefon Numarası",
-        cell: (info) => info.getValue(),
+        meta: {
+          type: "text",
+        },
       }),
       columnHelper.accessor("city", {
         header: "Katıldığı Şehir",
-        cell: (info) => info.getValue(),
+        meta: {
+          type: "text",
+        },
       }),
       columnHelper.accessor("category", {
         header: "Kategorisi",
-        cell: (info) => info.getValue(),
+        meta: {
+          type: "select",
+          options: categories.map((category, index) => ({
+            value: index.toString(),
+            label: category,
+          })),
+        },
       }),
       columnHelper.accessor("age", {
         header: "Yaş",
-        cell: (info) => info.getValue(),
+        meta: {
+          type: "select",
+          options: ageList.map((age, index) => ({
+            value: index.toString(),
+            label: age,
+          })),
+        },
       }),
       columnHelper.accessor("pairName", {
         header: "Eşi",
-        cell: (info) => info.getValue(),
+        meta: {
+          type: "text",
+        },
       }),
       columnHelper.accessor("rating", {
         header: "Puan",
-        cell: (info) => info.getValue(),
+        meta: {
+          type: "number",
+        },
+      }),
+      columnHelper.display({
+        id: "edit",
+        cell: TableEditCell<ParticipantAgeCategoryDTO>,
       }),
     ],
     []
@@ -112,17 +144,19 @@ function AgeCategoryPage({
         activeTab={ageActiveTab}
         setActiveTab={setAgeActiveTab}
       />
-      <div className={styles.tableContainer}>
-        <div className={styles.tableHeader}>
-          <p>Toplam Katılımcı Sayısı: {participants.length}</p>
-          <button onClick={() => setShowGroups(true)}>Gruplara Ayır</button>
+      {participants && (
+        <div className={styles.tableContainer}>
+          <div className={styles.tableHeader}>
+            <p>Toplam Katılımcı Sayısı: {participants.length}</p>
+            <button onClick={() => setShowGroups(true)}>Gruplara Ayır</button>
+          </div>
+          <Table<ParticipantAgeCategoryDTO>
+            columns={columns}
+            data={participants}
+            setData={setParticipants}
+          />
         </div>
-        <Table<ParticipantAgeCategoryDTO>
-          columns={columns}
-          data={participants}
-          setData={setParticipants}
-        />
-      </div>
+      )}
     </div>
   );
 }

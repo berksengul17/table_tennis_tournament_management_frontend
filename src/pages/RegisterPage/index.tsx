@@ -61,8 +61,8 @@ function RegisterPage() {
 
       setAgeList(
         await getAgeListByCategoryAndGender(
-          selectedGender.value,
-          currentCategoryIndex
+          currentCategoryIndex,
+          selectedGender.value
         )
       );
     }
@@ -122,7 +122,7 @@ function RegisterPage() {
       const gender = getValues("gender");
       if (gender) {
         setAgeList(
-          await getAgeListByCategoryAndGender(gender, currentCategoryIndex)
+          await getAgeListByCategoryAndGender(currentCategoryIndex, gender)
         );
       }
     })();

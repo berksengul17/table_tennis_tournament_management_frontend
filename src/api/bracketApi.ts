@@ -2,7 +2,7 @@ import axios, { AxiosError } from "axios";
 import { IBracket } from "../type";
 import { handleAxiosError } from "../utils";
 
-const API_URL = "http://localhost:8081/api/bracket";
+const API_URL = "http://localhost:8082/api/bracket";
 
 export const getWinnersBracket = async (
   ageCategory: number

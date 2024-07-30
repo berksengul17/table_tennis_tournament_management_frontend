@@ -1,0 +1,16 @@
+.tableInput,
+.tableTextArea,
+.tableSelect {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.tableSelect {
+  width: fit-content;
+}
+
+.tableTextArea {
+  resize: none;
+}

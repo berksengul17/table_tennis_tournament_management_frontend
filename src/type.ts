@@ -35,6 +35,15 @@ export type Group = {
   participants: Participant[];
 };
 
+export type TableOptionsMeta = {
+  value: string;
+  label: string;
+};
+
+export type TableEditedRows = {
+  [key: string]: boolean;
+};
+
 export enum AGE_CATEGORY {
   FORTY_TO_FORTY_NINE = "40-49",
   FIFTY_TO_FIFTY_NINE = "50-59",

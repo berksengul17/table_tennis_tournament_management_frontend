@@ -1,12 +1,20 @@
 import { createColumnHelper } from "@tanstack/react-table";
 import React, { useEffect, useMemo, useState } from "react";
+import { getAgeListByCategoryAndGender } from "../../api/ageCategoryApi";
 import { getParticipants } from "../../api/participantAgeCategoryApi";
 import Table from "../../components/Table";
+import TableEditCell from "../../components/TableEditCell";
+import { useAgeCategory } from "../../context/AgeCategoryProvider";
 import { useAuth } from "../../context/AuthProvider";
 import { ParticipantAgeCategoryDTO } from "../../type";
 import styles from "./index.module.css";
 
 const columnHelper = createColumnHelper<ParticipantAgeCategoryDTO>();
+
+const genderOptions = [
+  { value: "0", label: "Erkek", categories: ["Erkek", "Karışık"] },
+  { value: "1", label: "Kadın", categories: ["Kadın", "Karışık"] },
+];
 
 function ParticipantsPage({
   setShowAgeCategoryTable,
@@ -14,62 +22,98 @@ function ParticipantsPage({
   setShowAgeCategoryTable?: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   const { isAdminDashboard } = useAuth();
+  const { categories } = useAgeCategory();
+  const [ageList, setAgeList] = useState<string[]>([]);
   const [participants, setParticipants] = useState<ParticipantAgeCategoryDTO[]>(
     []
   );
+
   const columns = useMemo(
     () => [
       columnHelper.accessor((row) => `${row.firstName} ${row.lastName}`, {
         header: "Ad-Soyad",
-        cell: (info) => info.getValue(),
+        meta: {
+          type: "text",
+        },
       }),
       columnHelper.accessor("email", {
         header: "Email",
-        cell: (info) => info.getValue(),
+        meta: {
+          type: "text",
+        },
       }),
       columnHelper.accessor("gender", {
         header: "Cinsiyet",
-        cell: (info) => info.getValue(),
+        meta: {
+          type: "select",
+          options: genderOptions,
+        },
       }),
       columnHelper.accessor("birthDate", {
         header: "Doğum Tarihi",
-        cell: (info) => {
-          const date = new Date(info.getValue() as string);
-          return date.toLocaleDateString("en-GB");
+        meta: {
+          type: "date",
         },
       }),
       columnHelper.accessor("phoneNumber", {
         header: "Telefon Numarası",
-        cell: (info) => info.getValue(),
+        meta: {
+          type: "text",
+        },
       }),
       columnHelper.accessor("city", {
         header: "Katıldığı Şehir",
-        cell: (info) => info.getValue(),
+        meta: {
+          type: "text",
+        },
       }),
       columnHelper.accessor("category", {
         header: "Kategorisi",
-        cell: (info) => info.getValue(),
+        meta: {
+          type: "select",
+          options: categories.map((category, index) => ({
+            value: index.toString(),
+            label: category,
+          })),
+        },
       }),
       columnHelper.accessor("age", {
         header: "Yaş",
-        cell: (info) => info.getValue(),
+        meta: {
+          type: "select",
+          options: ageList.map((age, index) => ({
+            value: index.toString(),
+            label: age,
+          })),
+        },
       }),
       columnHelper.accessor("pairName", {
         header: "Eşi",
-        cell: (info) => info.getValue(),
+        meta: {
+          type: "text",
+        },
       }),
       columnHelper.accessor("rating", {
         header: "Puan",
-        cell: (info) => info.getValue(),
+        meta: {
+          type: "number",
+        },
+      }),
+      columnHelper.display({
+        id: "edit",
+        cell: ({ row, table }) => (
+          <TableEditCell<ParticipantAgeCategoryDTO> row={row} table={table} />
+        ),
       }),
     ],
-    []
+    [categories, ageList]
   );
 
   useEffect(() => {
     // fetch participants
     (async () => {
       setParticipants(await getParticipants());
+      setAgeList(await getAgeListByCategoryAndGender());
     })();
   }, []);
 
@@ -93,6 +137,7 @@ function ParticipantsPage({
         <Table<ParticipantAgeCategoryDTO>
           columns={columns}
           data={participants}
+          setData={isAdminDashboard ? setParticipants : undefined}
         />
       </div>
     )

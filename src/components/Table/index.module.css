@@ -1,12 +1,12 @@
 .usersTable {
   border-collapse: collapse;
   margin-bottom: 1rem;
+  width: 100%;
 }
 
 .usersTableCell {
   border: 1px solid #dddddd;
   padding: 8px;
-  min-width: fit-content;
 }
 
 .tableHeader {

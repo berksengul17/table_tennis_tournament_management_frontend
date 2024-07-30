@@ -1,16 +1,31 @@
 import {
-  ColumnDef,
   flexRender,
   getCoreRowModel,
   RowData,
   useReactTable,
 } from "@tanstack/react-table";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { updateParticipant } from "../../api/participantAgeCategoryApi";
+import {
+  ParticipantAgeCategoryDTO,
+  TableEditedRows,
+  TableOptionsMeta,
+} from "../../type";
+import TableColumn from "../TableColumn";
 import styles from "./index.module.css";
 
 declare module "@tanstack/react-table" {
   interface TableMeta<TData extends RowData> {
+    editedRows: TableEditedRows;
+    setEditedRows: React.Dispatch<React.SetStateAction<TableEditedRows>>;
+    updateRow: (rowIndex: number, revert: boolean) => void;
     updateData: (rowIndex: number, columnId: string, value: unknown) => void;
+  }
+
+  interface ColumnMeta<TData extends RowData, TValue> {
+    type: string;
+    onChange?: (e: any) => void;
+    options?: TableOptionsMeta[];
   }
 }
 
@@ -23,40 +38,36 @@ type TableProps<T> = {
 };
 
 function Table<T>({ data, columns, setData }: TableProps<T>) {
-  const defaultColumn: Partial<ColumnDef<T>> = {
-    cell: ({ getValue, row: { index }, column: { id }, table }) => {
-      const initialValue = getValue();
-      // We need to keep and update the state of the cell normally
-      const [value, setValue] = useState(initialValue);
-
-      // When the input is blurred, we'll call our table meta's updateData function
-      const onBlur = () => {
-        table.options.meta?.updateData(index, id, value);
-      };
-
-      // If the initialValue is changed external, sync it up with our state
-      useEffect(() => {
-        setValue(initialValue);
-      }, [initialValue]);
-
-      console.log("default");
-
-      return (
-        <input
-          value={value as string}
-          onChange={(e) => setValue(e.target.value)}
-          onBlur={onBlur}
-        />
-      );
-    },
-  };
+  const [originalData, setOriginalData] = useState<T[]>([]);
+  const [editedRows, setEditedRows] = useState({});
 
   const table = useReactTable({
     data: data ?? fallbackData,
     columns: columns,
-    defaultColumn,
+    defaultColumn: TableColumn<T>(),
     getCoreRowModel: getCoreRowModel(),
+    state: { columnVisibility: { edit: setData !== undefined } },
     meta: {
+      editedRows,
+      setEditedRows,
+      updateRow: async (rowIndex: number, revert: boolean) => {
+        if (revert) {
+          setData?.((prev) => {
+            console.log(originalData[rowIndex]);
+            if (!originalData[rowIndex]) return prev;
+            return prev.map((row, index) => {
+              return index === rowIndex ? originalData[rowIndex] : row;
+            });
+          });
+        } else {
+          await updateParticipant(data[rowIndex] as ParticipantAgeCategoryDTO);
+          // setOriginalData((prev) =>
+          //   prev.map((row, index) =>
+          //     index === rowIndex ? data[rowIndex] : row
+          //   )
+          // );
+        }
+      },
       updateData: (rowIndex, columnId, value) => {
         setData?.((old) =>
           old.map((row, index) => {
@@ -73,6 +84,12 @@ function Table<T>({ data, columns, setData }: TableProps<T>) {
       },
     },
   });
+
+  useEffect(() => {
+    if (originalData.length === 0) {
+      setOriginalData([...data]);
+    }
+  }, [data]);
 
   return (
     <>

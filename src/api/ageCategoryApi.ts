@@ -2,7 +2,7 @@ import axios, { AxiosError } from "axios";
 import { AgeCategory } from "../type";
 import { handleAxiosError } from "../utils";
 
-const API_URL = "http://localhost:8081/api/age-category";
+const API_URL = "http://localhost:8082/api/age-category";
 
 export const createAgeCategories = async (): Promise<AgeCategory[]> => {
   try {
@@ -38,7 +38,7 @@ export const getAllCategories = async (): Promise<string[]> => {
 };
 
 export const getAgeListByCategoryAndGender = async (
-  category: number,
+  category?: number,
   gender?: string
 ): Promise<string[]> => {
   try {

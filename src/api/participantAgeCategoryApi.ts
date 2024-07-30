@@ -2,7 +2,7 @@ import axios, { AxiosError } from "axios";
 import { ParticipantAgeCategoryDTO } from "../type";
 import { handleAxiosError } from "../utils";
 
-const API_URL = "http://localhost:8081/api/participant-age-category";
+const API_URL = "http://localhost:8082/api/participant-age-category";
 
 export const getParticipants = async (
   categoryVal?: number,
@@ -18,4 +18,20 @@ export const getParticipants = async (
   }
 
   return [];
+};
+
+export const updateParticipant = async (
+  participantAgeCategoryDTO: ParticipantAgeCategoryDTO
+): Promise<string> => {
+  try {
+    const response = await axios.put(
+      `${API_URL}/update-participant/${participantAgeCategoryDTO.id}`,
+      participantAgeCategoryDTO
+    );
+    return response.data;
+  } catch (error: AxiosError | unknown) {
+    handleAxiosError(error);
+  }
+
+  return "";
 };

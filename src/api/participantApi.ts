@@ -2,7 +2,7 @@ import axios, { AxiosError } from "axios";
 import { ParticipantInputs } from "../type";
 import { handleAxiosError } from "../utils";
 
-const API_URL = "http://localhost:8081/api/participant";
+const API_URL = "http://localhost:8082/api/participant";
 
 export const register = async (participant: ParticipantInputs) => {
   try {
