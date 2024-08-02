@@ -35,7 +35,7 @@ export type Group = {
   participants: Participant[];
 };
 
-export type TableOptionsMeta = {
+export type Option = {
   value: string;
   label: string;
 };

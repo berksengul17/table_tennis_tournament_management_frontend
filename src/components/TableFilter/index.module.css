@@ -1,0 +1,12 @@
+.rangeContainer {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.rangeContainer input {
+  width: 5rem;
+}
+
+.input {
+  width: 8rem;
+}

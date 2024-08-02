@@ -1,6 +1,6 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { ChangeEvent, useEffect, useState } from "react";
-import { TableOptionsMeta } from "../../type";
+import { Option } from "../../type";
 import styles from "./index.module.css";
 
 const TableColumn = <T,>(): Partial<ColumnDef<T>> => ({
@@ -42,7 +42,7 @@ const TableColumn = <T,>(): Partial<ColumnDef<T>> => ({
           onChange={onSelectChange}
           value={initialValue}
         >
-          {columnMeta?.options?.map((option: TableOptionsMeta) => (
+          {columnMeta?.options?.map((option: Option) => (
             <option key={option.value} value={option.value}>
               {option.label}
             </option>
