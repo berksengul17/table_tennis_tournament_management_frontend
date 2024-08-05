@@ -1,17 +1,13 @@
 import { createColumnHelper } from "@tanstack/react-table";
 import { useEffect, useMemo, useState } from "react";
-import {
-  createAgeCategories,
-  getAgeCategories,
-} from "../../api/ageCategoryApi";
 import { getParticipants } from "../../api/participantAgeCategoryApi";
 import AgeCategoryTabs from "../../components/AgeCategoryTabs";
 import CategoryTabs from "../../components/CategoryTabs";
 import Table from "../../components/Table";
 import TableEditCell from "../../components/TableEditCell";
-import { useAgeCategory } from "../../context/AgeCategoryProvider";
-import { AgeCategory, ParticipantAgeCategoryDTO } from "../../type";
+import { ParticipantAgeCategoryDTO } from "../../type";
 import styles from "./index.module.css";
+import { downloadAgeCategoriesPdf } from "../../api/documentApi";
 
 const columnHelper = createColumnHelper<ParticipantAgeCategoryDTO>();
 
@@ -20,22 +16,28 @@ function AgeCategoryPage({
 }: {
   setShowGroups: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
-  const { categories, ageList } = useAgeCategory();
   const [participants, setParticipants] = useState<ParticipantAgeCategoryDTO[]>(
     []
   );
-  const [ageCategories, setAgeCategories] = useState<AgeCategory[]>([]);
   const [categoryActiveTab, setCategoryActiveTab] = useState<number>(0);
   const [ageActiveTab, setAgeActiveTab] = useState<number>(0);
 
   const columns = useMemo(
     () => [
-      columnHelper.accessor((row) => `${row.firstName} ${row.lastName}`, {
-        header: "Ad-Soyad",
-        meta: {
-          type: "text",
+      columnHelper.accessor(
+        (row) => {
+          const names = (row.firstName + " " + row.lastName).split(" ");
+          return names
+            .map((name) => name.slice(0, 1).toUpperCase() + name.slice(1))
+            .join(" ");
         },
-      }),
+        {
+          header: "Ad-Soyad",
+          meta: {
+            type: "text",
+          },
+        }
+      ),
       columnHelper.accessor("email", {
         header: "Email",
         meta: {
@@ -70,26 +72,26 @@ function AgeCategoryPage({
           type: "text",
         },
       }),
-      columnHelper.accessor("category", {
-        header: "Kategorisi",
-        meta: {
-          type: "select",
-          options: categories.map((category, index) => ({
-            value: index.toString(),
-            label: category,
-          })),
-        },
-      }),
-      columnHelper.accessor("age", {
-        header: "Yaş",
-        meta: {
-          type: "select",
-          options: ageList.map((age, index) => ({
-            value: index.toString(),
-            label: age,
-          })),
-        },
-      }),
+      // columnHelper.accessor("category", {
+      //   header: "Kategorisi",
+      //   meta: {
+      //     type: "select",
+      //     options: categories.map((category, index) => ({
+      //       value: index.toString(),
+      //       label: category,
+      //     })),
+      //   },
+      // }),
+      // columnHelper.accessor("age", {
+      //   header: "Yaş",
+      //   meta: {
+      //     type: "select",
+      //     options: ageList.map((age, index) => ({
+      //       value: index.toString(),
+      //       label: age,
+      //     })),
+      //   },
+      // }),
       columnHelper.accessor("pairName", {
         header: "Eşi",
         meta: {
@@ -110,21 +112,25 @@ function AgeCategoryPage({
     []
   );
 
-  useEffect(() => {
-    // fetch participants
-    (async () => {
-      let categories = await getAgeCategories();
-      if (categories.length == 0) {
-        categories = await createAgeCategories();
-      }
+  const downloadPdf = async () => {
+    await downloadAgeCategoriesPdf();
+  };
 
-      setAgeCategories(categories);
-    })();
+  // useEffect(() => {
+  //   // fetch participants
+  //   (async () => {
+  //     let categories = await getAgeCategories();
+  //     if (categories.length == 0) {
+  //       categories = await createAgeCategories();
+  //     }
 
-    return () => {
-      setAgeCategories([]);
-    };
-  }, []);
+  //     setAgeCategories(categories);
+  //   })();
+
+  //   return () => {
+  //     setAgeCategories([]);
+  //   };
+  // }, []);
 
   useEffect(() => {
     console.log(categoryActiveTab, ageActiveTab);
@@ -148,7 +154,10 @@ function AgeCategoryPage({
         <div className={styles.tableContainer}>
           <div className={styles.tableHeader}>
             <p>Toplam Katılımcı Sayısı: {participants.length}</p>
-            <button onClick={() => setShowGroups(true)}>Gruplara Ayır</button>
+            <div className={styles.buttonContainer}>
+              <button onClick={downloadPdf}>Grup PDF İndir</button>
+              <button onClick={() => setShowGroups(true)}>Gruplara Ayır</button>
+            </div>
           </div>
           <Table<ParticipantAgeCategoryDTO>
             columns={columns}

@@ -5,11 +5,17 @@ import styles from "./index.module.css";
 
 const TableColumn = <T,>(): Partial<ColumnDef<T>> => ({
   cell: ({ getValue, row, column, table }) => {
-    const initialValue: any = getValue();
     const columnMeta = column.columnDef.meta;
     const tableMeta = table.options.meta;
     const isNumberInput = columnMeta?.type === "number";
     const isEditable = tableMeta?.editedRows[row.id];
+
+    let initialValue = getValue();
+    if (columnMeta?.type === "select") {
+      initialValue = columnMeta.options?.find(
+        (option) => option.label === initialValue
+      )?.value;
+    }
 
     const [value, setValue] = useState(initialValue);
 
@@ -27,7 +33,11 @@ const TableColumn = <T,>(): Partial<ColumnDef<T>> => ({
 
     const onSelectChange = (e: ChangeEvent<HTMLSelectElement>) => {
       setValue(e.target.value);
-      tableMeta?.updateData(row.index, column.id, e.target.value);
+      const label = columnMeta?.options?.find(
+        (option) => option.value === e.target.value
+      )?.label;
+
+      tableMeta?.updateData(row.index, column.id, label);
       columnMeta?.onChange?.(e);
     };
 
@@ -40,7 +50,7 @@ const TableColumn = <T,>(): Partial<ColumnDef<T>> => ({
         <select
           className={styles.tableSelect}
           onChange={onSelectChange}
-          value={initialValue}
+          value={value as string}
         >
           {columnMeta?.options?.map((option: Option) => (
             <option key={option.value} value={option.value}>
@@ -65,6 +75,8 @@ const TableColumn = <T,>(): Partial<ColumnDef<T>> => ({
           onBlur={onBlur}
         />
       )
+    ) : columnMeta?.type === "select" ? (
+      columnMeta.options?.find((option) => option.value === value)?.label
     ) : (
       value
     );

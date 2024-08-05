@@ -1,4 +1,5 @@
 import axios, { AxiosError } from "axios";
+import { ParticipantInputs } from "./type";
 
 export const handleAxiosError = (error: unknown | AxiosError) => {
   if (axios.isAxiosError(error)) {
@@ -19,3 +20,17 @@ export const handleAxiosError = (error: unknown | AxiosError) => {
 
 export const emailRegex =
   /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
+export const participantInputsDefaultValues: Omit<ParticipantInputs, "rating"> =
+  {
+    firstName: "",
+    lastName: "",
+    gender: "",
+    email: "",
+    phoneNumber: "",
+    category: "",
+    birthDate: "",
+    pairName: "",
+    age: "",
+    city: "",
+  };

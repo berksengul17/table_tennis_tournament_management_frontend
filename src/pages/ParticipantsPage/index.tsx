@@ -1,13 +1,18 @@
 import { ColumnFiltersState, createColumnHelper } from "@tanstack/react-table";
 import React, { useEffect, useMemo, useState } from "react";
 import { getAgeListByCategoryAndGender } from "../../api/ageCategoryApi";
-import { getParticipants } from "../../api/participantAgeCategoryApi";
+import {
+  getParticipants,
+  updateParticipant,
+} from "../../api/participantAgeCategoryApi";
 import Table from "../../components/Table";
 import TableEditCell from "../../components/TableEditCell";
 import { useAgeCategory } from "../../context/AgeCategoryProvider";
 import { useAuth } from "../../context/AuthProvider";
 import { Option, ParticipantAgeCategoryDTO } from "../../type";
 import styles from "./index.module.css";
+import { deleteParticipant, register } from "../../api/participantApi";
+import { participantInputsDefaultValues } from "../../utils";
 
 const columnHelper = createColumnHelper<ParticipantAgeCategoryDTO>();
 
@@ -23,7 +28,6 @@ function ParticipantsPage({
 }) {
   const { isAdminDashboard } = useAuth();
   const { categories } = useAgeCategory();
-  const [ageList, setAgeList] = useState<string[]>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [participants, setParticipants] = useState<ParticipantAgeCategoryDTO[]>(
     []
@@ -34,11 +38,14 @@ function ParticipantsPage({
   const columns = useMemo(
     () => [
       columnHelper.accessor(
-        (row) =>
-          `${
-            row.firstName.slice(0, 1).toUpperCase() + row.firstName.slice(1)
-          } ${row.lastName.slice(0, 1).toUpperCase() + row.lastName.slice(1)}`,
+        (row) => {
+          const names = (row.firstName + " " + row.lastName).split(" ");
+          return names
+            .map((name) => name.slice(0, 1).toUpperCase() + name.slice(1))
+            .join(" ");
+        },
         {
+          id: "fullName",
           header: "Ad-Soyad",
           filterFn: "includesString",
           meta: {
@@ -181,16 +188,66 @@ function ParticipantsPage({
         ),
       }),
     ],
-    [categories, ageList]
+    [categories, ageListOptions]
   );
+
+  const addRow = async () => {
+    const newParticipant = await register({
+      ...participantInputsDefaultValues,
+      rating: 0,
+    });
+
+    console.log("new participant", newParticipant);
+
+    setParticipants((old) => [newParticipant, ...old]);
+  };
+
+  // TODO type tanımları nasıl daha iyi olabilirdi?
+  const updateRow = async (
+    participantAgeCategory: any & { fullName: string }
+  ) => {
+    let firstName = participantAgeCategory.firstName.trim();
+    let lastName = participantAgeCategory.lastName.trim();
+    if (participantAgeCategory.fullName) {
+      participantAgeCategory.fullName = participantAgeCategory.fullName.trim();
+      const names = participantAgeCategory.fullName.split(" ");
+      firstName = names.slice(0, names.length - 1).join(" ");
+      lastName = names[names.length - 1];
+    }
+
+    const updatedData: ParticipantAgeCategoryDTO = {
+      ...participantAgeCategory,
+      firstName,
+      lastName,
+    };
+    await updateParticipant(updatedData);
+  };
+
+  const removeRow = async (participantId: number) => {
+    await deleteParticipant(participantId);
+
+    setParticipants((old) => [
+      ...old.filter((participant) => participant.id !== participantId),
+    ]);
+  };
 
   useEffect(() => {
     // fetch participants
     (async () => {
       setParticipants(await getParticipants());
-      setAgeList(await getAgeListByCategoryAndGender());
+      const ageList = await getAgeListByCategoryAndGender();
+      setAgeListOptions(
+        ageList.map((age, index) => ({
+          value: index.toString(),
+          label: age,
+        }))
+      );
     })();
   }, []);
+
+  useEffect(() => {
+    console.log("participants changed");
+  }, [participants]);
 
   useEffect(() => {
     setCategoryOptions(
@@ -200,15 +257,6 @@ function ParticipantsPage({
       }))
     );
   }, [categories]);
-
-  useEffect(() => {
-    setAgeListOptions(
-      ageList.map((age, index) => ({
-        value: index.toString(),
-        label: age,
-      }))
-    );
-  }, [ageList]);
 
   return (
     participants && (
@@ -233,6 +281,9 @@ function ParticipantsPage({
           setColumnFilters={setColumnFilters}
           data={participants}
           setData={isAdminDashboard ? setParticipants : undefined}
+          addRow={isAdminDashboard ? addRow : undefined}
+          updateRow={isAdminDashboard ? updateRow : undefined}
+          removeRow={isAdminDashboard ? removeRow : undefined}
         />
       </div>
     )

@@ -66,3 +66,7 @@ export type IBracket = {
   id: number;
   rounds: IRound[];
 };
+
+export interface Identifiable {
+  id: number;
+}

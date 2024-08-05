@@ -13,6 +13,17 @@ export const register = async (participant: ParticipantInputs) => {
     handleAxiosError(error);
   }
 };
+
+export const deleteParticipant = async (participantId: number) => {
+  try {
+    const response = await axios.delete(
+      `${API_URL}/delete-participant/${participantId}`
+    );
+    return response.data;
+  } catch (error: unknown | AxiosError) {
+    handleAxiosError(error);
+  }
+};
 // export const getParticipants = async () => {
 //   try {
 //     const response = await axios.get(`${API_URL}/participants`);

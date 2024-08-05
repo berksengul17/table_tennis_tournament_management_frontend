@@ -8,16 +8,19 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import React, { useEffect, useState } from "react";
-import { updateParticipant } from "../../api/participantAgeCategoryApi";
-import { ParticipantAgeCategoryDTO, TableEditedRows, Option } from "../../type";
+import { TableEditedRows, Option, Identifiable } from "../../type";
 import TableColumn from "../TableColumn";
 import styles from "./index.module.css";
 import TableFilter from "../TableFilter";
+import TablePagination from "../TablePagination";
+import { useAuth } from "../../context/AuthProvider";
 
 declare module "@tanstack/react-table" {
   interface TableMeta<TData extends RowData> {
     editedRows: TableEditedRows;
     setEditedRows: React.Dispatch<React.SetStateAction<TableEditedRows>>;
+    addRow: () => void;
+    removeRow: (rowIndex: number) => void;
     updateRow: (rowIndex: number, revert: boolean) => void;
     updateData: (rowIndex: number, columnId: string, value: unknown) => void;
   }
@@ -38,15 +41,22 @@ type TableProps<T> = {
   columnFilters?: ColumnFiltersState;
   setColumnFilters?: React.Dispatch<React.SetStateAction<ColumnFiltersState>>;
   setData?: React.Dispatch<React.SetStateAction<T[]>>;
+  addRow?: () => void;
+  updateRow?: (data: T) => void;
+  removeRow?: (dataId: number) => void;
 };
 
-function Table<T>({
+function Table<T extends Identifiable>({
   data,
   columns,
   columnFilters,
   setColumnFilters,
   setData,
+  addRow,
+  updateRow,
+  removeRow,
 }: TableProps<T>) {
+  const { isAdminDashboard } = useAuth();
   const [originalData, setOriginalData] = useState<T[]>([]);
   const [editedRows, setEditedRows] = useState({});
 
@@ -63,9 +73,21 @@ function Table<T>({
       columnVisibility: { edit: setData !== undefined },
     },
     onColumnFiltersChange: setColumnFilters,
+    getRowId: (row) => {
+      return row.id?.toString();
+    },
     meta: {
       editedRows,
       setEditedRows,
+      addRow: () => {
+        addRow?.();
+        const setFunc = (old: T[]) => [...old, {} as T];
+        setData?.(setFunc);
+        setOriginalData(setFunc);
+      },
+      removeRow: (dataId: number) => {
+        removeRow?.(dataId);
+      },
       updateRow: async (rowIndex: number, revert: boolean) => {
         if (revert) {
           setData?.((prev) => {
@@ -76,7 +98,9 @@ function Table<T>({
             });
           });
         } else {
-          await updateParticipant(data[rowIndex] as ParticipantAgeCategoryDTO);
+          console.log(data[rowIndex]);
+
+          updateRow?.(data[rowIndex]);
           // setOriginalData((prev) =>
           //   prev.map((row, index) =>
           //     index === rowIndex ? data[rowIndex] : row
@@ -102,6 +126,8 @@ function Table<T>({
   });
 
   useEffect(() => {
+    console.log("data", data);
+
     if (originalData.length === 0) {
       setOriginalData([...data]);
     }
@@ -143,63 +169,21 @@ function Table<T>({
             </tr>
           ))}
         </tbody>
+        <tfoot>
+          {isAdminDashboard && (
+            <tr>
+              <th>
+                <button onClick={table.options.meta?.addRow}>Ekle</button>
+              </th>
+            </tr>
+          )}
+          <tr>
+            <th>
+              <TablePagination<T> table={table} />
+            </th>
+          </tr>
+        </tfoot>
       </table>
-      <div>
-        <button
-          onClick={() => table.setPageIndex(0)}
-          disabled={!table.getCanPreviousPage()}
-        >
-          {"<<"}
-        </button>
-        <button
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          {"<"}
-        </button>
-        <button
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-        >
-          {">"}
-        </button>
-        <button
-          onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-          disabled={!table.getCanNextPage()}
-        >
-          {">>"}
-        </button>
-        <span>
-          <div>Page</div>
-          <strong>
-            {table.getState().pagination.pageIndex + 1} of{" "}
-            {table.getPageCount()}
-          </strong>
-        </span>
-        <span>
-          | Go to page:
-          <input
-            type="number"
-            defaultValue={table.getState().pagination.pageIndex + 1}
-            onChange={(e) => {
-              const page = e.target.value ? Number(e.target.value) - 1 : 0;
-              table.setPageIndex(page);
-            }}
-          />
-        </span>
-        <select
-          value={table.getState().pagination.pageSize}
-          onChange={(e) => {
-            table.setPageSize(Number(e.target.value));
-          }}
-        >
-          {[10, 20, 30, 40, 50].map((pageSize) => (
-            <option key={pageSize} value={pageSize}>
-              Show {pageSize}
-            </option>
-          ))}
-        </select>
-      </div>
     </div>
   );
 }

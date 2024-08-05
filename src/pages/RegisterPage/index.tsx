@@ -4,7 +4,7 @@ import { getAgeListByCategoryAndGender } from "../../api/ageCategoryApi.ts";
 import { register as registerParticipant } from "../../api/participantApi.ts";
 import { useAgeCategory } from "../../context/AgeCategoryProvider.tsx";
 import { ParticipantInputs } from "../../type";
-import { emailRegex } from "../../utils.ts";
+import { emailRegex, participantInputsDefaultValues } from "../../utils.ts";
 import RequiredLabel from "./components/RequiredLabel/index.tsx";
 import styles from "./index.module.css";
 
@@ -27,18 +27,7 @@ function RegisterPage() {
     formState,
     formState: { isSubmitSuccessful, errors },
   } = useForm<ParticipantInputs>({
-    defaultValues: {
-      firstName: "",
-      lastName: "",
-      gender: "",
-      email: "",
-      phoneNumber: "",
-      category: "",
-      birthDate: "",
-      pairName: "",
-      age: "",
-      city: "",
-    },
+    defaultValues: participantInputsDefaultValues,
   });
 
   const handlePhoneChange = (e: any) => {
