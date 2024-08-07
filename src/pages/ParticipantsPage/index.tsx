@@ -44,8 +44,6 @@ function ParticipantsPage({
   // const [selectedGender, setSelectedGender] = useState<string>("0");
   // const [selectedCategory, setSelectedCategory] = useState<string>("0");
   const [editedRows, setEditedRows] = useState<EditedRow[]>([]);
-  const [selectedCategories, setSelectedCategories] = useState<EditedRow[]>([]);
-  const [availableAgeLists, setAvailableAgeLists] = useState([]);
   const [rowAgeListOptions, setRowAgeListOptions] = useState<{
     [key: string]: Option[];
   }>({});

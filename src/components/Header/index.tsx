@@ -10,7 +10,7 @@ const Header = () => (
     </div>
     <ul className={styles.navbarLinks}>
       <li>
-        <HeaderLink to="/" text="Anasayfaa" />
+        <HeaderLink to="/" text="Anasayfa" />
       </li>
       <li>
         <HeaderLink to="/register" text="Kayıt" />
