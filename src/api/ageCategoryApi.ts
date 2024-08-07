@@ -1,7 +1,6 @@
 import axios, { AxiosError } from "axios";
 import { AgeCategory } from "../type";
 import { handleAxiosError } from "../utils";
-
 const API_URL = "http://localhost:8082/api/age-category";
 
 export const createAgeCategories = async (): Promise<AgeCategory[]> => {
@@ -28,7 +27,9 @@ export const getAgeCategories = async (): Promise<AgeCategory[]> => {
 
 export const getAllCategories = async (): Promise<string[]> => {
   try {
-    const response = await axios.get(`${API_URL}/get-categories`);
+    const response = await axios.get(`${API_URL}/get-categories`, {
+      params: { showDoubles: false },
+    });
     return response.data;
   } catch (error: unknown | AxiosError) {
     handleAxiosError(error);

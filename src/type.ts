@@ -70,3 +70,8 @@ export type IBracket = {
 export interface Identifiable {
   id: number;
 }
+
+export type Admin = {
+  id: string;
+  name: string;
+};

@@ -1,15 +1,12 @@
 import { PropsWithChildren, createContext, useContext, useState } from "react";
-
-type Admin = {
-  id: string;
-  name: string;
-};
+import { Admin } from "../type";
+import { loginAdmin } from "../api/adminApi";
 
 type AuthContextProps = {
   admin: Admin | null;
   isAdminDashboard: boolean;
   setAdminDashboard: React.Dispatch<React.SetStateAction<boolean>>;
-  login: (username: string, password: string) => void;
+  login: (username: string, password: string) => boolean;
   logout: () => void;
 };
 
@@ -22,12 +19,16 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   });
   const [isAdminDashboard, setAdminDashboard] = useState<boolean>(false);
 
-  const login = (username: string, password: string) => {
-    if (username === "admin" && password === "admin") {
-      const adminData = { id: "1", name: "Admin" };
-      setAdmin(adminData);
-      localStorage.setItem("admin", JSON.stringify(adminData));
-    }
+  const login = (username: string, password: string): boolean => {
+    let success = false;
+    loginAdmin(username, password).then((adminData) => {
+      if (adminData) {
+        setAdmin(adminData);
+        localStorage.setItem("admin", JSON.stringify(adminData));
+        success = true;
+      }
+    });
+    return success;
   };
 
   const logout = () => {

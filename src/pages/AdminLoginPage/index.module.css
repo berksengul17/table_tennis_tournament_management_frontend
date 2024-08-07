@@ -1,7 +1,14 @@
 .container {
   display: flex;
-  height: 100%;
+  flex-direction: column;
   justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.container img {
+  width: 100px;
+  margin-bottom: 2rem;
 }
 
 .form {
@@ -14,4 +21,10 @@
 
 .form label {
   margin-right: 0.5rem;
+}
+
+.inputContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }

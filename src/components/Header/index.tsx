@@ -1,22 +1,6 @@
-import { NavLink } from "react-router-dom";
-import logo from "../../assets/images/logo.png";
+import logo from "../../assets/images/logo1.png";
 import styles from "./index.module.css";
-
-const HeaderLink = ({ to, text }: { to: string; text: string }) => {
-  return (
-    <NavLink
-      to={to}
-      className={({ isActive, isPending }) =>
-        [
-          isPending ? styles.pending : isActive ? styles.active : "",
-          styles.link,
-        ].join(" ")
-      }
-    >
-      {text}
-    </NavLink>
-  );
-};
+import { HeaderLink } from "../HeaderLink";
 
 const Header = () => (
   <nav className={styles.navbar}>

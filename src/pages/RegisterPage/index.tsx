@@ -206,7 +206,6 @@ function RegisterPage() {
               {...register("category", {
                 required: true,
                 onChange: (e) => {
-                  console.log(e.target.value);
                   setCurrentCategoryIndex(parseInt(e.target.value));
                 },
               })}
@@ -257,6 +256,23 @@ function RegisterPage() {
           <div className={styles.inputContainer}>
             <RequiredLabel htmlFor="city" text="Katılınan Şehir" required />
             <input {...register("city", { required: true })} id="city" />
+          </div>
+
+          <div className={styles.feeInfo}>
+            <p>❗Kayıt ücreti 650 TL'dir.</p>
+            <p style={{ display: "flex" }}>
+              <span>❗</span>
+              <span style={{ display: "flex", flexDirection: "column" }}>
+                Ücretler
+                <span className={styles.bankInfo}>
+                  Garanti: TR03 0006 2001 1530 0006 6921 70
+                </span>
+                <span className={styles.bankInfo}>
+                  Yapıkredi: TR68 0006 7010 0000 0093 4321 84
+                </span>
+                IBAN adreslerinden birine yatırılabilir.
+              </span>
+            </p>
           </div>
 
           <input type="submit" value={"Kaydol"} />

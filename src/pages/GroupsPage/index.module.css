@@ -24,7 +24,18 @@
 
 .noGroup {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
+  gap: 2rem;
+  margin-top: 5rem;
+}
+
+.noGroup img {
+  width: 80px;
+}
+
+.noGroup p {
   font-size: 1.5rem;
+  font-weight: 600;
 }

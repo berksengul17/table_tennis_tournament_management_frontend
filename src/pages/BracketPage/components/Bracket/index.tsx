@@ -9,9 +9,7 @@ function Bracket() {
   const [rounds, setRounds] = useState<IRound[]>([]);
 
   useEffect(() => {
-    console.log("brackets[activeBracket]", brackets[activeBracket]);
     if (brackets[activeBracket]) {
-      console.log("brackets", brackets[activeBracket]);
       setRounds(brackets[activeBracket].rounds);
     }
   }, [brackets, activeBracket]);

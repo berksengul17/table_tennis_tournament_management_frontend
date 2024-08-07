@@ -14,6 +14,13 @@ import styles from "./index.module.css";
 import { deleteParticipant, register } from "../../api/participantApi";
 import { participantInputsDefaultValues } from "../../utils";
 
+type EditedRow = {
+  [key: string]: {
+    selectedGender: string;
+    selectedCategory: string;
+  };
+};
+
 const columnHelper = createColumnHelper<ParticipantAgeCategoryDTO>();
 
 const genderOptions = [
@@ -34,6 +41,14 @@ function ParticipantsPage({
   );
   const [categoryOptions, setCategoryOptions] = useState<Option[]>([]);
   const [ageListOptions, setAgeListOptions] = useState<Option[]>([]);
+  // const [selectedGender, setSelectedGender] = useState<string>("0");
+  // const [selectedCategory, setSelectedCategory] = useState<string>("0");
+  const [editedRows, setEditedRows] = useState<EditedRow[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<EditedRow[]>([]);
+  const [availableAgeLists, setAvailableAgeLists] = useState([]);
+  const [rowAgeListOptions, setRowAgeListOptions] = useState<{
+    [key: string]: Option[];
+  }>({});
 
   const columns = useMemo(
     () => [
@@ -79,7 +94,20 @@ function ParticipantsPage({
         meta: {
           type: "select",
           filterVariant: "select",
-          options: genderOptions,
+          options: () => genderOptions,
+          onChange: (e: React.ChangeEvent<HTMLSelectElement>, rowId) => {
+            setEditedRows((old) =>
+              old.map((row) => {
+                if (row[rowId]) {
+                  return {
+                    ...row,
+                    [rowId]: { ...row[rowId], selectedGender: e.target.value },
+                  };
+                }
+                return row;
+              })
+            );
+          },
         },
       }),
       columnHelper.accessor("birthDate", {
@@ -142,7 +170,47 @@ function ParticipantsPage({
         meta: {
           type: "select",
           filterVariant: "select",
-          options: categoryOptions,
+          options: (rowId) => {
+            if (rowId !== undefined) {
+              const editedRow = editedRows.find((row) => row[rowId]);
+              if (editedRow !== undefined) {
+                const selectedGender = editedRow[rowId].selectedGender;
+                const gender = genderOptions.find(
+                  (option) => option.value === selectedGender
+                );
+                const filteredCategories = categories.filter((category) =>
+                  gender?.categories.some((gCategory) =>
+                    category.includes(gCategory)
+                  )
+                );
+
+                return filteredCategories.map((category, index) => ({
+                  value: index.toString(),
+                  label: category,
+                }));
+              }
+
+              return [];
+            }
+
+            return categoryOptions;
+          },
+          onChange: (e, rowId) => {
+            setEditedRows((old) =>
+              old.map((row) => {
+                if (row[rowId]) {
+                  return {
+                    ...row,
+                    [rowId]: {
+                      ...row[rowId],
+                      selectedCategory: e.target.value,
+                    },
+                  };
+                }
+                return row;
+              })
+            );
+          },
         },
       }),
       columnHelper.accessor("age", {
@@ -162,7 +230,13 @@ function ParticipantsPage({
         meta: {
           type: "select",
           filterVariant: "select",
-          options: ageListOptions,
+          options: (rowId) => {
+            if (rowId !== undefined) {
+              return rowAgeListOptions[rowId] || [];
+            }
+
+            return ageListOptions;
+          },
         },
       }),
       columnHelper.accessor("pairName", {
@@ -184,11 +258,37 @@ function ParticipantsPage({
       columnHelper.display({
         id: "edit",
         cell: ({ row, table }) => (
-          <TableEditCell<ParticipantAgeCategoryDTO> row={row} table={table} />
+          <TableEditCell<ParticipantAgeCategoryDTO>
+            row={row}
+            table={table}
+            onPressEdit={(rowId) => {
+              const selectedGender = genderOptions.find(
+                (gender) => gender.label === row.original.gender
+              )?.value;
+              const selectedCategory = categoryOptions.find(
+                (category) =>
+                  category.label === row.original.category.toString()
+              )?.value;
+              setEditedRows((old) => [
+                ...old,
+                {
+                  [rowId]: {
+                    selectedGender: selectedGender ? selectedGender : "0",
+                    selectedCategory: selectedCategory ? selectedCategory : "0",
+                  },
+                },
+              ]);
+            }}
+            onDone={(rowId) => {
+              setEditedRows((old) =>
+                old.filter((row) => row[rowId] === undefined)
+              );
+            }}
+          />
         ),
       }),
     ],
-    [categories, ageListOptions]
+    [categories, editedRows, rowAgeListOptions]
   );
 
   const addRow = async () => {
@@ -197,9 +297,9 @@ function ParticipantsPage({
       rating: 0,
     });
 
-    console.log("new participant", newParticipant);
-
-    setParticipants((old) => [newParticipant, ...old]);
+    if (newParticipant != null) {
+      setParticipants((old) => [newParticipant, ...old]);
+    }
   };
 
   // TODO type tanımları nasıl daha iyi olabilirdi?
@@ -220,7 +320,14 @@ function ParticipantsPage({
       firstName,
       lastName,
     };
-    await updateParticipant(updatedData);
+
+    const updatedParticipant = await updateParticipant(updatedData);
+
+    if (updatedParticipant != null) {
+      setParticipants((old) =>
+        old.map((p) => (p.id === updatedData.id ? updatedParticipant : p))
+      );
+    }
   };
 
   const removeRow = async (participantId: number) => {
@@ -232,7 +339,6 @@ function ParticipantsPage({
   };
 
   useEffect(() => {
-    // fetch participants
     (async () => {
       setParticipants(await getParticipants());
       const ageList = await getAgeListByCategoryAndGender();
@@ -246,10 +352,6 @@ function ParticipantsPage({
   }, []);
 
   useEffect(() => {
-    console.log("participants changed");
-  }, [participants]);
-
-  useEffect(() => {
     setCategoryOptions(
       categories.map((category, index) => ({
         value: index.toString(),
@@ -257,6 +359,71 @@ function ParticipantsPage({
       }))
     );
   }, [categories]);
+
+  useEffect(() => {
+    const fetchAgeListOptions = async (
+      rowId: string,
+      selectedCategory: string,
+      selectedGender: string
+    ) => {
+      const ageList = await getAgeListByCategoryAndGender(
+        parseInt(selectedCategory),
+        selectedGender
+      );
+
+      setRowAgeListOptions((prev) => ({
+        ...prev,
+        [rowId]: ageList.map((age, index) => ({
+          value: index.toString(),
+          label: age,
+        })),
+      }));
+    };
+
+    editedRows.forEach((editedRow) => {
+      const rowId = Object.keys(editedRow)[0];
+      const { selectedCategory, selectedGender } = editedRow[rowId];
+      fetchAgeListOptions(rowId, selectedCategory, selectedGender);
+    });
+  }, [editedRows]);
+
+  // useEffect(() => {
+  //   if (selectedGender) {
+  //     const gender = genderOptions.find(
+  //       (option) => option.value === selectedGender
+  //     );
+
+  //     const filteredCategories = categories.filter((category) =>
+  //       gender?.categories.some((gCategory) => category.includes(gCategory))
+  //     );
+
+  //     console.log(filteredCategories);
+
+  //     setCategoryOptions(
+  //       filteredCategories.map((category, index) => ({
+  //         value: index.toString(),
+  //         label: category,
+  //       }))
+  //     );
+  //   }
+  // }, [selectedGender, categories]);
+
+  // useEffect(() => {
+  //   if (categoryOptions.length > 0) {
+  //     (async () => {
+  //       const ageList = await getAgeListByCategoryAndGender(
+  //         parseInt(selectedCategory),
+  //         selectedGender
+  //       );
+  //       setAgeListOptions(
+  //         ageList.map((age, index) => ({
+  //           value: index.toString(),
+  //           label: age,
+  //         }))
+  //       );
+  //     })();
+  //   }
+  // }, [categoryOptions, selectedCategory]);
 
   return (
     participants && (

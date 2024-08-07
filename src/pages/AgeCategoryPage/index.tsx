@@ -48,7 +48,7 @@ function AgeCategoryPage({
         header: "Cinsiyet",
         meta: {
           type: "select",
-          options: [
+          options: () => [
             { value: "0", label: "Erkek" },
             { value: "1", label: "Kadın" },
           ],
@@ -106,7 +106,9 @@ function AgeCategoryPage({
       }),
       columnHelper.display({
         id: "edit",
-        cell: TableEditCell<ParticipantAgeCategoryDTO>,
+        cell: ({ row, table }) => (
+          <TableEditCell<ParticipantAgeCategoryDTO> row={row} table={table} />
+        ),
       }),
     ],
     []
@@ -133,8 +135,6 @@ function AgeCategoryPage({
   // }, []);
 
   useEffect(() => {
-    console.log(categoryActiveTab, ageActiveTab);
-
     (async () => {
       setParticipants(await getParticipants(categoryActiveTab, ageActiveTab));
     })();

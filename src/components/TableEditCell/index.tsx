@@ -6,9 +6,13 @@ import { Identifiable } from "../../type";
 function TableEditCell<T extends Identifiable>({
   row,
   table,
+  onPressEdit,
+  onDone,
 }: {
   row: Row<T>;
   table: Table<T>;
+  onPressEdit?: (rowId: string) => void;
+  onDone?: (rowId: string) => void;
 }) {
   const meta = table.options.meta;
   const setEditedRows = (e: MouseEvent<HTMLButtonElement>) => {
@@ -31,14 +35,20 @@ function TableEditCell<T extends Identifiable>({
           <button
             name="done"
             className={styles.editCellBtn}
-            onClick={setEditedRows}
+            onClick={(e) => {
+              setEditedRows(e);
+              onDone?.(row.id);
+            }}
           >
             ✔
           </button>
           <button
             name="cancel"
             className={styles.editCellBtn}
-            onClick={setEditedRows}
+            onClick={(e) => {
+              setEditedRows(e);
+              onDone?.(row.id);
+            }}
           >
             X
           </button>
@@ -48,7 +58,10 @@ function TableEditCell<T extends Identifiable>({
           <button
             name="edit"
             className={styles.editCellBtn}
-            onClick={setEditedRows}
+            onClick={(e) => {
+              setEditedRows(e);
+              onPressEdit?.(row.id);
+            }}
           >
             ✐
           </button>

@@ -6,11 +6,9 @@ function TableFilter({ column }: { column: Column<any, unknown> }) {
   const columnFilterValue = column.getFilterValue();
   const { filterVariant, options } = column.columnDef.meta ?? {};
 
-  // console.log("filter value", columnFilterValue);
-
   let extendedOptions;
   if (options) {
-    extendedOptions = [{ value: "all", label: "Hepsi" }, ...options];
+    extendedOptions = [{ value: "all", label: "Hepsi" }, ...options()];
   }
 
   return filterVariant === "date" ? (

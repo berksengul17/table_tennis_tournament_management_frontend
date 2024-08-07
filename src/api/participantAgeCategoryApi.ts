@@ -22,7 +22,7 @@ export const getParticipants = async (
 
 export const updateParticipant = async (
   participantAgeCategoryDTO: ParticipantAgeCategoryDTO
-): Promise<string> => {
+): Promise<ParticipantAgeCategoryDTO | null> => {
   try {
     const response = await axios.put(
       `${API_URL}/update-participant/${participantAgeCategoryDTO.id}`,
@@ -33,5 +33,5 @@ export const updateParticipant = async (
     handleAxiosError(error);
   }
 
-  return "";
+  return null;
 };

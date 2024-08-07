@@ -27,8 +27,8 @@ declare module "@tanstack/react-table" {
 
   interface ColumnMeta<TData extends RowData, TValue> {
     type: string;
-    onChange?: (e: any) => void;
-    options?: Option[];
+    onChange?: (e: any, rowId: string) => void;
+    options?: (rowId?: string) => Option[];
     filterVariant?: "text" | "range" | "select" | "date";
   }
 }
@@ -81,9 +81,6 @@ function Table<T extends Identifiable>({
       setEditedRows,
       addRow: () => {
         addRow?.();
-        const setFunc = (old: T[]) => [...old, {} as T];
-        setData?.(setFunc);
-        setOriginalData(setFunc);
       },
       removeRow: (dataId: number) => {
         removeRow?.(dataId);
@@ -91,15 +88,12 @@ function Table<T extends Identifiable>({
       updateRow: async (rowIndex: number, revert: boolean) => {
         if (revert) {
           setData?.((prev) => {
-            console.log(originalData[rowIndex]);
             if (!originalData[rowIndex]) return prev;
             return prev.map((row, index) => {
               return index === rowIndex ? originalData[rowIndex] : row;
             });
           });
         } else {
-          console.log(data[rowIndex]);
-
           updateRow?.(data[rowIndex]);
           // setOriginalData((prev) =>
           //   prev.map((row, index) =>
@@ -126,9 +120,7 @@ function Table<T extends Identifiable>({
   });
 
   useEffect(() => {
-    console.log("data", data);
-
-    if (originalData.length === 0) {
+    if (originalData.length === 0 || data.length != originalData.length) {
       setOriginalData([...data]);
     }
   }, [data]);
@@ -170,20 +162,25 @@ function Table<T extends Identifiable>({
           ))}
         </tbody>
         <tfoot>
-          {isAdminDashboard && (
+          {isAdminDashboard && addRow && (
             <tr>
               <th>
-                <button onClick={table.options.meta?.addRow}>Ekle</button>
+                <button
+                  style={{
+                    display: "block",
+                    marginRight: "auto",
+                    marginTop: "1rem",
+                  }}
+                  onClick={table.options.meta?.addRow}
+                >
+                  Ekle
+                </button>
               </th>
             </tr>
           )}
-          <tr>
-            <th>
-              <TablePagination<T> table={table} />
-            </th>
-          </tr>
         </tfoot>
       </table>
+      <TablePagination<T> table={table} />
     </div>
   );
 }

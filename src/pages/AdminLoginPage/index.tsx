@@ -3,6 +3,7 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthProvider";
 import styles from "./index.module.css";
+import logo from "../../assets/images/logo1.png";
 
 type LoginInputs = {
   username: string;
@@ -26,7 +27,6 @@ function AdminLoginPage() {
   };
 
   useEffect(() => {
-    console.log("admin", admin);
     if (admin !== null) {
       navigate("/dashboard/manage-participants");
     }
@@ -34,13 +34,14 @@ function AdminLoginPage() {
 
   return (
     <div className={styles.container}>
+      <img src={logo} />
       <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
-        <div>
+        <div className={styles.inputContainer}>
           <label htmlFor="username">Username:</label>
           <input {...register("username", { required: true })} id="username" />
         </div>
 
-        <div>
+        <div className={styles.inputContainer}>
           <label htmlFor="password">Password:</label>
           <input
             {...register("password", { required: true })}

@@ -31,22 +31,33 @@
   gap: 1.5rem;
 }
 
-.link {
-  text-decoration: none;
-  color: black;
+.userInfo {
+  display: flex;
+  align-items: center;
+}
+
+.adminName {
   font-size: 1.2rem;
   font-weight: 500;
-  transition: color 0.3s;
+  color: black;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-right: 1rem;
 }
 
-.link:hover {
-  color: #555;
+.btn {
+  background-color: #ff4d4d;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  border-radius: 5px;
 }
 
-.active {
-  color: red;
-}
-
-.pending {
-  color: yellow;
+.btn:hover {
+  background-color: #ff1a1a;
 }

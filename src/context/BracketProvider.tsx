@@ -40,8 +40,6 @@ export const BracketProvider = ({ children }: PropsWithChildren) => {
         bracket = await createWinnersBracket(activeBracket);
       }
 
-      console.log("bracket", bracket);
-
       setBrackets((prevBrackets) => {
         const newBrackets = [...prevBrackets];
         newBrackets[activeBracket] = bracket;

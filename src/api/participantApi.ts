@@ -1,10 +1,12 @@
 import axios, { AxiosError } from "axios";
-import { ParticipantInputs } from "../type";
+import { ParticipantAgeCategoryDTO, ParticipantInputs } from "../type";
 import { handleAxiosError } from "../utils";
 
 const API_URL = "http://localhost:8082/api/participant";
 
-export const register = async (participant: ParticipantInputs) => {
+export const register = async (
+  participant: ParticipantInputs
+): Promise<ParticipantAgeCategoryDTO | null> => {
   try {
     const response = await axios.post(`${API_URL}/register`, participant);
 
@@ -12,6 +14,8 @@ export const register = async (participant: ParticipantInputs) => {
   } catch (error: unknown | AxiosError) {
     handleAxiosError(error);
   }
+
+  return null;
 };
 
 export const deleteParticipant = async (participantId: number) => {

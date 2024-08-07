@@ -9,22 +9,25 @@ const TableColumn = <T,>(): Partial<ColumnDef<T>> => ({
     const tableMeta = table.options.meta;
     const isNumberInput = columnMeta?.type === "number";
     const isEditable = tableMeta?.editedRows[row.id];
+    const options = columnMeta?.options?.(row.id);
 
     let initialValue = getValue();
     if (columnMeta?.type === "select") {
-      initialValue = columnMeta.options?.find(
+      initialValue = options?.find(
         (option) => option.label === initialValue
       )?.value;
     }
 
     const [value, setValue] = useState(initialValue);
 
+    // Warning: `value` prop on `textarea` should not be null.
+    // Consider using an empty string to clear the component or `undefined` for uncontrolled components.
     const onChange = (e: any) => {
       setValue(
         isNumberInput ? e.target.value.replace(/\D/g, "") : e.target.value
       );
 
-      columnMeta?.onChange?.(e);
+      columnMeta?.onChange?.(e, row.id);
     };
 
     const onBlur = () => {
@@ -33,12 +36,12 @@ const TableColumn = <T,>(): Partial<ColumnDef<T>> => ({
 
     const onSelectChange = (e: ChangeEvent<HTMLSelectElement>) => {
       setValue(e.target.value);
-      const label = columnMeta?.options?.find(
+      const label = options?.find(
         (option) => option.value === e.target.value
       )?.label;
 
       tableMeta?.updateData(row.index, column.id, label);
-      columnMeta?.onChange?.(e);
+      columnMeta?.onChange?.(e, row.id);
     };
 
     useEffect(() => {
@@ -52,7 +55,7 @@ const TableColumn = <T,>(): Partial<ColumnDef<T>> => ({
           onChange={onSelectChange}
           value={value as string}
         >
-          {columnMeta?.options?.map((option: Option) => (
+          {options?.map((option: Option) => (
             <option key={option.value} value={option.value}>
               {option.label}
             </option>
@@ -76,7 +79,7 @@ const TableColumn = <T,>(): Partial<ColumnDef<T>> => ({
         />
       )
     ) : columnMeta?.type === "select" ? (
-      columnMeta.options?.find((option) => option.value === value)?.label
+      options?.find((option) => option.value === value)?.label
     ) : (
       value
     );

@@ -12,6 +12,7 @@ import { AGE_CATEGORY, Group } from "../../type";
 import GroupCard from "./components/GroupCard";
 import NewGroupDropArea from "./components/NewGroupDropArea";
 import styles from "./index.module.css";
+import noDataImg from "../../assets/images/ban-solid.svg";
 
 const CustomTabPanel = ({
   value,
@@ -40,10 +41,6 @@ const GroupsPage: React.FC = () => {
       setGroups(groups);
     })();
   }, [isAdminDashboard]);
-
-  useEffect(() => {
-    console.log("Groups updated:", groups);
-  }, [groups]);
 
   const moveParticipant = useCallback(
     (participantId: string, fromGroup: Group, toGroup: Group) => {
@@ -153,12 +150,16 @@ const GroupsPage: React.FC = () => {
   );
 
   const handleSave = async () => {
-    console.log("Saving groups:", groups);
     setGroups(await saveGroups(groups));
   };
 
   if (groups.length === 0) {
-    return <p className={styles.noGroup}>Gruplar henüz oluşturulmadı.</p>;
+    return (
+      <div className={styles.noGroup}>
+        <img src={noDataImg} />
+        <p>Gruplar henüz oluşturulmadı.</p>;
+      </div>
+    );
   }
 
   return (
