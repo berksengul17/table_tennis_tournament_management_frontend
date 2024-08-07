@@ -286,7 +286,7 @@ function ParticipantsPage({
         ),
       }),
     ],
-    [categories, editedRows, rowAgeListOptions]
+    [categories, editedRows, rowAgeListOptions, categoryOptions]
   );
 
   const addRow = async () => {
