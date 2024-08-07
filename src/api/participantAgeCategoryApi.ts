@@ -2,7 +2,9 @@ import axios, { AxiosError } from "axios";
 import { ParticipantAgeCategoryDTO } from "../type";
 import { handleAxiosError } from "../utils";
 
-const API_URL = "http://localhost:8082/api/participant-age-category";
+const API_URL = `${
+  import.meta.env.VITE_SERVER_URL
+}/api/participant-age-category`;
 
 export const getParticipants = async (
   categoryVal?: number,

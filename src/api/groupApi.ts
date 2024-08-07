@@ -2,7 +2,7 @@ import axios, { AxiosError } from "axios";
 import { Group } from "../type";
 import { handleAxiosError } from "../utils";
 
-const API_URL = "http://localhost:8082/api/group";
+const API_URL = `${import.meta.env.VITE_SERVER_URL}/api/group`;
 
 export const createGroupsForAgeCategory = async (
   ageCategory: number

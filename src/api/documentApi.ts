@@ -1,7 +1,7 @@
 import axios, { AxiosError } from "axios";
 import { handleAxiosError } from "../utils";
 
-const API_URL = "http://localhost:8082/api/document";
+const API_URL = `${import.meta.env.VITE_SERVER_URL}/api/document`;
 
 export const downloadAgeCategoriesPdf = async () => {
   try {

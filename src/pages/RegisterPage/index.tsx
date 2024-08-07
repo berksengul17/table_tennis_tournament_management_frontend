@@ -18,6 +18,7 @@ function RegisterPage() {
   const [filteredCategories, setFilteredCategories] =
     useState<string[]>(categories);
   const [currentCategoryIndex, setCurrentCategoryIndex] = useState<number>(0);
+  const [showSuccess, setShowSuccess] = useState<boolean>(false);
   const {
     register,
     handleSubmit,
@@ -99,7 +100,8 @@ function RegisterPage() {
   const onSubmit: SubmitHandler<ParticipantInputs> = async (
     data: ParticipantInputs
   ) => {
-    await registerParticipant(data);
+    const newParticipant = await registerParticipant(data);
+    if (newParticipant !== null) setShowSuccess(true);
   };
 
   useEffect(() => {
@@ -275,6 +277,12 @@ function RegisterPage() {
             </p>
           </div>
 
+          {showSuccess && (
+            <p style={{ fontSize: "1.2rem", fontWeight: "600" }}>
+              Başarılı bir şekilde kayıt oldunuz. Katılımcılar sekmesinden
+              bilgilerinizi kontrol edebilirsiniz.
+            </p>
+          )}
           <input type="submit" value={"Kaydol"} />
         </form>
       )}
