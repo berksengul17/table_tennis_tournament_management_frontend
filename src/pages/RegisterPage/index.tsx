@@ -19,6 +19,7 @@ function RegisterPage() {
     useState<string[]>(categories);
   const [currentCategoryIndex, setCurrentCategoryIndex] = useState<number>(0);
   const [showSuccess, setShowSuccess] = useState<boolean>(false);
+  const [isLoading, setLoading] = useState<boolean>(true);
   const {
     register,
     handleSubmit,
@@ -105,8 +106,17 @@ function RegisterPage() {
   };
 
   useEffect(() => {
-    setFilteredCategories(categories);
-  }, []);
+    const initializeCategories = async () => {
+      // Simulate fetching categories if they are not readily available
+      if (categories.length === 0) {
+        // Simulate a delay to fetch categories
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
+      setFilteredCategories(categories);
+      setLoading(false);
+    };
+    initializeCategories();
+  }, [categories]);
 
   useEffect(() => {
     (async () => {
@@ -128,7 +138,9 @@ function RegisterPage() {
   return (
     <div className={styles.container}>
       <h1 className={styles.title}>Kayıt Formu</h1>
-      {filteredCategories.length > 0 && (
+      {isLoading ? (
+        <div>Yükleniyor...</div>
+      ) : (
         <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
           <div className={styles.inputContainer}>
             <RequiredLabel htmlFor="firstName" text="Adı" required />
@@ -233,7 +245,7 @@ function RegisterPage() {
             />
           </div>
 
-          {filteredCategories[currentCategoryIndex].includes("Çift") && (
+          {filteredCategories[currentCategoryIndex]?.includes("Çift") && (
             <div className={styles.inputContainer}>
               <RequiredLabel htmlFor="pairName" text="Çift Adı" required />
               <input
@@ -283,7 +295,7 @@ function RegisterPage() {
               bilgilerinizi kontrol edebilirsiniz.
             </p>
           )}
-          <input type="submit" value={"Kaydol"} />
+          <button type="submit">Kaydol</button>
         </form>
       )}
     </div>

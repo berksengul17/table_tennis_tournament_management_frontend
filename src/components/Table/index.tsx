@@ -4,6 +4,7 @@ import {
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
+  Row,
   RowData,
   useReactTable,
 } from "@tanstack/react-table";
@@ -28,7 +29,7 @@ declare module "@tanstack/react-table" {
   interface ColumnMeta<TData extends RowData, TValue> {
     type: string;
     onChange?: (e: any, rowId: string) => void;
-    options?: (rowId?: string) => Option[];
+    options?: (row?: Row<TData>) => Option[];
     filterVariant?: "text" | "range" | "select" | "date";
   }
 }

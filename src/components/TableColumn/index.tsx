@@ -9,7 +9,7 @@ const TableColumn = <T,>(): Partial<ColumnDef<T>> => ({
     const tableMeta = table.options.meta;
     const isNumberInput = columnMeta?.type === "number";
     const isEditable = tableMeta?.editedRows[row.id];
-    const options = columnMeta?.options?.(row.id);
+    const options = columnMeta?.options?.(row);
 
     let initialValue = getValue();
     if (columnMeta?.type === "select") {

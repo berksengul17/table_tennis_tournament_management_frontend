@@ -168,27 +168,32 @@ function ParticipantsPage({
         meta: {
           type: "select",
           filterVariant: "select",
-          options: (rowId) => {
-            if (rowId !== undefined) {
-              const editedRow = editedRows.find((row) => row[rowId]);
+          options: (row) => {
+            if (row !== undefined) {
+              const id = row.id;
+              const editedRow = editedRows.find((row) => row[id]);
+              let gender;
               if (editedRow !== undefined) {
-                const selectedGender = editedRow[rowId].selectedGender;
-                const gender = genderOptions.find(
+                const selectedGender = editedRow[row.id].selectedGender;
+                gender = genderOptions.find(
                   (option) => option.value === selectedGender
                 );
-                const filteredCategories = categories.filter((category) =>
-                  gender?.categories.some((gCategory) =>
-                    category.includes(gCategory)
-                  )
+              } else {
+                gender = genderOptions.find(
+                  (option) => option.label === row.original.gender
                 );
-
-                return filteredCategories.map((category, index) => ({
-                  value: index.toString(),
-                  label: category,
-                }));
               }
 
-              return [];
+              const filteredCategories = categories.filter((category) =>
+                gender?.categories.some((gCategory) =>
+                  category.includes(gCategory)
+                )
+              );
+
+              return filteredCategories.map((category, index) => ({
+                value: index.toString(),
+                label: category,
+              }));
             }
 
             return categoryOptions;
@@ -228,12 +233,12 @@ function ParticipantsPage({
         meta: {
           type: "select",
           filterVariant: "select",
-          options: (rowId) => {
-            if (rowId !== undefined) {
-              return rowAgeListOptions[rowId] || [];
+          options: (row) => {
+            if (row !== undefined) {
+              return rowAgeListOptions[row.id] || ageListOptions;
             }
 
-            return ageListOptions;
+            return [];
           },
         },
       }),
@@ -286,7 +291,7 @@ function ParticipantsPage({
         ),
       }),
     ],
-    [categories, editedRows, rowAgeListOptions, categoryOptions]
+    [categories, editedRows, rowAgeListOptions, categoryOptions, ageListOptions]
   );
 
   const addRow = async () => {
