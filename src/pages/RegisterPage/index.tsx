@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { getAgeListByCategoryAndGender } from "../../api/ageCategoryApi.ts";
 import { register as registerParticipant } from "../../api/participantApi.ts";
 import { useAgeCategory } from "../../context/AgeCategoryProvider.tsx";
 import { ParticipantInputs } from "../../type";
@@ -14,16 +13,15 @@ const genderOptions = [
 ];
 
 function RegisterPage() {
-  const { categories, ageList, setAgeList } = useAgeCategory();
-  const [filteredCategories, setFilteredCategories] =
-    useState<string[]>(categories);
-  const [currentCategoryIndex, setCurrentCategoryIndex] = useState<number>(0);
+  const { categories, ageList } = useAgeCategory();
+  // const [filteredCategories, setFilteredCategories] =
+  //   useState<string[]>(categories);
+  // const [currentCategoryIndex, setCurrentCategoryIndex] = useState<number>(0);
   const [showSuccess, setShowSuccess] = useState<boolean>(false);
   const [isLoading, setLoading] = useState<boolean>(true);
   const {
     register,
     handleSubmit,
-    getValues,
     setValue,
     reset,
     formState,
@@ -39,25 +37,26 @@ function RegisterPage() {
     }
   };
 
-  const handleGenderChange = async (e: any) => {
-    const selectedGender = genderOptions.find(
-      (option) => option.value === e.target.value
-    );
-    if (selectedGender) {
-      setFilteredCategories(
-        categories.filter((c) =>
-          selectedGender.categories.some((category) => c.includes(category))
-        )
-      );
+  // const handleGenderChange = async (e: any) => {
+  //   const selectedGender = genderOptions.find(
+  //     (option) => option.value === e.target.value
+  //   );
+  //   if (selectedGender) {
+  //     setFilteredCategories(
+  //       categories.filter((c) =>
+  //         selectedGender.categories.some((category) => c.includes(category))
+  //       )
+  //     );
 
-      setAgeList(
-        await getAgeListByCategoryAndGender(
-          currentCategoryIndex,
-          selectedGender.value
-        )
-      );
-    }
-  };
+  //     // setAgeList(
+  //     //   await getAgeListByCategoryAndGender(
+  //     //     currentCategoryIndex,
+  //     //     selectedGender.value
+  //     //   )
+  //     // );
+  //   }
+  // };
+
   // when birthdate change automatically update age category
   const handleBirthDateChange = (e: any) => {
     const age = calculateAge(e.target.value);
@@ -112,22 +111,22 @@ function RegisterPage() {
         // Simulate a delay to fetch categories
         await new Promise((resolve) => setTimeout(resolve, 1000));
       }
-      setFilteredCategories(categories);
+      // setFilteredCategories(categories);
       setLoading(false);
     };
     initializeCategories();
   }, [categories]);
 
-  useEffect(() => {
-    (async () => {
-      const gender = getValues("gender");
-      if (gender) {
-        setAgeList(
-          await getAgeListByCategoryAndGender(currentCategoryIndex, gender)
-        );
-      }
-    })();
-  }, [currentCategoryIndex]);
+  // useEffect(() => {
+  //   (async () => {
+  //     const gender = getValues("gender");
+  //     if (gender) {
+  //       setAgeList(
+  //         await getAgeListByCategoryAndGender(currentCategoryIndex, gender)
+  //       );
+  //     }
+  //   })();
+  // }, [currentCategoryIndex]);
 
   useEffect(() => {
     if (isSubmitSuccessful) {
@@ -201,7 +200,6 @@ function RegisterPage() {
                   <input
                     {...register("gender", {
                       required: true,
-                      onChange: handleGenderChange,
                     })}
                     type="radio"
                     id={option.value}
@@ -213,7 +211,7 @@ function RegisterPage() {
             </div>
           </div>
 
-          <div className={styles.inputContainer}>
+          {/* <div className={styles.inputContainer}>
             <RequiredLabel htmlFor="category" text="Kategori" required />
 
             <select
@@ -231,7 +229,7 @@ function RegisterPage() {
                 </option>
               ))}
             </select>
-          </div>
+          </div> */}
 
           <div className={styles.inputContainer}>
             <RequiredLabel htmlFor="birthDate" text="Doğum Tarihi" required />
@@ -245,7 +243,7 @@ function RegisterPage() {
             />
           </div>
 
-          {filteredCategories[currentCategoryIndex]?.includes("Çift") && (
+          {/* {filteredCategories[currentCategoryIndex]?.includes("Çift") && (
             <div className={styles.inputContainer}>
               <RequiredLabel htmlFor="pairName" text="Çift Adı" required />
               <input
@@ -253,9 +251,9 @@ function RegisterPage() {
                 id="pairName"
               />
             </div>
-          )}
+          )} */}
 
-          <div className={styles.inputContainer}>
+          {/* <div className={styles.inputContainer}>
             <RequiredLabel htmlFor="ageCategory" text="Yaş Grubu" required />
 
             <select {...register("age", { required: true })} id="age">
@@ -265,7 +263,7 @@ function RegisterPage() {
                 </option>
               ))}
             </select>
-          </div>
+          </div> */}
 
           <div className={styles.inputContainer}>
             <RequiredLabel htmlFor="city" text="Katılınan Şehir" required />

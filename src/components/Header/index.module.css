@@ -7,6 +7,12 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+.headerContainer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .logoContainer {
   display: flex;
   gap: 10px;
@@ -29,6 +35,13 @@
 .navbarLinks {
   display: flex;
   gap: 1.5rem;
+  transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+  overflow: hidden;
+}
+
+.navbarLinks.open {
+  max-height: 500px; /* Adjust this value based on your menu's max height */
+  opacity: 1;
 }
 
 .userInfo {
@@ -60,4 +73,44 @@
 
 .btn:hover {
   background-color: #ff1a1a;
+}
+
+.navbarLinks li {
+  margin: 0 1rem;
+}
+
+.hamburger {
+  display: none;
+  font-size: 2rem;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .headerContainer {
+    width: 100%;
+  }
+
+  .navbar {
+    flex-direction: column;
+  }
+
+  .navbarLinks {
+    flex-direction: column;
+    width: 100%;
+    background-color: #f8f8f8;
+    max-height: 0;
+    opacity: 0;
+    transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out,
+      padding 0.3s ease-in-out;
+  }
+
+  .navbarLinks.open {
+    max-height: 500px; /* Adjust this value based on your menu's max height */
+    padding: 1rem 0;
+    opacity: 1;
+  }
+
+  .hamburger {
+    display: block;
+  }
 }
