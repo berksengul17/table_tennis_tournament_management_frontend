@@ -36,7 +36,6 @@
   display: flex;
   gap: 1.5rem;
   transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
-  pointer-events: none;
 }
 
 .navbarLinks.open {
@@ -101,6 +100,7 @@
     background-color: #f8f8f8;
     max-height: 0;
     opacity: 0;
+    pointer-events: none;
     transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out,
       padding 0.3s ease-in-out;
   }
