@@ -277,6 +277,9 @@ function RegisterPage() {
               <span style={{ display: "flex", flexDirection: "column" }}>
                 Ücretler
                 <span className={styles.bankInfo}>
+                  Hesap Sahibi: Ahmet Bitirmiş
+                </span>
+                <span className={styles.bankInfo}>
                   Garanti: TR03 0006 2001 1530 0006 6921 70
                 </span>
                 <span className={styles.bankInfo}>
