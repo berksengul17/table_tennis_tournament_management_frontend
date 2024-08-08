@@ -23,7 +23,6 @@
   font-weight: bold;
   color: rgb(28, 21, 101);
   white-space: nowrap;
-  overflow: hidden;
   text-overflow: ellipsis;
 }
 

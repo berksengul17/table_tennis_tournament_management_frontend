@@ -323,7 +323,14 @@ function RegisterPage() {
           </div>
 
           {showSuccess && (
-            <p style={{ fontSize: "1.2rem", fontWeight: "600" }}>
+            <p
+              style={{
+                fontSize: "1.5rem",
+                fontWeight: "600",
+                color: "red",
+                textAlign: "center",
+              }}
+            >
               Başarılı bir şekilde kayıt oldunuz. Katılımcılar sekmesinden
               bilgilerinizi kontrol edebilirsiniz.
             </p>
