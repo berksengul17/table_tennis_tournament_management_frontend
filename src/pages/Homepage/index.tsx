@@ -1,15 +1,18 @@
+import { useNavigate } from "react-router-dom";
 import img from "../../assets/images/afiş.png";
+import styles from "./index.module.css";
 
 function Homepage() {
+  const navigate = useNavigate();
+
   return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        marginTop: "1rem",
-      }}
-    >
+    <div className={styles.homepage}>
+      <button
+        className={styles.registerBtn}
+        onClick={() => navigate("/register")}
+      >
+        Kayıt Ol!
+      </button>
       <img
         src={img}
         alt="Afiş"
