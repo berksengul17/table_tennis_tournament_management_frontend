@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { register as registerParticipant } from "../../api/participantApi.ts";
 import { useAgeCategory } from "../../context/AgeCategoryProvider.tsx";
 import { ParticipantInputs } from "../../type";
@@ -24,17 +24,23 @@ function RegisterPage() {
     handleSubmit,
     setValue,
     reset,
+    control,
     formState,
     formState: { isSubmitSuccessful, errors },
   } = useForm<ParticipantInputs>({
     defaultValues: participantInputsDefaultValues,
   });
 
-  const handlePhoneChange = (e: any) => {
-    const length = e.target.value.length;
-    if (length === 3 || length === 7 || length === 10) {
-      e.target.value += " ";
+  const handlePhoneChange = (value: string) => {
+    const cleaned = value.replace(/\D/g, "");
+    const match = cleaned.match(/(\d{1,3})(\d{1,3})?(\d{1,2})?(\d{1,2})?/);
+    if (match) {
+      return [match[1], match[2], match[3], match[4]]
+        .filter(Boolean)
+        .join(" ")
+        .trim();
     }
+    return value;
   };
 
   // const handleGenderChange = async (e: any) => {
@@ -180,17 +186,43 @@ function RegisterPage() {
               text="Telefon Numarası"
               required
             />
+            <Controller
+              name="phoneNumber"
+              control={control}
+              rules={{ required: true }}
+              render={({ field }) => (
+                <input
+                  {...field}
+                  id="phoneNumber"
+                  type="tel"
+                  value={field.value}
+                  onChange={(e) =>
+                    field.onChange(handlePhoneChange(e.target.value))
+                  }
+                  pattern="[0-9]{3} [0-9]{3} [0-9]{2} [0-9]{2}"
+                  placeholder="5XX XXX XX XX"
+                />
+              )}
+            />
+          </div>
+
+          {/* <div className={styles.inputContainer}>
+            <RequiredLabel
+              htmlFor="phoneNumber"
+              text="Telefon Numarası"
+              required
+            />
             <input
               {...register("phoneNumber", {
                 required: true,
-                onChange: handlePhoneChange,
+                onChange: (e) => handlePhoneChange(e.target.value),
               })}
               id="phoneNumber"
               type="tel"
               pattern="[0-9]{3} [0-9]{3} [0-9]{2} [0-9]{2}"
               placeholder="5XX XXX XX XX"
             />
-          </div>
+          </div> */}
 
           <div className={styles.inputContainer}>
             <RequiredLabel htmlFor="gender" text="Cinsiyet" required />
