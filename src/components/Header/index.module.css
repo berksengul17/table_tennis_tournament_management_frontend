@@ -36,11 +36,13 @@
   display: flex;
   gap: 1.5rem;
   transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+  pointer-events: none;
 }
 
 .navbarLinks.open {
   max-height: 500px; /* Adjust this value based on your menu's max height */
   opacity: 1;
+  pointer-events: auto;
 }
 
 .userInfo {
