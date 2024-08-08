@@ -36,7 +36,6 @@
   display: flex;
   gap: 1.5rem;
   transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
-  overflow: hidden;
 }
 
 .navbarLinks.open {
