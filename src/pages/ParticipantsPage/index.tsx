@@ -39,6 +39,7 @@ function ParticipantsPage({
   const [participants, setParticipants] = useState<ParticipantAgeCategoryDTO[]>(
     []
   );
+  const [numOfParticipants, setNumOfParticipants] = useState<number>(0);
   const [categoryOptions, setCategoryOptions] = useState<Option[]>([]);
   const [ageListOptions, setAgeListOptions] = useState<Option[]>([]);
   // const [selectedGender, setSelectedGender] = useState<string>("0");
@@ -263,7 +264,7 @@ function ParticipantsPage({
               return rowAgeListOptions[row.id] || ageListOptions;
             }
 
-            return [];
+            return ageListOptions;
           },
         },
       }),
@@ -380,6 +381,10 @@ function ParticipantsPage({
   }, []);
 
   useEffect(() => {
+    setNumOfParticipants(participants.length);
+  }, [participants]);
+
+  useEffect(() => {
     setCategoryOptions(
       categories.map((category, index) => ({
         value: index.toString(),
@@ -459,7 +464,7 @@ function ParticipantsPage({
         <div className={styles.header}>
           <div className={styles.headerContent}>
             <h1>Katılımcılar</h1>
-            <h3>Katılımcı Sayısı: {participants.length}</h3>
+            <h3>Katılımcı Sayısı: {numOfParticipants}</h3>
           </div>
           {isAdminDashboard && (
             <button
