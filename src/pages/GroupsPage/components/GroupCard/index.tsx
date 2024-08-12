@@ -24,6 +24,8 @@ const GroupCard: React.FC<GroupCardProps> = ({
   moveParticipant,
   moveParticipantInGroup,
 }) => {
+  console.log("rendering", group);
+
   const [{ isOver }, drop] = useDrop({
     accept: "participant",
     drop: (item: { id: string; group: Group }) => {

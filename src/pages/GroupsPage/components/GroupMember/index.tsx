@@ -72,7 +72,8 @@ const GroupMember: React.FC<GroupMemberProps> = ({
           ref={isAdminDashboard ? ref : null}
           style={{ opacity: isDragging ? 0.5 : 1 }}
         >
-          {participant.firstName} {participant.lastName} - {participant.rating}
+          {participant.firstName} {participant.lastName} - {participant.rating}{" "}
+          - {participant.city}
         </p>
       )}
     </>

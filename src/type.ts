@@ -30,7 +30,7 @@ export type ParticipantAgeCategoryDTO = {
   Omit<AgeCategory, "id">;
 
 export type Group = {
-  id: number;
+  id: number | null;
   ageCategory: number;
   participants: Participant[];
 };

@@ -50,6 +50,14 @@ function ParticipantsPage({
 
   const columns = useMemo(
     () => [
+      columnHelper.display({
+        id: "rowNumber",
+        header: "No",
+        cell: (info) => info.row.index + 1, // Row numbers start from 1
+        meta: {
+          type: "text",
+        },
+      }),
       columnHelper.accessor(
         (row) => {
           const names = (row.firstName + " " + row.lastName).split(" ");
@@ -67,14 +75,21 @@ function ParticipantsPage({
           },
         }
       ),
-      columnHelper.accessor("email", {
-        header: "Email",
-        filterFn: "includesString",
-        meta: {
-          type: "text",
-          filterVariant: "text",
+      columnHelper.accessor(
+        (row) => {
+          if (isAdminDashboard) return row.email;
+
+          return row.email.replace(/(\w{1})[\w.-]+@([\w.]+\w)/, "$1***@$2");
         },
-      }),
+        {
+          header: "Email",
+          filterFn: "includesString",
+          meta: {
+            type: "text",
+            filterVariant: "text",
+          },
+        }
+      ),
       columnHelper.accessor("gender", {
         header: "Cinsiyet",
         filterFn: (row, id, value) => {
@@ -135,14 +150,24 @@ function ParticipantsPage({
           filterVariant: "date",
         },
       }),
-      columnHelper.accessor("phoneNumber", {
-        header: "Telefon Numarası",
-        filterFn: "includesString",
-        meta: {
-          type: "text",
-          filterVariant: "text",
+      columnHelper.accessor(
+        (row) => {
+          if (isAdminDashboard) return row.phoneNumber;
+
+          return (
+            row.phoneNumber.slice(0, 2) +
+            row.phoneNumber.slice(2).replace(/.(?=..)/g, "*")
+          );
         },
-      }),
+        {
+          header: "Telefon Numarası",
+          filterFn: "includesString",
+          meta: {
+            type: "text",
+            filterVariant: "text",
+          },
+        }
+      ),
       columnHelper.accessor("city", {
         header: "Katıldığı Şehir",
         filterFn: "includesString",
@@ -389,6 +414,10 @@ function ParticipantsPage({
       fetchAgeListOptions(rowId, selectedCategory, selectedGender);
     });
   }, [editedRows]);
+
+  useEffect(() => {
+    console.log(participants);
+  }, [participants]);
 
   // useEffect(() => {
   //   if (selectedGender) {

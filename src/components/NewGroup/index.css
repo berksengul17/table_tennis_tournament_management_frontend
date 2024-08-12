@@ -1,0 +1,19 @@
+.custom-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.custom-table th,
+.custom-table td {
+  border: 1px solid black;
+  padding: 8px;
+  text-align: center;
+}
+
+.custom-table th {
+  background-color: #f2f2f2;
+}
+
+.black-cell {
+  background-color: black;
+}

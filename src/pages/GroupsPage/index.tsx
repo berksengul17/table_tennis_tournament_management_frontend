@@ -2,45 +2,77 @@ import React, { useCallback, useEffect, useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import {
-  createGroupsForAgeCategory,
-  getAllGroups,
+  createGroupsForAgeCategoryAndAge,
+  getGroupsForAgeCategoryAndAge,
   saveGroups,
 } from "../../api/groupApi";
 import AgeCategoryTabs from "../../components/AgeCategoryTabs";
 import { useAuth } from "../../context/AuthProvider";
-import { AGE_CATEGORY, Group } from "../../type";
+import { Group } from "../../type";
 import GroupCard from "./components/GroupCard";
 import NewGroupDropArea from "./components/NewGroupDropArea";
 import styles from "./index.module.css";
 import noDataImg from "../../assets/images/ban-solid.svg";
-
-const CustomTabPanel = ({
-  value,
-  index,
-  children,
-}: { value: number; index: number } & React.PropsWithChildren<{}>) => {
-  return <div style={{ width: "50%" }}>{value === index && children}</div>;
-};
+import CategoryTabs from "../../components/CategoryTabs";
+import { downloadGroupsPdf } from "../../api/documentApi";
 
 const GroupsPage: React.FC = () => {
   const { isAdminDashboard } = useAuth();
   const [groups, setGroups] = useState<Group[]>([]);
-  const [activeTab, setActiveTab] = useState<number>(0);
+  const [categoryActiveTab, setCategoryActiveTab] = useState<number>(0);
+  const [ageActiveTab, setAgeActiveTab] = useState<number>(0);
 
   useEffect(() => {
     // Fetch participants
     (async () => {
-      let groups = await getAllGroups();
+      let groups = await getGroupsForAgeCategoryAndAge(
+        categoryActiveTab,
+        ageActiveTab
+      );
 
       if (isAdminDashboard && groups.length === 0) {
-        for (let i = 0; i < Object.keys(AGE_CATEGORY).length; i++) {
-          groups = groups.concat(await createGroupsForAgeCategory(i));
-        }
+        groups = groups.concat(
+          await createGroupsForAgeCategoryAndAge(
+            categoryActiveTab,
+            ageActiveTab
+          )
+        );
       }
+
+      console.log("GROUPS", groups);
 
       setGroups(groups);
     })();
-  }, [isAdminDashboard]);
+  }, [isAdminDashboard, categoryActiveTab, ageActiveTab]);
+
+  useEffect(() => {
+    setAgeActiveTab(0);
+  }, [categoryActiveTab]);
+
+  // useEffect(() => {
+  //   // Fetch participants
+  //   (async () => {
+  //     let groups = await getAllGroups();
+
+  //     if (isAdminDashboard && groups.length === 0) {
+  //       for (let i = 0; i < categories.length; i++) {
+  //         groups = groups.concat(await createGroupsForAgeCategory(i));
+  //       }
+  //     }
+
+  //     setGroups(groups);
+  //   })();
+  // }, [isAdminDashboard]);
+
+  const createGroups = async () => {
+    setGroups(
+      await createGroupsForAgeCategoryAndAge(
+        categoryActiveTab,
+        ageActiveTab,
+        true
+      )
+    );
+  };
 
   const moveParticipant = useCallback(
     (participantId: string, fromGroup: Group, toGroup: Group) => {
@@ -138,7 +170,7 @@ const GroupsPage: React.FC = () => {
 
         // Create new group with the participant
         const newGroup: Group = {
-          id: prevGroups[prevGroups.length - 1].id + 1, // Or use a better ID generation strategy
+          id: null,
           ageCategory: item.group.ageCategory,
           participants: [participant],
         };
@@ -153,6 +185,10 @@ const GroupsPage: React.FC = () => {
     setGroups(await saveGroups(groups));
   };
 
+  const downloadGroups = async () => {
+    await downloadGroupsPdf(categoryActiveTab, ageActiveTab);
+  };
+
   if (groups.length === 0) {
     return (
       <div className={styles.noGroup}>
@@ -165,49 +201,62 @@ const GroupsPage: React.FC = () => {
   return (
     <DndProvider backend={HTML5Backend}>
       <div className={styles.container}>
-        <AgeCategoryTabs activeTab={activeTab} setActiveTab={setActiveTab} />
-        {Object.keys(AGE_CATEGORY).map((_, index) => (
-          <CustomTabPanel key={index} value={activeTab} index={index}>
-            <div className={styles.header}>
-              <p>
-                Toplam Katılımcı Sayısı:{" "}
-                {groups
-                  .filter((group) => group.ageCategory === index)
-                  .reduce(
-                    (acc, group) => acc + (group.participants?.length ?? 0),
-                    0
-                  )}
-              </p>
-              {isAdminDashboard && (
+        <CategoryTabs
+          activeTab={categoryActiveTab}
+          setActiveTab={setCategoryActiveTab}
+        />
+        <AgeCategoryTabs
+          activeTab={ageActiveTab}
+          setActiveTab={setAgeActiveTab}
+        />
+
+        <div style={{ width: "80%" }}>
+          <div className={styles.header}>
+            <p>
+              Toplam Katılımcı Sayısı:{" "}
+              {groups.reduce(
+                (acc, group) => acc + group.participants.length,
+                0
+              )}
+            </p>
+            {isAdminDashboard && (
+              <div>
+                <button
+                  onClick={downloadGroups}
+                  style={{ marginRight: "10px" }}
+                >
+                  Grup PDF İndir
+                </button>
+                <button onClick={createGroups} style={{ marginRight: "10px" }}>
+                  Yenile
+                </button>
                 <button onClick={handleSave}>Değişiklikleri Kaydet</button>
-              )}
-            </div>
-            <div className={styles.groupContainer}>
-              {groups
-                .filter((group) => group.ageCategory === index)
-                .map(
-                  (group, index) =>
-                    group &&
-                    group.id && (
-                      <GroupCard
-                        key={group.id}
-                        group={group}
-                        ordinal={index + 1}
-                        moveParticipant={
-                          isAdminDashboard ? moveParticipant : undefined
-                        }
-                        moveParticipantInGroup={
-                          isAdminDashboard ? moveParticipantInGroup : undefined
-                        }
-                      />
-                    )
-                )}
-              {isAdminDashboard && (
-                <NewGroupDropArea createNewGroup={createNewGroup} />
-              )}
-            </div>
-          </CustomTabPanel>
-        ))}
+              </div>
+            )}
+          </div>
+          <div className={styles.groupContainer}>
+            {groups.map(
+              (group, index) =>
+                group &&
+                group.id && (
+                  <GroupCard
+                    key={group.id}
+                    group={group}
+                    ordinal={index + 1}
+                    moveParticipant={
+                      isAdminDashboard ? moveParticipant : undefined
+                    }
+                    moveParticipantInGroup={
+                      isAdminDashboard ? moveParticipantInGroup : undefined
+                    }
+                  />
+                )
+            )}
+            {isAdminDashboard && (
+              <NewGroupDropArea createNewGroup={createNewGroup} />
+            )}
+          </div>
+        </div>
       </div>
     </DndProvider>
   );
