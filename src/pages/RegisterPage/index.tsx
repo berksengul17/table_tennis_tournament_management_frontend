@@ -312,7 +312,7 @@ function RegisterPage() {
                   Hesap Sahibi: Ahmet Bitirmiş
                 </span>
                 <span className={styles.bankInfo}>
-                  Garanti: TR03 0006 2001 1530 0006 6921 70
+                  İş Bankası: TR41 0006 4000 0013 4702 36 43 97
                 </span>
                 <span className={styles.bankInfo}>
                   Yapıkredi: TR68 0006 7010 0000 0093 4321 84
