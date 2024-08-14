@@ -314,10 +314,7 @@ function RegisterPage() {
                 <span className={styles.bankInfo}>
                   İş Bankası: TR41 0006 4000 0013 4702 36 43 97
                 </span>
-                <span className={styles.bankInfo}>
-                  Yapıkredi: TR68 0006 7010 0000 0093 4321 84
-                </span>
-                IBAN adreslerinden birine yatırılabilir.
+                IBAN adresine yatırılabilir.
               </span>
             </p>
           </div>
