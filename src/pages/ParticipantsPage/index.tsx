@@ -83,6 +83,7 @@ function ParticipantsPage({
           return row.email.replace(/(\w{1})[\w.-]+@([\w.]+\w)/, "$1***@$2");
         },
         {
+          id: "email",
           header: "Email",
           filterFn: "includesString",
           meta: {
