@@ -1,5 +1,5 @@
 import axios, { AxiosError } from "axios";
-import { Hotel, ParticipantInputs } from "./type";
+import { ParticipantInputs } from "./type";
 
 export const handleAxiosError = (error: unknown | AxiosError) => {
   if (axios.isAxiosError(error)) {
