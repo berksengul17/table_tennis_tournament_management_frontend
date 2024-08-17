@@ -1,5 +1,7 @@
 import axios, { AxiosError } from "axios";
-import { ParticipantInputs } from "./type";
+import { Hotel, ParticipantInputs } from "./type";
+import { getHotelOptions } from "./api/hotelApi";
+import { Option } from "./type";
 
 export const handleAxiosError = (error: unknown | AxiosError) => {
   if (axios.isAxiosError(error)) {
@@ -33,4 +35,19 @@ export const participantInputsDefaultValues: Omit<ParticipantInputs, "rating"> =
     pairName: "",
     age: "",
     city: "",
+    hotel: "0",
   };
+
+export const genderOptions = [
+  { value: "0", label: "Erkek", categories: ["Erkek", "Karışık"] },
+  { value: "1", label: "Kadın", categories: ["Kadın", "Karışık"] },
+];
+
+export const hotelOptions: Option[] = await (async () => {
+  const hotels = await getHotelOptions();
+
+  return hotels.map((hotel: Hotel, index: number) => ({
+    value: index,
+    label: hotel.name,
+  }));
+})();

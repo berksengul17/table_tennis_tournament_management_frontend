@@ -3,14 +3,14 @@ import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { register as registerParticipant } from "../../api/participantApi.ts";
 import { useAgeCategory } from "../../context/AgeCategoryProvider.tsx";
 import { ParticipantInputs } from "../../type";
-import { emailRegex, participantInputsDefaultValues } from "../../utils.ts";
+import {
+  emailRegex,
+  genderOptions,
+  hotelOptions,
+  participantInputsDefaultValues,
+} from "../../utils.ts";
 import RequiredLabel from "./components/RequiredLabel/index.tsx";
 import styles from "./index.module.css";
-
-const genderOptions = [
-  { value: "0", label: "Erkek", categories: ["Erkek", "Karışık"] },
-  { value: "1", label: "Kadın", categories: ["Kadın", "Karışık"] },
-];
 
 function RegisterPage() {
   const { categories, ageList } = useAgeCategory();
@@ -300,6 +300,23 @@ function RegisterPage() {
           <div className={styles.inputContainer}>
             <RequiredLabel htmlFor="city" text="Katılınan Şehir" required />
             <input {...register("city", { required: true })} id="city" />
+          </div>
+
+          <div className={styles.inputContainer}>
+            <RequiredLabel htmlFor="hotel" text="Otel Tercihi" required />
+
+            <select
+              {...register("hotel", {
+                required: true,
+              })}
+              id="hotel"
+            >
+              {hotelOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className={styles.feeInfo}>

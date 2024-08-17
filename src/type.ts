@@ -15,6 +15,7 @@ export type ParticipantInputs = Omit<Participant, "id"> & {
   category: string;
   pairName: string;
   age: string;
+  hotel: string;
 };
 
 export type AgeCategory = {
@@ -26,6 +27,7 @@ export type AgeCategory = {
 export type ParticipantAgeCategoryDTO = {
   id: number;
   pairName: string;
+  hotel: string;
 } & Omit<Participant, "id"> &
   Omit<AgeCategory, "id">;
 
@@ -72,6 +74,11 @@ export interface Identifiable {
 }
 
 export type Admin = {
+  id: string;
+  name: string;
+};
+
+export type Hotel = {
   id: string;
   name: string;
 };

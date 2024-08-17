@@ -12,7 +12,11 @@ import { useAuth } from "../../context/AuthProvider";
 import { Option, ParticipantAgeCategoryDTO } from "../../type";
 import styles from "./index.module.css";
 import { deleteParticipant, register } from "../../api/participantApi";
-import { participantInputsDefaultValues } from "../../utils";
+import {
+  genderOptions,
+  hotelOptions,
+  participantInputsDefaultValues,
+} from "../../utils";
 
 type EditedRow = {
   [key: string]: {
@@ -22,11 +26,6 @@ type EditedRow = {
 };
 
 const columnHelper = createColumnHelper<ParticipantAgeCategoryDTO>();
-
-const genderOptions = [
-  { value: "0", label: "Erkek", categories: ["Erkek", "Karışık"] },
-  { value: "1", label: "Kadın", categories: ["Kadın", "Karışık"] },
-];
 
 function ParticipantsPage({
   setShowAgeCategoryTable,
@@ -275,6 +274,26 @@ function ParticipantsPage({
         meta: {
           type: "text",
           filterVariant: "text",
+        },
+      }),
+      columnHelper.accessor("hotel", {
+        header: "Otel",
+        filterFn: (row, id, value) => {
+          if (value === "all") {
+            return true;
+          }
+
+          const hotelFilter = hotelOptions.find(
+            (option) => option.value === value
+          );
+          if (!hotelFilter) return false;
+
+          return hotelFilter.label.includes(row.getValue(id));
+        },
+        meta: {
+          type: "select",
+          filterVariant: "select",
+          options: () => hotelOptions,
         },
       }),
       columnHelper.accessor("rating", {
