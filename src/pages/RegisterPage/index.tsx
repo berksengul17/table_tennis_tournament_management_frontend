@@ -2,15 +2,15 @@ import { useEffect, useState } from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { register as registerParticipant } from "../../api/participantApi.ts";
 import { useAgeCategory } from "../../context/AgeCategoryProvider.tsx";
-import { ParticipantInputs } from "../../type";
+import { Hotel, Option, ParticipantInputs } from "../../type";
 import {
   emailRegex,
   genderOptions,
-  hotelOptions,
   participantInputsDefaultValues,
 } from "../../utils.ts";
 import RequiredLabel from "./components/RequiredLabel/index.tsx";
 import styles from "./index.module.css";
+import { getHotelOptions } from "../../api/hotelApi.ts";
 
 function RegisterPage() {
   const { categories, ageList } = useAgeCategory();
@@ -18,6 +18,7 @@ function RegisterPage() {
   //   useState<string[]>(categories);
   // const [currentCategoryIndex, setCurrentCategoryIndex] = useState<number>(0);
   const [showSuccess, setShowSuccess] = useState<boolean>(false);
+  const [hotelOptions, setHotelOptions] = useState<Option[]>([]);
   const [isLoading, setLoading] = useState<boolean>(true);
   const {
     register,
@@ -109,6 +110,18 @@ function RegisterPage() {
     const newParticipant = await registerParticipant(data);
     if (newParticipant !== null) setShowSuccess(true);
   };
+
+  useEffect(() => {
+    (async () => {
+      const hotels = await getHotelOptions();
+      setHotelOptions(
+        hotels.map((hotel: Hotel, index: number) => ({
+          value: index,
+          label: hotel.name,
+        }))
+      );
+    })();
+  }, []);
 
   useEffect(() => {
     const initializeCategories = async () => {

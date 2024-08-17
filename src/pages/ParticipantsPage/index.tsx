@@ -9,14 +9,11 @@ import Table from "../../components/Table";
 import TableEditCell from "../../components/TableEditCell";
 import { useAgeCategory } from "../../context/AgeCategoryProvider";
 import { useAuth } from "../../context/AuthProvider";
-import { Option, ParticipantAgeCategoryDTO } from "../../type";
+import { Hotel, Option, ParticipantAgeCategoryDTO } from "../../type";
 import styles from "./index.module.css";
 import { deleteParticipant, register } from "../../api/participantApi";
-import {
-  genderOptions,
-  hotelOptions,
-  participantInputsDefaultValues,
-} from "../../utils";
+import { genderOptions, participantInputsDefaultValues } from "../../utils";
+import { getHotelOptions } from "../../api/hotelApi";
 
 type EditedRow = {
   [key: string]: {
@@ -41,6 +38,7 @@ function ParticipantsPage({
   const [numOfParticipants, setNumOfParticipants] = useState<number>(0);
   const [categoryOptions, setCategoryOptions] = useState<Option[]>([]);
   const [ageListOptions, setAgeListOptions] = useState<Option[]>([]);
+  const [hotelOptions, setHotelOptions] = useState<Option[]>([]);
   // const [selectedGender, setSelectedGender] = useState<string>("0");
   // const [selectedCategory, setSelectedCategory] = useState<string>("0");
   const [editedRows, setEditedRows] = useState<EditedRow[]>([]);
@@ -337,7 +335,14 @@ function ParticipantsPage({
         ),
       }),
     ],
-    [categories, editedRows, rowAgeListOptions, categoryOptions, ageListOptions]
+    [
+      categories,
+      editedRows,
+      rowAgeListOptions,
+      categoryOptions,
+      ageListOptions,
+      hotelOptions,
+    ]
   );
 
   const addRow = async () => {
@@ -395,6 +400,14 @@ function ParticipantsPage({
         ageList.map((age, index) => ({
           value: index.toString(),
           label: age,
+        }))
+      );
+
+      const hotels = await getHotelOptions();
+      setHotelOptions(
+        hotels.map((hotel: Hotel, index: number) => ({
+          value: index,
+          label: hotel.name,
         }))
       );
     })();
