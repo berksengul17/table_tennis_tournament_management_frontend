@@ -65,6 +65,13 @@ const GroupMember: React.FC<GroupMemberProps> = ({
 
   drag(drop(ref));
 
+  const names = (participant?.firstName + " " + participant?.lastName).split(
+    " "
+  );
+  const name = names
+    .map((name) => name.slice(0, 1).toUpperCase() + name.slice(1))
+    .join(" ");
+
   return (
     <>
       {participant && (
@@ -72,8 +79,7 @@ const GroupMember: React.FC<GroupMemberProps> = ({
           ref={isAdminDashboard ? ref : null}
           style={{ opacity: isDragging ? 0.5 : 1 }}
         >
-          {participant.firstName} {participant.lastName} - {participant.rating}{" "}
-          - {participant.city}
+          {name} - {participant.rating} - {participant.city}
         </p>
       )}
     </>

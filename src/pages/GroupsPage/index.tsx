@@ -16,7 +16,11 @@ import noDataImg from "../../assets/images/ban-solid.svg";
 import CategoryTabs from "../../components/CategoryTabs";
 import { downloadGroupsPdf } from "../../api/documentApi";
 
-const GroupsPage: React.FC = () => {
+const GroupsPage = ({
+  setShowMatches,
+}: {
+  setShowMatches?: React.Dispatch<React.SetStateAction<boolean>>;
+}) => {
   const { isAdminDashboard } = useAuth();
   const [groups, setGroups] = useState<Group[]>([]);
   const [categoryActiveTab, setCategoryActiveTab] = useState<number>(0);
@@ -221,6 +225,12 @@ const GroupsPage: React.FC = () => {
             </p>
             {isAdminDashboard && (
               <div>
+                <button
+                  onClick={() => setShowMatches?.(true)}
+                  style={{ marginRight: "10px" }}
+                >
+                  Maçları Oluştur
+                </button>
                 <button
                   onClick={downloadGroups}
                   style={{ marginRight: "10px" }}

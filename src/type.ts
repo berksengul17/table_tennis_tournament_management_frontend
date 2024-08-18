@@ -35,6 +35,17 @@ export type Group = {
   participants: Participant[];
 };
 
+export type Match = {
+  id: number;
+  group: Group;
+  p1: Participant;
+  p2: Participant;
+  p1Score: number;
+  p2Score: number;
+  startTime: string;
+  endTime: string;
+};
+
 export type Option = {
   value: string;
   label: string;
