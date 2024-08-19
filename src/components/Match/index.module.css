@@ -1,0 +1,18 @@
+.centerVertically {
+  display: flex;
+  align-items: center;
+}
+
+.match p:first-child {
+  margin-bottom: 0.5rem;
+}
+
+.match span {
+  font-weight: 600;
+}
+
+.scoreInput {
+  width: 3.5rem;
+  text-align: center;
+  margin: 0 0.5rem;
+}

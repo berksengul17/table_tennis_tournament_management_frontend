@@ -1,10 +1,11 @@
 import { useDrop } from "react-dnd";
-import { Group } from "../../../../type";
+import { Group, GroupTableTime } from "../../../../type";
 import GroupMember from "../GroupMember";
 import styles from "./index.module.css";
 
 type GroupCardProps = {
   group: Group;
+  groupTableTime?: GroupTableTime;
   ordinal: number;
   moveParticipant?: (
     participantId: string,
@@ -20,12 +21,11 @@ type GroupCardProps = {
 
 const GroupCard: React.FC<GroupCardProps> = ({
   group,
+  groupTableTime,
   ordinal,
   moveParticipant,
   moveParticipantInGroup,
 }) => {
-  console.log("rendering", group);
-
   const [{ isOver }, drop] = useDrop({
     accept: "participant",
     drop: (item: { id: string; group: Group }) => {
@@ -38,9 +38,24 @@ const GroupCard: React.FC<GroupCardProps> = ({
     }),
   });
 
+  const { tableTime } = groupTableTime || {};
+  const { table = { name: "" }, time = { startTime: "", endTime: "" } } =
+    tableTime || {};
+
   return (
     <div ref={drop} className={styles.group}>
-      <p>{ordinal}. grup</p>
+      <div style={{ display: "flex", gap: "2rem" }}>
+        <p>{ordinal}. grup</p>
+        {groupTableTime && (
+          <>
+            <p>{table.name}</p>
+            <p>
+              {time.startTime} - {time.endTime}
+            </p>
+          </>
+        )}
+      </div>
+
       <div
         className={styles.card}
         style={{ backgroundColor: isOver ? "lightblue" : "white" }}

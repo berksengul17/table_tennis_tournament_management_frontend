@@ -8,13 +8,14 @@ import {
 } from "../../api/groupApi";
 import AgeCategoryTabs from "../../components/AgeCategoryTabs";
 import { useAuth } from "../../context/AuthProvider";
-import { Group } from "../../type";
+import { Group, GroupTableTime } from "../../type";
 import GroupCard from "./components/GroupCard";
 import NewGroupDropArea from "./components/NewGroupDropArea";
 import styles from "./index.module.css";
 import noDataImg from "../../assets/images/ban-solid.svg";
 import CategoryTabs from "../../components/CategoryTabs";
 import { downloadGroupsPdf } from "../../api/documentApi";
+import { assignGroupsToTableAndTime } from "../../api/groupTableTimeApi";
 
 const GroupsPage = ({
   setShowMatches,
@@ -25,6 +26,10 @@ const GroupsPage = ({
   const [groups, setGroups] = useState<Group[]>([]);
   const [categoryActiveTab, setCategoryActiveTab] = useState<number>(0);
   const [ageActiveTab, setAgeActiveTab] = useState<number>(0);
+  const [showTables, setShowTables] = useState<boolean>(false);
+  const [groupTableTimeList, setGroupTableTimeList] = useState<
+    GroupTableTime[]
+  >([]);
 
   useEffect(() => {
     // Fetch participants
@@ -52,21 +57,6 @@ const GroupsPage = ({
   useEffect(() => {
     setAgeActiveTab(0);
   }, [categoryActiveTab]);
-
-  // useEffect(() => {
-  //   // Fetch participants
-  //   (async () => {
-  //     let groups = await getAllGroups();
-
-  //     if (isAdminDashboard && groups.length === 0) {
-  //       for (let i = 0; i < categories.length; i++) {
-  //         groups = groups.concat(await createGroupsForAgeCategory(i));
-  //       }
-  //     }
-
-  //     setGroups(groups);
-  //   })();
-  // }, [isAdminDashboard]);
 
   const createGroups = async () => {
     setGroups(
@@ -193,6 +183,11 @@ const GroupsPage = ({
     await downloadGroupsPdf(categoryActiveTab, ageActiveTab);
   };
 
+  const assignToTables = async () => {
+    setGroupTableTimeList(await assignGroupsToTableAndTime());
+    setShowTables(true);
+  };
+
   if (groups.length === 0) {
     return (
       <div className={styles.noGroup}>
@@ -226,11 +221,19 @@ const GroupsPage = ({
             {isAdminDashboard && (
               <div>
                 <button
-                  onClick={() => setShowMatches?.(true)}
+                  onClick={assignToTables}
                   style={{ marginRight: "10px" }}
                 >
-                  Maçları Oluştur
+                  Masalara Ata
                 </button>
+                {showTables && (
+                  <button
+                    onClick={() => setShowMatches?.(true)}
+                    style={{ marginRight: "10px" }}
+                  >
+                    Maçları Oluştur
+                  </button>
+                )}
                 <button
                   onClick={downloadGroups}
                   style={{ marginRight: "10px" }}
@@ -252,6 +255,9 @@ const GroupsPage = ({
                   <GroupCard
                     key={group.id}
                     group={group}
+                    groupTableTime={groupTableTimeList.find(
+                      (gtt) => gtt.group.id === group.id
+                    )}
                     ordinal={index + 1}
                     moveParticipant={
                       isAdminDashboard ? moveParticipant : undefined

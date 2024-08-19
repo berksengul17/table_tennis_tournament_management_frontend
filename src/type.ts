@@ -29,23 +29,6 @@ export type ParticipantAgeCategoryDTO = {
 } & Omit<Participant, "id"> &
   Omit<AgeCategory, "id">;
 
-export type Group = {
-  id: number | null;
-  ageCategory: number;
-  participants: Participant[];
-};
-
-export type Match = {
-  id: number;
-  group: Group;
-  p1: Participant;
-  p2: Participant;
-  p1Score: number;
-  p2Score: number;
-  startTime: string;
-  endTime: string;
-};
-
 export type Option = {
   value: string;
   label: string;
@@ -85,4 +68,46 @@ export interface Identifiable {
 export type Admin = {
   id: string;
   name: string;
+};
+
+export type Group = {
+  id: number | null;
+  ageCategory: number;
+  participants: Participant[];
+};
+
+export type Match = {
+  id: number;
+  group: Group;
+  table: Table;
+  p1: Participant;
+  p2: Participant;
+  p1Score: number;
+  p2Score: number;
+  startTime: string;
+  endTime: string;
+};
+
+export type GroupTableTime = {
+  id: number;
+  group: Group;
+  tableTime: TableTime;
+};
+
+export type TableTime = {
+  id: number;
+  table: Table;
+  time: Time;
+  isAvailable: boolean;
+};
+
+export type Table = {
+  id: number;
+  name: string;
+};
+
+export type Time = {
+  id: number;
+  startTime: string;
+  endTime: string;
 };
