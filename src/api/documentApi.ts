@@ -50,16 +50,45 @@ export const downloadGroupsPdf = async (category: number, age: number) => {
 
 export const downloadGroupTableTimePdf = async (
   category: number,
-  age: number
+  age: number,
+  createEmpty: boolean = false
 ) => {
   try {
     const response = await axios.get(
       `${API_URL}/download-group-table-time/${category}/${age}`,
       {
+        params: { createEmpty },
         responseType: "blob",
       }
     );
-    const fileName = "maç_sonuçları.pdf";
+    const fileName = "gruplar_masa_saatler.pdf";
+
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.setAttribute("download", fileName);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  } catch (error: unknown | AxiosError) {
+    handleAxiosError(error);
+  }
+};
+
+export const downloadAllGroupTableTimePdf = async (
+  createEmpty: boolean = false
+) => {
+  try {
+    const response = await axios.get(
+      `${API_URL}/download-all-group-table-time`,
+      {
+        params: { createEmpty },
+        responseType: "blob",
+      }
+    );
+    const fileName = "tüm_gruplar_masa_saatler.pdf";
 
     const url = window.URL.createObjectURL(new Blob([response.data]));
     const link = document.createElement("a");

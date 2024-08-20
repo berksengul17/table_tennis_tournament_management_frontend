@@ -14,7 +14,11 @@ import NewGroupDropArea from "./components/NewGroupDropArea";
 import styles from "./index.module.css";
 import noDataImg from "../../assets/images/ban-solid.svg";
 import CategoryTabs from "../../components/CategoryTabs";
-import { downloadGroupsPdf } from "../../api/documentApi";
+import {
+  downloadAllGroupTableTimePdf,
+  downloadGroupsPdf,
+  downloadGroupTableTimePdf,
+} from "../../api/documentApi";
 import { assignGroupsToTableAndTime } from "../../api/groupTableTimeApi";
 
 const GroupsPage = ({
@@ -183,6 +187,14 @@ const GroupsPage = ({
     await downloadGroupsPdf(categoryActiveTab, ageActiveTab);
   };
 
+  const downloadGroupTableTime = async () => {
+    await downloadGroupTableTimePdf(categoryActiveTab, ageActiveTab, true);
+  };
+
+  const downloadAllGroupTableTime = async () => {
+    await downloadAllGroupTableTimePdf(true);
+  };
+
   const assignToTables = async () => {
     setGroupTableTimeList(await assignGroupsToTableAndTime());
     setShowTables(true);
@@ -227,12 +239,26 @@ const GroupsPage = ({
                   Masalara Ata
                 </button>
                 {showTables && (
-                  <button
-                    onClick={() => setShowMatches?.(true)}
-                    style={{ marginRight: "10px" }}
-                  >
-                    Maçları Oluştur
-                  </button>
+                  <>
+                    <button
+                      onClick={downloadGroupTableTime}
+                      style={{ marginRight: "10px" }}
+                    >
+                      Masa Yerleşmeleri PDF İndir
+                    </button>
+                    <button
+                      onClick={downloadAllGroupTableTime}
+                      style={{ marginRight: "10px" }}
+                    >
+                      Tüm Gruplar Masa Yerleşmeleri PDF İndir
+                    </button>
+                    <button
+                      onClick={() => setShowMatches?.(true)}
+                      style={{ marginRight: "10px" }}
+                    >
+                      Maçları Oluştur
+                    </button>
+                  </>
                 )}
                 <button
                   onClick={downloadGroups}
