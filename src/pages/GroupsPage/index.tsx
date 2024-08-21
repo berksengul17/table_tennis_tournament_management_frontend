@@ -8,7 +8,7 @@ import {
 } from "../../api/groupApi";
 import AgeCategoryTabs from "../../components/AgeCategoryTabs";
 import { useAuth } from "../../context/AuthProvider";
-import { Group, GroupTableTime } from "../../type";
+import { Group, GroupTableTime, Table, Time } from "../../type";
 import GroupCard from "./components/GroupCard";
 import NewGroupDropArea from "./components/NewGroupDropArea";
 import styles from "./index.module.css";
@@ -19,7 +19,12 @@ import {
   downloadGroupsPdf,
   downloadGroupTableTimePdf,
 } from "../../api/documentApi";
-import { assignGroupsToTableAndTime } from "../../api/groupTableTimeApi";
+import {
+  assignGroupsToTableAndTime,
+  saveGroupTableTimeList,
+} from "../../api/groupTableTimeApi";
+import { getAllTables } from "../../api/tableApi";
+import { getAllTimes } from "../../api/timeApi";
 
 const GroupsPage = ({
   setShowMatches,
@@ -34,6 +39,8 @@ const GroupsPage = ({
   const [groupTableTimeList, setGroupTableTimeList] = useState<
     GroupTableTime[]
   >([]);
+  const [tableOptions, setTableOptions] = useState<Table[]>([]);
+  const [timeOptions, setTimeOptions] = useState<Time[]>([]);
 
   useEffect(() => {
     // Fetch participants
@@ -61,6 +68,10 @@ const GroupsPage = ({
   useEffect(() => {
     setAgeActiveTab(0);
   }, [categoryActiveTab]);
+
+  useEffect(() => {
+    console.log("group table time list changed", groupTableTimeList);
+  }, [groupTableTimeList]);
 
   const createGroups = async () => {
     setGroups(
@@ -181,6 +192,9 @@ const GroupsPage = ({
 
   const handleSave = async () => {
     setGroups(await saveGroups(groups));
+    if (groupTableTimeList.length > 0) {
+      setGroupTableTimeList(await saveGroupTableTimeList(groupTableTimeList));
+    }
   };
 
   const downloadGroups = async () => {
@@ -198,6 +212,8 @@ const GroupsPage = ({
   const assignToTables = async () => {
     setGroupTableTimeList(await assignGroupsToTableAndTime());
     setShowTables(true);
+    setTableOptions(await getAllTables());
+    setTimeOptions(await getAllTimes());
   };
 
   if (groups.length === 0) {
@@ -285,6 +301,8 @@ const GroupsPage = ({
                       (gtt) => gtt.group.id === group.id
                     )}
                     ordinal={index + 1}
+                    tableOptions={tableOptions}
+                    timeOptions={timeOptions}
                     moveParticipant={
                       isAdminDashboard ? moveParticipant : undefined
                     }

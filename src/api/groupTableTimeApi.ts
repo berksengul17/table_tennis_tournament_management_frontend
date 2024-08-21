@@ -16,3 +16,16 @@ export const assignGroupsToTableAndTime = async (): Promise<
 
   return [];
 };
+
+export const saveGroupTableTimeList = async (
+  groupTableTimeList: GroupTableTime[]
+): Promise<GroupTableTime[]> => {
+  try {
+    const response = await axios.post(`${API_URL}/save`, groupTableTimeList);
+    return response.data;
+  } catch (e: unknown | AxiosError) {
+    handleAxiosError(e);
+  }
+
+  return [];
+};
