@@ -5,11 +5,12 @@ import { handleAxiosError } from "../utils";
 const API_URL = `${import.meta.env.VITE_SERVER_URL}/api/bracket`;
 
 export const getWinnersBracket = async (
-  ageCategory: number
+  category: number,
+  age: number
 ): Promise<IBracket | null> => {
   try {
     const response = await axios.get(
-      `${API_URL}/get-winners-bracket/${ageCategory}`
+      `${API_URL}/get-winners-bracket/${category}/${age}`
     );
     return response.data ? response.data : null;
   } catch (error: unknown | AxiosError) {
@@ -20,11 +21,12 @@ export const getWinnersBracket = async (
 };
 
 export const createWinnersBracket = async (
-  ageCategory: number
+  category: number,
+  age: number
 ): Promise<IBracket> => {
   try {
     const response = await axios.post(
-      `${API_URL}/create-winners-bracket/${ageCategory}`
+      `${API_URL}/create-winners-bracket/${category}/${age}`
     );
     return response.data;
   } catch (error: unknown | AxiosError) {

@@ -9,6 +9,7 @@ export type Participant = {
   city: string;
   rating: number;
   groupId?: number;
+  groupRaking?: number;
 };
 
 export type ParticipantInputs = Omit<Participant, "id"> & {
