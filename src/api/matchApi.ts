@@ -13,9 +13,15 @@ export const getMatches = async (category: number, age: number) => {
   }
 };
 
-export const createMatches = async (category: number, age: number) => {
+export const createMatches = async (
+  category: number,
+  age: number,
+  refresh: boolean = false
+) => {
   try {
-    const response = await axios.get(`${API_URL}/create/${category}/${age}`);
+    const response = await axios.get(`${API_URL}/create/${category}/${age}`, {
+      params: { refresh },
+    });
     return response.data;
   } catch (e: unknown | AxiosError) {
     handleAxiosError(e);

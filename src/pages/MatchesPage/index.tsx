@@ -5,7 +5,10 @@ import AgeCategoryTabs from "../../components/AgeCategoryTabs";
 import CategoryTabs from "../../components/CategoryTabs";
 import styles from "./index.module.css";
 import GroupMatch from "../../components/GroupMatch";
-import { downloadGroupTableTimePdf } from "../../api/documentApi";
+import {
+  downloadAllGroupTableTimePdf,
+  downloadGroupTableTimePdf,
+} from "../../api/documentApi";
 
 function MatchesPage() {
   const [allGroupMatches, setAllGroupMatches] = useState<Match[][]>([]);
@@ -25,6 +28,16 @@ function MatchesPage() {
     })();
   }, [categoryActiveTab, ageActiveTab]);
 
+  const recreateMatches = async () => {
+    setAllGroupMatches(
+      await createMatches(categoryActiveTab, ageActiveTab, true)
+    );
+  };
+
+  const downloadAllGroupTableTime = async () => {
+    await downloadAllGroupTableTimePdf(true);
+  };
+
   const downloadMatchScores = async () => {
     await downloadGroupTableTimePdf(categoryActiveTab, ageActiveTab);
   };
@@ -41,6 +54,15 @@ function MatchesPage() {
       />
       <div style={{ width: "80%" }}>
         <div className={styles.header}>
+          <button onClick={recreateMatches} style={{ marginRight: "10px" }}>
+            Yenile
+          </button>
+          <button
+            onClick={downloadAllGroupTableTime}
+            style={{ marginRight: "10px" }}
+          >
+            Tüm Gruplar Masa Yerleşmeleri PDF İndir
+          </button>
           <button onClick={downloadMatchScores}>Maç Sonuçları PDF İndir</button>
         </div>
         <div className={styles.groupMatchesContainer}>

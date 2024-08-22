@@ -4,6 +4,7 @@ import GroupMember from "../GroupMember";
 import styles from "./index.module.css";
 import { useEffect, useState } from "react";
 import { getTableTime } from "../../../../api/tableTimeApi";
+import { byField } from "../../../../utils";
 
 type GroupCardProps = {
   group: Group;
@@ -118,18 +119,20 @@ const GroupCard: React.FC<GroupCardProps> = ({
         className={styles.card}
         style={{ backgroundColor: isOver ? "lightblue" : "white" }}
       >
-        {group.participants?.map(
-          (participant, index) =>
-            participant && (
-              <GroupMember
-                key={participant.id}
-                participant={participant}
-                group={group}
-                index={index}
-                moveParticipantInGroup={moveParticipantInGroup}
-              />
-            )
-        )}
+        {group.participants
+          ?.sort(byField("groupRanking"))
+          .map(
+            (participant, index) =>
+              participant && (
+                <GroupMember
+                  key={participant.id}
+                  participant={participant}
+                  group={group}
+                  index={index}
+                  moveParticipantInGroup={moveParticipantInGroup}
+                />
+              )
+          )}
       </div>
     </div>
   );

@@ -69,10 +69,6 @@ const GroupsPage = ({
     setAgeActiveTab(0);
   }, [categoryActiveTab]);
 
-  useEffect(() => {
-    console.log("group table time list changed", groupTableTimeList);
-  }, [groupTableTimeList]);
-
   const createGroups = async () => {
     setGroups(
       await createGroupsForAgeCategoryAndAge(
@@ -133,6 +129,8 @@ const GroupsPage = ({
           const participants = [...group.participants];
           const [draggedParticipant] = participants.splice(dragIndex, 1);
           participants.splice(hoverIndex, 0, draggedParticipant);
+
+          participants.forEach((p, index) => (p.groupRanking = index + 1));
 
           return prevGroups.map((g) =>
             g.id === groupId
