@@ -7,19 +7,39 @@ import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import CategoryTabs from "../../components/CategoryTabs";
 import { useEffect, useState } from "react";
 import { createWinnersBracket, getWinnersBracket } from "../../api/bracketApi";
+import { IBracket } from "../../type";
 
 const BracketPageContent = () => {
   const { bracket, setBracket } = useBracket();
+  const [currBracket, setCurrBracket] = useState<IBracket>({} as IBracket);
   const [categoryActiveTab, setCategoryActiveTab] = useState<number>(0);
   const [ageActiveTab, setAgeActiveTab] = useState<number>(0);
 
   useEffect(() => {
+    console.log("useEffect with static values triggered");
+
     (async () => {
+      let bracketData = await getWinnersBracket(0, 0); // Use static values
+      if (bracket == null) {
+        bracketData = await createWinnersBracket(0, 0); // Use static values
+      }
+      setBracket(bracketData!);
+    })();
+    console.log("bracket", bracket);
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      console.log("getting");
+
       let bracketData = await getWinnersBracket(
         categoryActiveTab,
         ageActiveTab
       );
-      if (bracket == null) {
+
+      if (bracketData === null) {
+        console.log("inside if");
+
         bracketData = await createWinnersBracket(
           categoryActiveTab,
           ageActiveTab
@@ -27,17 +47,22 @@ const BracketPageContent = () => {
       }
 
       setBracket(bracketData!);
+      console.log("bracket", bracketData);
     })();
   }, [categoryActiveTab, ageActiveTab]);
 
-  if (bracket === null) {
-    return (
-      <div className={styles.noBracket}>
-        <img src={noDataImg} />
-        <p>Fikstürler henüz oluşturulmadı.</p>;
-      </div>
-    );
-  }
+  useEffect(() => {
+    setBracket(currBracket);
+  }, [currBracket]);
+
+  // if (bracket === null) {
+  //   return (
+  //     <div className={styles.noBracket}>
+  //       <img src={noDataImg} />
+  //       <p>Fikstürler henüz oluşturulmadı.</p>;
+  //     </div>
+  //   );
+  // }
 
   return (
     <div
@@ -46,8 +71,6 @@ const BracketPageContent = () => {
         flexDirection: "column",
         justifyContent: "center",
         alignItems: "center",
-        height: "100%",
-        maxHeight: "100%",
       }}
     >
       <CategoryTabs
@@ -58,11 +81,11 @@ const BracketPageContent = () => {
         activeTab={ageActiveTab}
         setActiveTab={setAgeActiveTab}
       />
-      <TransformWrapper panning={{ excluded: ["input"] }}>
+      {bracket == null ? <p>Fikstür henüz oluşturulmadı</p> : <Bracket />}
+      {/* <TransformWrapper panning={{ excluded: ["input"] }}>
         <TransformComponent wrapperStyle={{ border: "1px solid black" }}>
-          <Bracket />
         </TransformComponent>
-      </TransformWrapper>
+      </TransformWrapper> */}
     </div>
   );
 };

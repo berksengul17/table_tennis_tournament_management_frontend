@@ -1,22 +1,33 @@
 import { useEffect, useState } from "react";
 import { advanceToNextRound } from "../../../../api/bracketApi";
 import { useBracket } from "../../../../context/BracketProvider";
-import { Participant } from "../../../../type";
+import { Participant, SeedParticipant } from "../../../../type";
 import SeedItem from "../SeedItem";
 import styles from "./index.module.css";
 
 function Seed({
-  participants,
+  seedParticipants,
   roundId,
 }: {
-  participants: Participant[];
+  seedParticipants: SeedParticipant[];
   roundId: number;
 }) {
-  const { brackets, setBrackets, activeBracket, isFinal } = useBracket();
-  const [scores, setScores] = useState<string[]>(["", ""]);
+  const { bracket, setBracket, isFinal } = useBracket();
+  const [scores, setScores] = useState<string[]>([
+    seedParticipants[0] ? seedParticipants[0].score.toString() : "",
+    seedParticipants[1] ? seedParticipants[1].score.toString() : "",
+  ]);
 
-  const getParticipant = (index: number): Participant | null => {
-    return participants && participants[index] ? participants[index] : null;
+  const getParticipant = (pIndex: number): Participant | null => {
+    if (seedParticipants) {
+      const seedParticipant = seedParticipants.find(
+        (sp) => sp.pindex === pIndex
+      );
+
+      return seedParticipant ? seedParticipant.participant : null;
+    }
+
+    return null;
   };
 
   useEffect(() => {
@@ -25,17 +36,12 @@ function Seed({
         const index = scores.findIndex((score) => score === "3");
         if (!isFinal(roundId)) {
           const updatedBracket = await advanceToNextRound(
-            participants[index].id,
-            brackets[activeBracket].id,
+            seedParticipants[index].participant.id,
+            bracket.id,
             roundId
           );
 
-          if (index !== -1)
-            setBrackets((prevBrackets) => {
-              const newBrackets = [...prevBrackets];
-              newBrackets[activeBracket] = updatedBracket;
-              return newBrackets;
-            });
+          if (index !== -1) setBracket(updatedBracket);
         }
       }
     })();

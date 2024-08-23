@@ -49,7 +49,15 @@ export enum AGE_CATEGORY {
 
 export type ISeed = {
   id: number;
-  participants: Participant[];
+  // participants: Participant[];
+};
+
+export type SeedParticipant = {
+  id: number;
+  seed: ISeed;
+  participant: Participant;
+  pindex: number;
+  score: number;
 };
 
 export type IRound = {

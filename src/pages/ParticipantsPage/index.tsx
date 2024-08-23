@@ -13,6 +13,7 @@ import { Option, ParticipantAgeCategoryDTO } from "../../type";
 import styles from "./index.module.css";
 import { deleteParticipant, register } from "../../api/participantApi";
 import { participantInputsDefaultValues } from "../../utils";
+import { useNavigate } from "react-router-dom";
 
 type EditedRow = {
   [key: string]: {
@@ -33,6 +34,7 @@ function ParticipantsPage({
 }: {
   setShowAgeCategoryTable?: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
+  const navigate = useNavigate();
   const { isAdminDashboard } = useAuth();
   const { categories } = useAgeCategory();
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -41,8 +43,6 @@ function ParticipantsPage({
   );
   const [categoryOptions, setCategoryOptions] = useState<Option[]>([]);
   const [ageListOptions, setAgeListOptions] = useState<Option[]>([]);
-  // const [selectedGender, setSelectedGender] = useState<string>("0");
-  // const [selectedCategory, setSelectedCategory] = useState<string>("0");
   const [editedRows, setEditedRows] = useState<EditedRow[]>([]);
   const [rowAgeListOptions, setRowAgeListOptions] = useState<{
     [key: string]: Option[];
@@ -466,12 +466,20 @@ function ParticipantsPage({
             <h3>Katılımcı Sayısı: {participants.length}</h3>
           </div>
           {isAdminDashboard && (
-            <button
-              onClick={() => setShowAgeCategoryTable?.(true)}
-              className={styles.categoryButton}
-            >
-              Yaş Kategorilerine Ayır
-            </button>
+            <>
+              <button
+                onClick={() => setShowAgeCategoryTable?.(true)}
+                className={styles.categoryButton}
+              >
+                Yaş Kategorilerine Ayır
+              </button>
+              <button
+                onClick={() => navigate("/bracket")}
+                className={styles.categoryButton}
+              >
+                Fikstür Oluştur
+              </button>
+            </>
           )}
         </div>
         <Table<ParticipantAgeCategoryDTO>
