@@ -22,7 +22,7 @@ function CategoryTabs({
         <Tab key={i} label={categories[i]} sx={{ textTransform: "none" }} />,
       ]);
     }
-  }, []);
+  }, [categories]);
 
   useEffect(() => {
     (async () => {

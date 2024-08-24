@@ -15,7 +15,7 @@ function Bracket() {
   }, [bracket]);
 
   return (
-    <div className={styles.bracket}>
+    <div className={styles.bracket} id="print">
       {rounds && rounds.map((round) => <Round key={round.id} round={round} />)}
     </div>
   );

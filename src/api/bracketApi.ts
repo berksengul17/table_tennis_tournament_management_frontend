@@ -1,5 +1,5 @@
 import axios, { AxiosError } from "axios";
-import { IBracket } from "../type";
+import { IBracket, ISeed } from "../type";
 import { handleAxiosError } from "../utils";
 
 const API_URL = `${import.meta.env.VITE_SERVER_URL}/api/bracket`;
@@ -62,4 +62,15 @@ export const advanceToNextRound = async (
   }
 
   return {} as IBracket;
+};
+
+export const getNextSeedId = async (seedId: number) => {
+  try {
+    const response = await axios.get(`${API_URL}/get-next-seed-id`, {
+      params: { seedId },
+    });
+    return response.data;
+  } catch (e: unknown | AxiosError) {
+    handleAxiosError(e);
+  }
 };

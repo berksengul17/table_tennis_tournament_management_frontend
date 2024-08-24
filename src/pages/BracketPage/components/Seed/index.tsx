@@ -4,6 +4,7 @@ import { useBracket } from "../../../../context/BracketProvider";
 import { Participant, SeedParticipant } from "../../../../type";
 import SeedItem from "../SeedItem";
 import styles from "./index.module.css";
+import { saveScores } from "../../../../api/seedParticipantApi";
 
 function Seed({
   seedParticipants,
@@ -13,10 +14,7 @@ function Seed({
   roundId: number;
 }) {
   const { bracket, setBracket, isFinal } = useBracket();
-  const [scores, setScores] = useState<string[]>([
-    seedParticipants[0] ? seedParticipants[0].score.toString() : "",
-    seedParticipants[1] ? seedParticipants[1].score.toString() : "",
-  ]);
+  const [scores, setScores] = useState<string[]>([]);
 
   const getParticipant = (pIndex: number): Participant | null => {
     if (seedParticipants) {
@@ -31,21 +29,42 @@ function Seed({
   };
 
   useEffect(() => {
+    console.log("change 1");
+
     (async () => {
       if (scores.length === 2 && !scores.includes("")) {
         const index = scores.findIndex((score) => score === "3");
-        if (!isFinal(roundId)) {
-          const updatedBracket = await advanceToNextRound(
-            seedParticipants[index].participant.id,
-            bracket.id,
-            roundId
-          );
+        if (index !== -1) {
+          saveScores(seedParticipants[0].seed.id, scores[0], scores[1]);
+          if (!isFinal(roundId)) {
+            const updatedBracket = await advanceToNextRound(
+              seedParticipants[index].participant.id,
+              bracket.id,
+              roundId
+            );
 
-          if (index !== -1) setBracket(updatedBracket);
+            setBracket(updatedBracket);
+          }
         }
       }
     })();
   }, [scores]);
+
+  useEffect(() => {
+    const newScores = [
+      seedParticipants[0] && seedParticipants[0].score !== null
+        ? seedParticipants[0].score.toString()
+        : "",
+      seedParticipants[1] && seedParticipants[1].score !== null
+        ? seedParticipants[1].score.toString()
+        : "",
+    ];
+
+    // Only update scores if they are different
+    if (newScores[0] !== scores[0] || newScores[1] !== scores[1]) {
+      setScores(newScores);
+    }
+  }, [seedParticipants]);
 
   return (
     <div className={styles.seedContainer}>
@@ -69,37 +88,3 @@ function Seed({
 }
 
 export default Seed;
-
-// .seedContainer:nth-child(odd)::after,
-// .seedContainer:nth-child(even)::after {
-//   content: "";
-//   position: absolute;
-//   flex-grow: 1;
-//   /* width: 50px;
-//   height: calc(5.5rem + 2px); */
-//   border-right: 1px solid black;
-//   left: calc(100% + 25px);
-//   transform: translateX(-50%);
-// }
-
-// .seedContainer:nth-child(odd)::before {
-//   content: "";
-//   position: absolute;
-//   width: calc(10rem - 50px);
-//   height: 1px;
-//   border-bottom: 1px solid black;
-//   left: calc(100% + calc(10rem - 50px) + 15px);
-//   bottom: calc(0% - 30px - 0.5px);
-//   transform: translateX(-50%);
-// }
-
-// .seedContainer:nth-child(odd)::after {
-//   border-top: 1px solid black;
-//   top: 50%;
-// }
-
-// .seedContainer:nth-child(even)::after {
-//   border-bottom: 1px solid black;
-//   /* TODO BAŞKA BİR ÇÖZÜM BUL */
-//   bottom: calc(50% - 0.2px);
-// }

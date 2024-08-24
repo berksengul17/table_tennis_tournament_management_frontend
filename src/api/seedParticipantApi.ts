@@ -16,3 +16,20 @@ export const getSeedParticipants = async (
 
   return [];
 };
+
+export const saveScores = async (
+  seedId: number,
+  p1Score: string,
+  p2Score: string
+) => {
+  try {
+    const formData = new FormData();
+    formData.append("seedId", seedId.toString());
+    formData.append("p1Score", p1Score);
+    formData.append("p2Score", p2Score);
+    const response = await axios.post(`${API_URL}/save-scores`, formData);
+    return response.data;
+  } catch (e: unknown | AxiosError) {
+    handleAxiosError(e);
+  }
+};

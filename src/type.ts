@@ -120,3 +120,21 @@ export type Time = {
   startTime: string;
   endTime: string;
 };
+
+export type GLootSeed = {
+  id: number;
+  name: string;
+  nextMatchId: number | null;
+  tournamentRoundText: string;
+  startTime?: string;
+  state: "NO_SHOW" | "WALK_OVER" | "NO_PARTY" | "DONE" | "SCORE_DONE";
+  participants: GLootParticipant[];
+};
+
+export type GLootParticipant = {
+  id: number;
+  resultText: string;
+  isWinner: boolean;
+  status: "PLAYED" | "NO_SHOW" | "WALK_OVER" | "NO_PARTY" | null;
+  name: string;
+};
