@@ -1,14 +1,8 @@
 import styles from "./index.module.css";
-import { Participant, Match as TMatch } from "../../type";
+import { Match as TMatch } from "../../type";
 import { useEffect, useState } from "react";
 import { saveScores } from "../../api/matchApi";
-
-const getName = (participant: Participant) => {
-  const names = (participant.firstName + " " + participant.lastName).split(" ");
-  return names
-    .map((name) => name.slice(0, 1).toUpperCase() + name.slice(1))
-    .join(" ");
-};
+import { getName } from "../../utils";
 
 const ScoreInput = ({
   score,

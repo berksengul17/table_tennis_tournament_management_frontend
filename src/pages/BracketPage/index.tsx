@@ -25,8 +25,6 @@ const BracketPageContent = () => {
   const [ageActiveTab, setAgeActiveTab] = useState<number>(0);
 
   useEffect(() => {
-    console.log("useEffect with static values triggered");
-
     (async () => {
       let bracketData = await getWinnersBracket(0, 0); // Use static values
       if (bracket == null) {
@@ -54,9 +52,9 @@ const BracketPageContent = () => {
           ageActiveTab
         );
       }
+      console.log("got bracket data", bracketData);
 
       setBracket(bracketData!);
-      console.log("bracket", bracketData);
     })();
   }, [categoryActiveTab, ageActiveTab]);
 
@@ -146,7 +144,6 @@ const BracketPageContent = () => {
         flexDirection: "column",
         justifyContent: "center",
         alignItems: "center",
-        height: "100%",
         paddingBottom: "2rem",
       }}
     >
@@ -176,13 +173,8 @@ const BracketPageContent = () => {
       >
         Ağacı İndir
       </button>
-      <TransformWrapper panning={{ excluded: ["input"] }}>
-        <TransformComponent
-          wrapperStyle={{ border: "1px solid black", marginTop: "2rem" }}
-        >
-          {bracket == null ? <p>Fikstür henüz oluşturulmadı</p> : <Bracket />}
-        </TransformComponent>
-      </TransformWrapper>
+
+      {bracket == null ? <p>Fikstür henüz oluşturulmadı</p> : <Bracket />}
     </div>
   );
 };

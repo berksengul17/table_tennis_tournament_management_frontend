@@ -1,14 +1,23 @@
 .seedItem {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   min-width: 100px;
   width: 12rem;
   height: 3rem;
-  padding: 0 1rem;
+  margin: 0 2rem;
 }
 
 .seedItem input {
+  padding: 5px;
+}
+
+.seedItem input:first-child {
+  width: 11rem;
+  margin-right: 0.5rem;
+}
+
+.seedItem input:last-child {
   text-align: center;
   width: 1.5rem;
 }

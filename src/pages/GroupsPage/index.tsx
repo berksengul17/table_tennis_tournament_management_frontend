@@ -214,14 +214,14 @@ const GroupsPage = ({
     setTimeOptions(await getAllTimes());
   };
 
-  if (groups.length === 0) {
-    return (
-      <div className={styles.noGroup}>
-        <img src={noDataImg} />
-        <p>Gruplar henüz oluşturulmadı.</p>;
-      </div>
-    );
-  }
+  // if (groups.length === 0) {
+  //   return (
+  //     <div className={styles.noGroup}>
+  //       <img src={noDataImg} />
+  //       <p>Gruplar henüz oluşturulmadı.</p>;
+  //     </div>
+  //   );
+  // }
 
   return (
     <DndProvider backend={HTML5Backend}>
