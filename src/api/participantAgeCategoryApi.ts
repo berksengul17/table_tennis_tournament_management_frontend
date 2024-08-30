@@ -22,6 +22,21 @@ export const getParticipants = async (
   return [];
 };
 
+export const getParticipant = async (
+  participantId: string
+): Promise<ParticipantAgeCategoryDTO | null> => {
+  try {
+    const response = await axios.get(
+      `${API_URL}/get-participant/${participantId}`
+    );
+    return response.data;
+  } catch (e: unknown | AxiosError) {
+    handleAxiosError(e);
+  }
+
+  return null;
+};
+
 export const updateParticipant = async (
   participantAgeCategoryDTO: ParticipantAgeCategoryDTO
 ): Promise<ParticipantAgeCategoryDTO | null> => {

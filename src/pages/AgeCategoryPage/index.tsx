@@ -17,7 +17,6 @@ function AgeCategoryPage({
 }: {
   setShowGroups: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
-  const { isAdminDashboard } = useAuth();
   const [participants, setParticipants] = useState<ParticipantAgeCategoryDTO[]>(
     []
   );
@@ -102,12 +101,20 @@ function AgeCategoryPage({
       //     })),
       //   },
       // }),
-      columnHelper.accessor("pairName", {
-        header: "Eşi",
-        meta: {
-          type: "text",
+      columnHelper.accessor(
+        (row) => {
+          const names = row.pairName.split(" ");
+          return names
+            .map((name) => name.slice(0, 1).toUpperCase() + name.slice(1))
+            .join(" ");
         },
-      }),
+        {
+          header: "Eşi",
+          meta: {
+            type: "text",
+          },
+        }
+      ),
       columnHelper.accessor("rating", {
         header: "Puan",
         meta: {
@@ -165,7 +172,7 @@ function AgeCategoryPage({
           <div className={styles.tableHeader}>
             <p>Toplam Katılımcı Sayısı: {participants.length}</p>
             <div className={styles.buttonContainer}>
-              <button onClick={downloadPdf}>Grup PDF İndir</button>
+              <button onClick={downloadPdf}>Yaş Kategorileri PDF İndir</button>
               <button onClick={() => setShowGroups(true)}>Gruplara Ayır</button>
             </div>
           </div>

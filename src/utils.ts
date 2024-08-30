@@ -41,6 +41,7 @@ export const participantInputsDefaultValues: Omit<ParticipantInputs, "rating"> =
     phoneNumber: "",
     category: "",
     birthDate: "",
+    isJoiningDoubles: "",
     pairName: "",
     age: "",
     city: "",
@@ -50,4 +51,9 @@ export const participantInputsDefaultValues: Omit<ParticipantInputs, "rating"> =
 export const genderOptions = [
   { value: "0", label: "Erkek", categories: ["Erkek", "Karışık"] },
   { value: "1", label: "Kadın", categories: ["Kadın", "Karışık"] },
+];
+
+export const yesNoOptions = [
+  { value: "true", label: "Evet" },
+  { value: "false", label: "Hayır" },
 ];

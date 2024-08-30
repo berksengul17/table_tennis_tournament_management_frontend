@@ -1,7 +1,8 @@
-import { useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useDrag, useDrop } from "react-dnd";
 import { useAuth } from "../../../../context/AuthProvider";
 import { Group, Participant } from "../../../../type";
+import { getParticipant } from "../../../../api/participantAgeCategoryApi";
 
 type GroupMemberProps = {
   participant: Participant;
@@ -22,6 +23,7 @@ const GroupMember: React.FC<GroupMemberProps> = ({
 }) => {
   const { isAdminDashboard } = useAuth();
   const ref = useRef<HTMLParagraphElement>(null);
+  const [pairName, setPairName] = useState<string>("");
   const [{ isDragging }, drag] = useDrag({
     type: "participant",
     item: { id: participant.id, group, index },
@@ -58,19 +60,35 @@ const GroupMember: React.FC<GroupMemberProps> = ({
         return;
       }
 
-      moveParticipantInGroup?.(group.id, dragIndex, hoverIndex);
+      moveParticipantInGroup?.(group.id!, dragIndex, hoverIndex);
       item.index = hoverIndex;
     },
   });
 
   drag(drop(ref));
 
-  const names = (participant?.firstName + " " + participant?.lastName).split(
-    " "
-  );
-  const name = names
-    .map((name) => name.slice(0, 1).toUpperCase() + name.slice(1))
-    .join(" ");
+  useEffect(() => {
+    const fetchPairName = async () => {
+      const participantAgeCategory = await getParticipant(participant.id);
+      const fetchedName = participantAgeCategory?.pairName
+        ?.split(" ")
+        .map((name) => name.slice(0, 1).toUpperCase() + name.slice(1))
+        .join(" ");
+
+      setPairName(fetchedName ?? "");
+    };
+
+    fetchPairName();
+  }, [participant.id]);
+
+  const name = useMemo(() => {
+    const names = (participant?.firstName + " " + participant?.lastName).split(
+      " "
+    );
+    return names
+      .map((name) => name.slice(0, 1).toUpperCase() + name.slice(1))
+      .join(" ");
+  }, [participant?.firstName, participant?.lastName]);
 
   return (
     <>
@@ -79,7 +97,15 @@ const GroupMember: React.FC<GroupMemberProps> = ({
           ref={isAdminDashboard ? ref : null}
           style={{ opacity: isDragging ? 0.5 : 1 }}
         >
-          {name} - {participant.rating} - {participant.city}
+          {pairName.length > 0 ? (
+            <span>
+              {name} - {pairName}
+            </span>
+          ) : (
+            <span>
+              {name} - {participant.rating} - {participant.city}
+            </span>
+          )}
         </p>
       )}
     </>

@@ -7,6 +7,7 @@ import {
   emailRegex,
   genderOptions,
   participantInputsDefaultValues,
+  yesNoOptions,
 } from "../../utils.ts";
 import RequiredLabel from "./components/RequiredLabel/index.tsx";
 import styles from "./index.module.css";
@@ -14,9 +15,6 @@ import { getHotelOptions } from "../../api/hotelApi.ts";
 
 function RegisterPage() {
   const { categories, ageList } = useAgeCategory();
-  // const [filteredCategories, setFilteredCategories] =
-  //   useState<string[]>(categories);
-  // const [currentCategoryIndex, setCurrentCategoryIndex] = useState<number>(0);
   const [showSuccess, setShowSuccess] = useState<boolean>(false);
   const [hotelOptions, setHotelOptions] = useState<Option[]>([]);
   const [isLoading, setLoading] = useState<boolean>(true);
@@ -26,11 +24,14 @@ function RegisterPage() {
     setValue,
     reset,
     control,
+    watch,
     formState,
     formState: { isSubmitSuccessful, errors },
   } = useForm<ParticipantInputs>({
     defaultValues: participantInputsDefaultValues,
   });
+
+  const watchIsJoiningDoubles = watch("isJoiningDoubles");
 
   const handlePhoneChange = (value: string) => {
     const cleaned = value.replace(/\D/g, "");
@@ -43,26 +44,6 @@ function RegisterPage() {
     }
     return value;
   };
-
-  // const handleGenderChange = async (e: any) => {
-  //   const selectedGender = genderOptions.find(
-  //     (option) => option.value === e.target.value
-  //   );
-  //   if (selectedGender) {
-  //     setFilteredCategories(
-  //       categories.filter((c) =>
-  //         selectedGender.categories.some((category) => c.includes(category))
-  //       )
-  //     );
-
-  //     // setAgeList(
-  //     //   await getAgeListByCategoryAndGender(
-  //     //     currentCategoryIndex,
-  //     //     selectedGender.value
-  //     //   )
-  //     // );
-  //   }
-  // };
 
   // when birthdate change automatically update age category
   const handleBirthDateChange = (e: any) => {
@@ -136,17 +117,6 @@ function RegisterPage() {
     initializeCategories();
   }, [categories]);
 
-  // useEffect(() => {
-  //   (async () => {
-  //     const gender = getValues("gender");
-  //     if (gender) {
-  //       setAgeList(
-  //         await getAgeListByCategoryAndGender(currentCategoryIndex, gender)
-  //       );
-  //     }
-  //   })();
-  // }, [currentCategoryIndex]);
-
   useEffect(() => {
     if (isSubmitSuccessful) {
       reset();
@@ -219,24 +189,6 @@ function RegisterPage() {
             />
           </div>
 
-          {/* <div className={styles.inputContainer}>
-            <RequiredLabel
-              htmlFor="phoneNumber"
-              text="Telefon Numarası"
-              required
-            />
-            <input
-              {...register("phoneNumber", {
-                required: true,
-                onChange: (e) => handlePhoneChange(e.target.value),
-              })}
-              id="phoneNumber"
-              type="tel"
-              pattern="[0-9]{3} [0-9]{3} [0-9]{2} [0-9]{2}"
-              placeholder="5XX XXX XX XX"
-            />
-          </div> */}
-
           <div className={styles.inputContainer}>
             <RequiredLabel htmlFor="gender" text="Cinsiyet" required />
             <div style={{ display: "flex" }}>
@@ -256,26 +208,6 @@ function RegisterPage() {
             </div>
           </div>
 
-          {/* <div className={styles.inputContainer}>
-            <RequiredLabel htmlFor="category" text="Kategori" required />
-
-            <select
-              {...register("category", {
-                required: true,
-                onChange: (e) => {
-                  setCurrentCategoryIndex(parseInt(e.target.value));
-                },
-              })}
-              id="category"
-            >
-              {filteredCategories.map((category, index) => (
-                <option key={index} value={index}>
-                  {category}
-                </option>
-              ))}
-            </select>
-          </div> */}
-
           <div className={styles.inputContainer}>
             <RequiredLabel htmlFor="birthDate" text="Doğum Tarihi" required />
             <input
@@ -288,7 +220,30 @@ function RegisterPage() {
             />
           </div>
 
-          {/* {filteredCategories[currentCategoryIndex]?.includes("Çift") && (
+          <div className={styles.inputContainer}>
+            <RequiredLabel
+              htmlFor="isJoiningDoubles"
+              text="Open çiftlere katılacak mısınız?"
+              required
+            />
+            <div style={{ display: "flex" }}>
+              {yesNoOptions.map((option) => (
+                <div key={option.value} className={styles.radioContainer}>
+                  <input
+                    {...register("isJoiningDoubles", {
+                      required: true,
+                    })}
+                    type="radio"
+                    id={option.value}
+                    value={option.value}
+                  />
+                  <label htmlFor={option.value}>{option.label}</label>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {watchIsJoiningDoubles === "true" && (
             <div className={styles.inputContainer}>
               <RequiredLabel htmlFor="pairName" text="Çift Adı" required />
               <input
@@ -296,19 +251,7 @@ function RegisterPage() {
                 id="pairName"
               />
             </div>
-          )} */}
-
-          {/* <div className={styles.inputContainer}>
-            <RequiredLabel htmlFor="ageCategory" text="Yaş Grubu" required />
-
-            <select {...register("age", { required: true })} id="age">
-              {ageList.map((age, index) => (
-                <option key={index} value={index}>
-                  {age}
-                </option>
-              ))}
-            </select>
-          </div> */}
+          )}
 
           <div className={styles.inputContainer}>
             <RequiredLabel htmlFor="city" text="Katılınan Şehir" required />

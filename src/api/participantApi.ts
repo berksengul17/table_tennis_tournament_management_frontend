@@ -8,7 +8,8 @@ export const register = async (
   participant: ParticipantInputs
 ): Promise<ParticipantAgeCategoryDTO | null> => {
   try {
-    const response = await axios.post(`${API_URL}/register`, participant);
+    const { isJoiningDoubles, ...participantData } = participant;
+    const response = await axios.post(`${API_URL}/register`, participantData);
 
     return response.data;
   } catch (error: unknown | AxiosError) {

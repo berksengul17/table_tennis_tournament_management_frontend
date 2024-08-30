@@ -14,6 +14,7 @@ export type Participant = {
 
 export type ParticipantInputs = Omit<Participant, "id"> & {
   category: string;
+  isJoiningDoubles: string;
   pairName: string;
   age: string;
   hotel: string;

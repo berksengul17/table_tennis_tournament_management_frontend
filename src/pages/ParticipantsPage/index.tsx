@@ -268,14 +268,22 @@ function ParticipantsPage({
           },
         },
       }),
-      columnHelper.accessor("pairName", {
-        header: "Eşi",
-        filterFn: "includesString",
-        meta: {
-          type: "text",
-          filterVariant: "text",
+      columnHelper.accessor(
+        (row) => {
+          const names = row.pairName.split(" ");
+          return names
+            .map((name) => name.slice(0, 1).toUpperCase() + name.slice(1))
+            .join(" ");
         },
-      }),
+        {
+          header: "Eşi",
+          filterFn: "includesString",
+          meta: {
+            type: "text",
+            filterVariant: "text",
+          },
+        }
+      ),
       columnHelper.accessor("hotel", {
         header: "Otel",
         filterFn: (row, id, value) => {
