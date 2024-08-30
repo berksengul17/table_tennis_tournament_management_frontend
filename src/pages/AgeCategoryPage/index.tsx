@@ -8,6 +8,7 @@ import TableEditCell from "../../components/TableEditCell";
 import { ParticipantAgeCategoryDTO } from "../../type";
 import styles from "./index.module.css";
 import { downloadAgeCategoriesPdf } from "../../api/documentApi";
+import { useAuth } from "../../context/AuthProvider";
 
 const columnHelper = createColumnHelper<ParticipantAgeCategoryDTO>();
 
@@ -16,6 +17,7 @@ function AgeCategoryPage({
 }: {
   setShowGroups: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
+  const { isAdminDashboard } = useAuth();
   const [participants, setParticipants] = useState<ParticipantAgeCategoryDTO[]>(
     []
   );
@@ -24,6 +26,14 @@ function AgeCategoryPage({
 
   const columns = useMemo(
     () => [
+      columnHelper.display({
+        id: "rowNumber",
+        header: "No",
+        cell: (info) => info.row.index + 1, // Row numbers start from 1
+        meta: {
+          type: "text",
+        },
+      }),
       columnHelper.accessor(
         (row) => {
           const names = (row.firstName + " " + row.lastName).split(" ");

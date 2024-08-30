@@ -5,17 +5,17 @@ import Round from "../Round";
 import styles from "./index.module.css";
 
 function Bracket() {
-  const { brackets, activeBracket } = useBracket();
+  const { bracket } = useBracket();
   const [rounds, setRounds] = useState<IRound[]>([]);
 
   useEffect(() => {
-    if (brackets[activeBracket]) {
-      setRounds(brackets[activeBracket].rounds);
+    if (bracket) {
+      setRounds(bracket.rounds);
     }
-  }, [brackets, activeBracket]);
+  }, [bracket]);
 
   return (
-    <div className={styles.bracket}>
+    <div className={styles.bracket} id="print">
       {rounds && rounds.map((round) => <Round key={round.id} round={round} />)}
     </div>
   );

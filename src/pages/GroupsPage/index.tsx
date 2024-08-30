@@ -2,45 +2,82 @@ import React, { useCallback, useEffect, useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import {
-  createGroupsForAgeCategory,
-  getAllGroups,
+  createGroupsForAgeCategoryAndAge,
+  getGroupsForAgeCategoryAndAge,
   saveGroups,
 } from "../../api/groupApi";
 import AgeCategoryTabs from "../../components/AgeCategoryTabs";
 import { useAuth } from "../../context/AuthProvider";
-import { AGE_CATEGORY, Group } from "../../type";
+import { Group, GroupTableTime, Table, Time } from "../../type";
 import GroupCard from "./components/GroupCard";
 import NewGroupDropArea from "./components/NewGroupDropArea";
 import styles from "./index.module.css";
 import noDataImg from "../../assets/images/ban-solid.svg";
+import CategoryTabs from "../../components/CategoryTabs";
+import {
+  downloadAllGroupTableTimePdf,
+  downloadGroupsPdf,
+  downloadGroupTableTimePdf,
+} from "../../api/documentApi";
+import {
+  assignGroupsToTableAndTime,
+  saveGroupTableTimeList,
+} from "../../api/groupTableTimeApi";
+import { getAllTables } from "../../api/tableApi";
+import { getAllTimes } from "../../api/timeApi";
 
-const CustomTabPanel = ({
-  value,
-  index,
-  children,
-}: { value: number; index: number } & React.PropsWithChildren<{}>) => {
-  return <div style={{ width: "50%" }}>{value === index && children}</div>;
-};
-
-const GroupsPage: React.FC = () => {
+const GroupsPage = ({
+  setShowMatches,
+}: {
+  setShowMatches?: React.Dispatch<React.SetStateAction<boolean>>;
+}) => {
   const { isAdminDashboard } = useAuth();
   const [groups, setGroups] = useState<Group[]>([]);
-  const [activeTab, setActiveTab] = useState<number>(0);
+  const [categoryActiveTab, setCategoryActiveTab] = useState<number>(0);
+  const [ageActiveTab, setAgeActiveTab] = useState<number>(0);
+  const [showTables, setShowTables] = useState<boolean>(false);
+  const [groupTableTimeList, setGroupTableTimeList] = useState<
+    GroupTableTime[]
+  >([]);
+  const [tableOptions, setTableOptions] = useState<Table[]>([]);
+  const [timeOptions, setTimeOptions] = useState<Time[]>([]);
 
   useEffect(() => {
     // Fetch participants
     (async () => {
-      let groups = await getAllGroups();
+      let groups = await getGroupsForAgeCategoryAndAge(
+        categoryActiveTab,
+        ageActiveTab
+      );
 
       if (isAdminDashboard && groups.length === 0) {
-        for (let i = 0; i < Object.keys(AGE_CATEGORY).length; i++) {
-          groups = groups.concat(await createGroupsForAgeCategory(i));
-        }
+        groups = groups.concat(
+          await createGroupsForAgeCategoryAndAge(
+            categoryActiveTab,
+            ageActiveTab
+          )
+        );
       }
+
+      console.log("GROUPS", groups);
 
       setGroups(groups);
     })();
-  }, [isAdminDashboard]);
+  }, [isAdminDashboard, categoryActiveTab, ageActiveTab]);
+
+  useEffect(() => {
+    setAgeActiveTab(0);
+  }, [categoryActiveTab]);
+
+  const createGroups = async () => {
+    setGroups(
+      await createGroupsForAgeCategoryAndAge(
+        categoryActiveTab,
+        ageActiveTab,
+        true
+      )
+    );
+  };
 
   const moveParticipant = useCallback(
     (participantId: string, fromGroup: Group, toGroup: Group) => {
@@ -93,6 +130,8 @@ const GroupsPage: React.FC = () => {
           const [draggedParticipant] = participants.splice(dragIndex, 1);
           participants.splice(hoverIndex, 0, draggedParticipant);
 
+          participants.forEach((p, index) => (p.groupRanking = index + 1));
+
           return prevGroups.map((g) =>
             g.id === groupId
               ? { ...g, participants: participants.filter(Boolean) }
@@ -138,7 +177,7 @@ const GroupsPage: React.FC = () => {
 
         // Create new group with the participant
         const newGroup: Group = {
-          id: prevGroups[prevGroups.length - 1].id + 1, // Or use a better ID generation strategy
+          id: null,
           ageCategory: item.group.ageCategory,
           participants: [participant],
         };
@@ -151,63 +190,131 @@ const GroupsPage: React.FC = () => {
 
   const handleSave = async () => {
     setGroups(await saveGroups(groups));
+    if (groupTableTimeList.length > 0) {
+      setGroupTableTimeList(await saveGroupTableTimeList(groupTableTimeList));
+    }
   };
 
-  if (groups.length === 0) {
-    return (
-      <div className={styles.noGroup}>
-        <img src={noDataImg} />
-        <p>Gruplar henüz oluşturulmadı.</p>;
-      </div>
-    );
-  }
+  const downloadGroups = async () => {
+    await downloadGroupsPdf(categoryActiveTab, ageActiveTab);
+  };
+
+  const downloadGroupTableTime = async () => {
+    await downloadGroupTableTimePdf(categoryActiveTab, ageActiveTab, true);
+  };
+
+  const downloadAllGroupTableTime = async () => {
+    await downloadAllGroupTableTimePdf(true);
+  };
+
+  const assignToTables = async () => {
+    setGroupTableTimeList(await assignGroupsToTableAndTime());
+    setShowTables(true);
+    setTableOptions(await getAllTables());
+    setTimeOptions(await getAllTimes());
+  };
+
+  // if (groups.length === 0) {
+  //   return (
+  //     <div className={styles.noGroup}>
+  //       <img src={noDataImg} />
+  //       <p>Gruplar henüz oluşturulmadı.</p>;
+  //     </div>
+  //   );
+  // }
 
   return (
     <DndProvider backend={HTML5Backend}>
       <div className={styles.container}>
-        <AgeCategoryTabs activeTab={activeTab} setActiveTab={setActiveTab} />
-        {Object.keys(AGE_CATEGORY).map((_, index) => (
-          <CustomTabPanel key={index} value={activeTab} index={index}>
-            <div className={styles.header}>
-              <p>
-                Toplam Katılımcı Sayısı:{" "}
-                {groups
-                  .filter((group) => group.ageCategory === index)
-                  .reduce(
-                    (acc, group) => acc + (group.participants?.length ?? 0),
-                    0
-                  )}
-              </p>
-              {isAdminDashboard && (
-                <button onClick={handleSave}>Değişiklikleri Kaydet</button>
+        <CategoryTabs
+          activeTab={categoryActiveTab}
+          setActiveTab={setCategoryActiveTab}
+        />
+        <AgeCategoryTabs
+          activeTab={ageActiveTab}
+          setActiveTab={setAgeActiveTab}
+        />
+
+        <div style={{ width: "80%" }}>
+          <div className={styles.header}>
+            <p>
+              Toplam Katılımcı Sayısı:{" "}
+              {groups.reduce(
+                (acc, group) => acc + group.participants.length,
+                0
               )}
-            </div>
-            <div className={styles.groupContainer}>
-              {groups
-                .filter((group) => group.ageCategory === index)
-                .map(
-                  (group, index) =>
-                    group &&
-                    group.id && (
-                      <GroupCard
-                        key={group.id}
-                        group={group}
-                        ordinal={index + 1}
-                        moveParticipant={
-                          isAdminDashboard ? moveParticipant : undefined
-                        }
-                        moveParticipantInGroup={
-                          isAdminDashboard ? moveParticipantInGroup : undefined
-                        }
-                      />
-                    )
+            </p>
+            {isAdminDashboard && (
+              <div>
+                <button
+                  onClick={assignToTables}
+                  style={{ marginRight: "10px" }}
+                >
+                  Masalara Ata
+                </button>
+                {showTables && (
+                  <>
+                    <button
+                      onClick={downloadGroupTableTime}
+                      style={{ marginRight: "10px" }}
+                    >
+                      Masa Yerleşmeleri PDF İndir
+                    </button>
+                    <button
+                      onClick={downloadAllGroupTableTime}
+                      style={{ marginRight: "10px" }}
+                    >
+                      Tüm Gruplar Masa Yerleşmeleri PDF İndir
+                    </button>
+                    <button
+                      onClick={() => setShowMatches?.(true)}
+                      style={{ marginRight: "10px" }}
+                    >
+                      Maçları Oluştur
+                    </button>
+                  </>
                 )}
-              {isAdminDashboard && (
-                <NewGroupDropArea createNewGroup={createNewGroup} />
-              )}
-            </div>
-          </CustomTabPanel>
-        ))}
+                <button
+                  onClick={downloadGroups}
+                  style={{ marginRight: "10px" }}
+                >
+                  Grup PDF İndir
+                </button>
+                <button onClick={createGroups} style={{ marginRight: "10px" }}>
+                  Yenile
+                </button>
+                <button onClick={handleSave}>Değişiklikleri Kaydet</button>
+              </div>
+            )}
+          </div>
+          <div className={styles.groupContainer}>
+            {groups.map(
+              (group, index) =>
+                group &&
+                group.id && (
+                  <GroupCard
+                    key={group.id}
+                    group={group}
+                    groupTableTime={groupTableTimeList.find(
+                      (gtt) => gtt.group.id === group.id
+                    )}
+                    ordinal={index + 1}
+                    tableOptions={tableOptions}
+                    timeOptions={timeOptions}
+                    moveParticipant={
+                      isAdminDashboard ? moveParticipant : undefined
+                    }
+                    moveParticipantInGroup={
+                      isAdminDashboard ? moveParticipantInGroup : undefined
+                    }
+                  />
+                )
+            )}
+            {isAdminDashboard && (
+              <NewGroupDropArea createNewGroup={createNewGroup} />
+            )}
+          </div>
+        </div>
       </div>
     </DndProvider>
   );

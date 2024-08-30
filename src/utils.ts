@@ -1,5 +1,5 @@
 import axios, { AxiosError } from "axios";
-import { ParticipantInputs } from "./type";
+import { Participant, ParticipantInputs } from "./type";
 
 export const handleAxiosError = (error: unknown | AxiosError) => {
   if (axios.isAxiosError(error)) {
@@ -16,6 +16,17 @@ export const handleAxiosError = (error: unknown | AxiosError) => {
   } else {
     console.log("Error", error);
   }
+};
+
+export function byField(fieldName: string) {
+  return (a: any, b: any) => (a[fieldName] > b[fieldName] ? 1 : -1);
+}
+
+export const getName = (participant: Participant) => {
+  const names = (participant.firstName + " " + participant.lastName).split(" ");
+  return names
+    .map((name) => name.slice(0, 1).toUpperCase() + name.slice(1))
+    .join(" ");
 };
 
 export const emailRegex =

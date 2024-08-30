@@ -9,6 +9,7 @@ export type Participant = {
   city: string;
   rating: number;
   groupId?: number;
+  groupRanking?: number;
 };
 
 export type ParticipantInputs = Omit<Participant, "id"> & {
@@ -31,12 +32,6 @@ export type ParticipantAgeCategoryDTO = {
 } & Omit<Participant, "id"> &
   Omit<AgeCategory, "id">;
 
-export type Group = {
-  id: number;
-  ageCategory: number;
-  participants: Participant[];
-};
-
 export type Option = {
   value: string;
   label: string;
@@ -56,7 +51,15 @@ export enum AGE_CATEGORY {
 
 export type ISeed = {
   id: number;
-  participants: Participant[];
+  // participants: Participant[];
+};
+
+export type SeedParticipant = {
+  id: number;
+  seed: ISeed;
+  participant: Participant;
+  pindex: number;
+  score: number;
 };
 
 export type IRound = {
@@ -80,5 +83,65 @@ export type Admin = {
 
 export type Hotel = {
   id: string;
+  name: string;
+};
+
+export type Group = {
+  id: number | null;
+  ageCategory: number;
+  participants: Participant[];
+};
+
+export type Match = {
+  id: number;
+  group: Group;
+  table: Table;
+  p1: Participant;
+  p2: Participant;
+  p1Score: number;
+  p2Score: number;
+  startTime: string;
+  endTime: string;
+};
+
+export type GroupTableTime = {
+  id: number;
+  group: Group;
+  tableTime: TableTime;
+};
+
+export type TableTime = {
+  id: number;
+  table: Table;
+  time: Time;
+  isAvailable: boolean;
+};
+
+export type Table = {
+  id: number;
+  name: string;
+};
+
+export type Time = {
+  id: number;
+  startTime: string;
+  endTime: string;
+};
+
+export type GLootSeed = {
+  id: number;
+  name: string;
+  nextMatchId: number | null;
+  tournamentRoundText: string;
+  startTime?: string;
+  state: "NO_SHOW" | "WALK_OVER" | "NO_PARTY" | "DONE" | "SCORE_DONE";
+  participants: GLootParticipant[];
+};
+
+export type GLootParticipant = {
+  id: number;
+  resultText: string;
+  isWinner: boolean;
+  status: "PLAYED" | "NO_SHOW" | "WALK_OVER" | "NO_PARTY" | null;
   name: string;
 };

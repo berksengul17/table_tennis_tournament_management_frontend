@@ -13,6 +13,7 @@ import { Hotel, Option, ParticipantAgeCategoryDTO } from "../../type";
 import styles from "./index.module.css";
 import { deleteParticipant, register } from "../../api/participantApi";
 import { genderOptions, participantInputsDefaultValues } from "../../utils";
+import { useNavigate } from "react-router-dom";
 import { getHotelOptions } from "../../api/hotelApi";
 
 type EditedRow = {
@@ -29,6 +30,7 @@ function ParticipantsPage({
 }: {
   setShowAgeCategoryTable?: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
+  const navigate = useNavigate();
   const { isAdminDashboard } = useAuth();
   const { categories } = useAgeCategory();
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -453,6 +455,10 @@ function ParticipantsPage({
     });
   }, [editedRows]);
 
+  useEffect(() => {
+    console.log(participants);
+  }, [participants]);
+
   // useEffect(() => {
   //   if (selectedGender) {
   //     const gender = genderOptions.find(
@@ -500,12 +506,20 @@ function ParticipantsPage({
             <h3>Katılımcı Sayısı: {numOfParticipants}</h3>
           </div>
           {isAdminDashboard && (
-            <button
-              onClick={() => setShowAgeCategoryTable?.(true)}
-              className={styles.categoryButton}
-            >
-              Yaş Kategorilerine Ayır
-            </button>
+            <>
+              <button
+                onClick={() => setShowAgeCategoryTable?.(true)}
+                className={styles.categoryButton}
+              >
+                Yaş Kategorilerine Ayır
+              </button>
+              <button
+                onClick={() => navigate("/bracket")}
+                className={styles.categoryButton}
+              >
+                Fikstür Oluştur
+              </button>
+            </>
           )}
         </div>
         <Table<ParticipantAgeCategoryDTO>
