@@ -1,8 +1,19 @@
 // TODO: lines array ini koordinatlara göre sırala
 // yoksa rastgele sırada birleştirince bozuluyor
 import { useRef, useEffect, useState, Fragment } from "react";
+import { IBracket, RoundSeedResponse } from "../../type";
+import {
+  connectSeeds,
+  createWinnersBracket,
+  getWinnersBracket,
+} from "../../api/bracketApi";
+import CategoryTabs from "../../components/CategoryTabs";
+import AgeCategoryTabs from "../../components/AgeCategoryTabs";
+import { getSeedParticipants } from "../../api/seedParticipantApi";
 
 type Line = {
+  roundId?: number;
+  seedId?: number;
   x1: number;
   y1: number;
   x2: number;
@@ -64,13 +75,15 @@ const LineDiv = ({
 const BracketPage = () => {
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [bracket, setBracket] = useState<IBracket>({} as IBracket);
+  const [categoryActiveTab, setCategoryActiveTab] = useState<number>(0);
+  const [ageActiveTab, setAgeActiveTab] = useState<number>(0);
   const [containerHeight, setContainerHeight] = useState(0);
   const [startLine, setStartLine] = useState<BracketPos | null>(null);
   const [tempLine, setTempLine] = useState<Coordinate | null>(null);
-  const [lines, setLines] = useState<Array<Array<Line>>>([]);
-  const numOfLines = 12;
+  const [lines, setLines] = useState<Line[][]>([]);
 
-  const handleLineClick = (pos: BracketPos, event: React.MouseEvent) => {
+  const handleLineClick = async (pos: BracketPos, event: React.MouseEvent) => {
     //event.stopPropagation();
     const rect = containerRef.current!.getBoundingClientRect();
 
@@ -90,23 +103,39 @@ const BracketPage = () => {
       )
         return;
 
-      const line = getLine(startLine.row, startLine.column);
+      const startLineData = getLine(lines, startLine.row, startLine.column);
+      const currPosData = getLine(lines, pos.row, pos.column);
 
-      const x = line.x2;
-      let y1 = line.y2;
-      let y2 = getLine(pos.row, pos.column).y2;
+      const x = startLineData.x2;
+      let y1 = startLineData.y2;
+      let y2 = currPosData.y2;
 
       if (y1 > y2) y1 += 5;
       else y2 += 5;
 
       let nextLineY = (y1 + y2) / 2;
 
+      let roundSeedResponse: RoundSeedResponse;
+      if (startLineData.seedId && currPosData.seedId) {
+        roundSeedResponse = await connectSeeds(
+          startLineData.seedId,
+          currPosData.seedId
+        );
+      }
+
       setLines((prevLines) => {
         const newLines = [...prevLines];
         newLines[pos.column + 1] = [
           ...(newLines[pos.column + 1] || []),
           { x1: x, y1: y1, x2: x, y2: y2 },
-          { x1: x, y1: nextLineY, x2: x + 120, y2: nextLineY },
+          {
+            roundId: roundSeedResponse.roundId,
+            seedId: roundSeedResponse.seedId,
+            x1: x,
+            y1: nextLineY,
+            x2: x + 120,
+            y2: nextLineY,
+          },
         ];
         return newLines;
       });
@@ -117,7 +146,7 @@ const BracketPage = () => {
   };
 
   const handleBye = (pos: BracketPos) => {
-    const line = getLine(pos.row, pos.column);
+    const line = getLine(lines, pos.row, pos.column);
 
     setLines((prevLines) => {
       const newLines = [...prevLines];
@@ -176,7 +205,7 @@ const BracketPage = () => {
   };
 
   const renderTempLine = () => {
-    const initialLine = getLine(startLine!.row, startLine!.column);
+    const initialLine = getLine(lines, startLine!.row, startLine!.column);
 
     return (
       <>
@@ -202,9 +231,99 @@ const BracketPage = () => {
     );
   };
 
+  const getNumberOfParticipants = async () => {
+    let count = 0;
+    console.log("bracket num", bracket);
+
+    for (const round of bracket.rounds) {
+      for (const seed of round.seeds) {
+        const seedParticipants = await getSeedParticipants(seed.id);
+        count += seedParticipants.length;
+      }
+    }
+
+    return count;
+  };
+
+  const processBracket = async (bracket: IBracket) => {
+    const processedLines: Array<Array<Line>> = [];
+    console.log("PROCESS BRACKET", bracket);
+
+    const rounds = bracket.rounds;
+    for (let roundIndex = 0; roundIndex < rounds.length; roundIndex++) {
+      const lines: Line[] = [];
+      const nextRoundLines: Line[] = [];
+      const seeds = rounds[roundIndex].seeds;
+      const numOfParticipants = await getNumberOfParticipants();
+      console.log("container", containerHeight, numOfParticipants);
+
+      let spaceBetweenSeeds =
+        roundIndex === 0
+          ? Math.round(containerHeight / (numOfParticipants + 1))
+          : 0;
+      console.log("space", spaceBetweenSeeds);
+
+      for (let seedIndex = 0; seedIndex < seeds.length; seedIndex++) {
+        const seedParticipants = await getSeedParticipants(seeds[seedIndex].id);
+        console.log("SEEDPARTICIPANTS", seedParticipants);
+
+        for (const seedParticipant of seedParticipants) {
+          let y1;
+          if (roundIndex !== 0) {
+            const prevSeedIndex = seedIndex * 2 + seedParticipant.pindex;
+            y1 =
+              (getLine(processedLines, prevSeedIndex * 2, roundIndex - 1).y2 +
+                getLine(processedLines, prevSeedIndex * 2 + 1, roundIndex - 1)
+                  .y2) /
+              2;
+          } else {
+            y1 = spaceBetweenSeeds;
+            if (lines[lines.length - 1]) {
+              y1 += lines[lines.length - 1].y1;
+            }
+          }
+
+          const x1 = 30 + roundIndex * 120; // Example calculation for x1
+          const x2 = x1 + 120; // Example calculation for x2
+          const y2 = y1; // Horizontal line for seeds in the same round
+
+          lines.push({
+            roundId: rounds[roundIndex].id,
+            seedId: seeds[seedIndex].id,
+            x1,
+            y1,
+            x2,
+            y2,
+          });
+        }
+
+        let x1, y1, x2, y2;
+        const len = lines.length;
+        if (seedParticipants.length === 2) {
+          x1 = lines[len - 2].x2;
+          y1 = lines[len - 2].y2;
+          x2 = lines[len - 1].x2;
+          y2 = lines[len - 1].y2;
+          nextRoundLines.push({ x1, y1, x2, y2 });
+        }
+        // else {
+        //   x1 = lines[len - 1].x2;
+        //   x2 = lines[len - 1].x2 + 120;
+        //   y1 = y2 = lines[len - 1].y2;
+        // }
+      }
+      processedLines.splice(roundIndex, 0, lines);
+      processedLines.splice(roundIndex + 1, 0, nextRoundLines);
+    }
+
+    console.log("processed", processedLines);
+
+    return processedLines;
+  };
+
   const isHorizontal = (line: Line) => line.y1 === line.y2;
 
-  const getLine = (row: number, column: number) => {
+  const getLine = (lines: Line[][], row: number, column: number) => {
     return lines[column].filter((line) => isHorizontal(line))[row];
   };
 
@@ -230,6 +349,33 @@ const BracketPage = () => {
   }, []);
 
   useEffect(() => {
+    console.log("bracket", bracket);
+    const processNewBracket = async () => {
+      console.log("process");
+
+      const lines = await processBracket(bracket);
+      setLines(lines);
+    };
+
+    if (Object.keys(bracket).length !== 0) {
+      processNewBracket();
+    }
+  }, [bracket]);
+
+  useEffect(() => {
+    const initBracket = async () => {
+      let b = await getWinnersBracket(categoryActiveTab, ageActiveTab);
+      if (b === null) {
+        b = await createWinnersBracket(categoryActiveTab, ageActiveTab);
+      }
+
+      setBracket(b);
+    };
+
+    initBracket();
+  }, [categoryActiveTab, ageActiveTab]);
+
+  useEffect(() => {
     if (startLine !== null) {
       document.addEventListener("mousemove", handleMouseMove);
     }
@@ -237,30 +383,53 @@ const BracketPage = () => {
     return () => document.removeEventListener("mousemove", handleMouseMove);
   }, [startLine]);
 
-  useEffect(() => {
-    if (lines.length === 0 && containerHeight > 0) {
-      const lines = Array.from({ length: numOfLines }, (_, i) => {
-        const yPosition = Math.round(
-          (containerHeight / (numOfLines + 1)) * (i + 1)
-        );
+  // TODO: BUNU SADECE İLK ROUND İÇİN DEĞİL HEPSİ İÇİN YAPMALI
+  // useEffect(() => {
+  //   if (lines.length === 0 && containerHeight > 0) {
+  //     const numOfLines = bracket.rounds[0].seeds.length;
+  //     const lines = Array.from({ length: numOfLines }, (_, i) => {
+  //       const yPosition = Math.round(
+  //         (containerHeight / (numOfLines + 1)) * (i + 1)
+  //       );
 
-        return {
-          x1: 30,
-          y1: yPosition,
-          x2: 150,
-          y2: yPosition,
-        };
-      });
+  //       return {
+  //         x1: 30,
+  //         y1: yPosition,
+  //         x2: 150,
+  //         y2: yPosition,
+  //       };
+  //     });
 
-      setLines([lines]);
-    }
-  }, [containerHeight]);
+  //     setLines([lines]);
+  //   }
+  // }, [containerHeight, bracket]);
 
   return (
-    <div style={{ display: "flex", flex: 1 }}>
+    <div
+      style={{
+        display: "flex",
+        flex: 1,
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    >
+      <CategoryTabs
+        activeTab={categoryActiveTab}
+        setActiveTab={setCategoryActiveTab}
+      />
+      <AgeCategoryTabs
+        activeTab={ageActiveTab}
+        setActiveTab={setAgeActiveTab}
+      />
       <div
         ref={containerRef}
-        style={{ position: "relative", flex: "1", overflow: "hidden" }}
+        style={{
+          position: "relative",
+          flex: "1",
+          overflow: "hidden",
+          width: "100%",
+        }}
         onClick={(event) => resetTempLine(event)}
       >
         {renderRounds()}

@@ -146,3 +146,8 @@ export type GLootParticipant = {
   status: "PLAYED" | "NO_SHOW" | "WALK_OVER" | "NO_PARTY" | null;
   name: string;
 };
+
+export type RoundSeedResponse = {
+  roundId: number;
+  seedId: number;
+};

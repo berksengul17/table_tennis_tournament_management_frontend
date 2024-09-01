@@ -1,5 +1,5 @@
 import axios, { AxiosError } from "axios";
-import { IBracket, ISeed } from "../type";
+import { IBracket, RoundSeedResponse } from "../type";
 import { handleAxiosError } from "../utils";
 
 const API_URL = `${import.meta.env.VITE_SERVER_URL}/api/bracket`;
@@ -73,4 +73,21 @@ export const getNextSeedId = async (seedId: number) => {
   } catch (e: unknown | AxiosError) {
     handleAxiosError(e);
   }
+};
+
+export const connectSeeds = async (
+  firstSeedId: number,
+  secondSeedId: number
+): Promise<RoundSeedResponse> => {
+  try {
+    const formData = new FormData();
+    formData.append("firstSeedId", firstSeedId.toString());
+    formData.append("secondSeedId", secondSeedId.toString());
+    const response = await axios.post(`${API_URL}/connect-seeds`, formData);
+    return response.data;
+  } catch (e: unknown | AxiosError) {
+    handleAxiosError(e);
+  }
+
+  return {} as RoundSeedResponse;
 };
