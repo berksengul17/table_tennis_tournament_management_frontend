@@ -52,6 +52,7 @@ export enum AGE_CATEGORY {
 
 export type ISeed = {
   id: number;
+  prevSeed: ISeed;
   // participants: Participant[];
 };
 

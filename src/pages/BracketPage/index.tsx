@@ -5,6 +5,7 @@ import { IBracket, RoundSeedResponse } from "../../type";
 import {
   connectSeeds,
   createWinnersBracket,
+  getParticipantCount,
   getWinnersBracket,
 } from "../../api/bracketApi";
 import CategoryTabs from "../../components/CategoryTabs";
@@ -14,6 +15,7 @@ import { getSeedParticipants } from "../../api/seedParticipantApi";
 type Line = {
   roundId?: number;
   seedId?: number;
+  prevSeedId?: number;
   x1: number;
   y1: number;
   x2: number;
@@ -44,6 +46,7 @@ const LineDiv = ({
     <>
       {isHorizontal && pos && (
         <input
+          value={`${line.seedId} - ${line.prevSeedId}`}
           type="text"
           placeholder={`Input ${pos.row + 1} - ${pos.column + 1}`}
           style={{
@@ -121,6 +124,12 @@ const BracketPage = () => {
           startLineData.seedId,
           currPosData.seedId
         );
+
+        if (startLineData.seedId < currPosData.seedId) {
+          currPosData.seedId = startLineData.seedId;
+        } else {
+          startLineData.seedId = currPosData.seedId;
+        }
       }
 
       setLines((prevLines) => {
@@ -145,14 +154,24 @@ const BracketPage = () => {
     }
   };
 
-  const handleBye = (pos: BracketPos) => {
+  const handleBye = async (pos: BracketPos) => {
     const line = getLine(lines, pos.row, pos.column);
-
+    let roundSeedResponse: RoundSeedResponse;
+    if (line.seedId) {
+      roundSeedResponse = await connectSeeds(line.seedId);
+    }
     setLines((prevLines) => {
       const newLines = [...prevLines];
       newLines[pos.column + 1] = [
         ...(newLines[pos.column + 1] || []),
-        { x1: line.x2, y1: line.y2, x2: line.x2 + 120, y2: line.y2 },
+        {
+          roundId: roundSeedResponse?.roundId,
+          seedId: roundSeedResponse?.seedId,
+          x1: line.x2,
+          y1: line.y2,
+          x2: line.x2 + 120,
+          y2: line.y2,
+        },
       ];
       return newLines;
     });
@@ -231,51 +250,35 @@ const BracketPage = () => {
     );
   };
 
-  const getNumberOfParticipants = async () => {
-    let count = 0;
-    console.log("bracket num", bracket);
-
-    for (const round of bracket.rounds) {
-      for (const seed of round.seeds) {
-        const seedParticipants = await getSeedParticipants(seed.id);
-        count += seedParticipants.length;
-      }
-    }
-
-    return count;
-  };
-
   const processBracket = async (bracket: IBracket) => {
     const processedLines: Array<Array<Line>> = [];
-    console.log("PROCESS BRACKET", bracket);
 
     const rounds = bracket.rounds;
     for (let roundIndex = 0; roundIndex < rounds.length; roundIndex++) {
       const lines: Line[] = [];
       const nextRoundLines: Line[] = [];
       const seeds = rounds[roundIndex].seeds;
-      const numOfParticipants = await getNumberOfParticipants();
-      console.log("container", containerHeight, numOfParticipants);
+      const numOfParticipants = await getParticipantCount(bracket.id);
 
       let spaceBetweenSeeds =
         roundIndex === 0
           ? Math.round(containerHeight / (numOfParticipants + 1))
           : 0;
-      console.log("space", spaceBetweenSeeds);
 
       for (let seedIndex = 0; seedIndex < seeds.length; seedIndex++) {
         const seedParticipants = await getSeedParticipants(seeds[seedIndex].id);
-        console.log("SEEDPARTICIPANTS", seedParticipants);
 
-        for (const seedParticipant of seedParticipants) {
+        for (let i = 0; i < seedParticipants.length; i++) {
           let y1;
           if (roundIndex !== 0) {
-            const prevSeedIndex = seedIndex * 2 + seedParticipant.pindex;
+            const prevSeeds = processedLines[roundIndex - 1].filter(
+              (line) => line.seedId === seedParticipants[i].seed.prevSeed.id
+            );
+
             y1 =
-              (getLine(processedLines, prevSeedIndex * 2, roundIndex - 1).y2 +
-                getLine(processedLines, prevSeedIndex * 2 + 1, roundIndex - 1)
-                  .y2) /
-              2;
+              prevSeeds.length === 1
+                ? prevSeeds[0].y2
+                : (prevSeeds[0].y2 + prevSeeds[1].y2) / 2;
           } else {
             y1 = spaceBetweenSeeds;
             if (lines[lines.length - 1]) {
@@ -290,6 +293,7 @@ const BracketPage = () => {
           lines.push({
             roundId: rounds[roundIndex].id,
             seedId: seeds[seedIndex].id,
+            prevSeedId: seedParticipants[0].seed.prevSeed?.id ?? undefined,
             x1,
             y1,
             x2,
@@ -303,7 +307,7 @@ const BracketPage = () => {
           x1 = lines[len - 2].x2;
           y1 = lines[len - 2].y2;
           x2 = lines[len - 1].x2;
-          y2 = lines[len - 1].y2;
+          y2 = lines[len - 1].y2 + 5;
           nextRoundLines.push({ x1, y1, x2, y2 });
         }
         // else {
@@ -312,11 +316,17 @@ const BracketPage = () => {
         //   y1 = y2 = lines[len - 1].y2;
         // }
       }
-      processedLines.splice(roundIndex, 0, lines);
-      processedLines.splice(roundIndex + 1, 0, nextRoundLines);
-    }
+      if (!processedLines[roundIndex]) {
+        processedLines.splice(roundIndex, 0, []);
+      }
 
-    console.log("processed", processedLines);
+      if (!processedLines[roundIndex + 1]) {
+        processedLines.splice(roundIndex + 1, 0, []);
+      }
+
+      processedLines[roundIndex].push(...lines);
+      processedLines[roundIndex + 1].push(...nextRoundLines);
+    }
 
     return processedLines;
   };
@@ -349,10 +359,7 @@ const BracketPage = () => {
   }, []);
 
   useEffect(() => {
-    console.log("bracket", bracket);
     const processNewBracket = async () => {
-      console.log("process");
-
       const lines = await processBracket(bracket);
       setLines(lines);
     };
@@ -382,6 +389,10 @@ const BracketPage = () => {
 
     return () => document.removeEventListener("mousemove", handleMouseMove);
   }, [startLine]);
+
+  useEffect(() => {
+    console.log("LINES", lines);
+  }, [lines]);
 
   // TODO: BUNU SADECE İLK ROUND İÇİN DEĞİL HEPSİ İÇİN YAPMALI
   // useEffect(() => {

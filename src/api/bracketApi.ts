@@ -20,6 +20,21 @@ export const getWinnersBracket = async (
   return null;
 };
 
+export const getParticipantCount = async (
+  bracketId: number
+): Promise<number> => {
+  try {
+    const response = await axios.get(
+      `${API_URL}/get-participant-count/${bracketId}`
+    );
+    return response.data;
+  } catch (e: unknown | AxiosError) {
+    handleAxiosError(e);
+  }
+
+  return 0;
+};
+
 export const createWinnersBracket = async (
   category: number,
   age: number
@@ -77,12 +92,14 @@ export const getNextSeedId = async (seedId: number) => {
 
 export const connectSeeds = async (
   firstSeedId: number,
-  secondSeedId: number
+  secondSeedId?: number
 ): Promise<RoundSeedResponse> => {
   try {
     const formData = new FormData();
     formData.append("firstSeedId", firstSeedId.toString());
-    formData.append("secondSeedId", secondSeedId.toString());
+    if (secondSeedId) {
+      formData.append("secondSeedId", secondSeedId.toString());
+    }
     const response = await axios.post(`${API_URL}/connect-seeds`, formData);
     return response.data;
   } catch (e: unknown | AxiosError) {
