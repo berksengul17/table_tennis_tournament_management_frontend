@@ -1,5 +1,7 @@
 // TODO: lines array ini koordinatlara göre sırala
 // yoksa rastgele sırada birleştirince bozuluyor
+// TODO: final maçı çizgisine tıklanabilir bir şekilde
+// buna nasıl bir kontrol yaparım bilmiyorum
 import { useRef, useEffect, useState, Fragment } from "react";
 import { IBracket, RoundSeedResponse } from "../../type";
 import {
@@ -11,6 +13,7 @@ import {
 import CategoryTabs from "../../components/CategoryTabs";
 import AgeCategoryTabs from "../../components/AgeCategoryTabs";
 import { getSeedParticipants } from "../../api/seedParticipantApi";
+import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
 
 type Line = {
   roundId?: number;
@@ -26,39 +29,81 @@ type Coordinate = { x: number; y: number };
 
 type BracketPos = { row: number; column: number };
 
+const LINE_WIDTH = 150;
+
 const LineDiv = ({
   pos,
-  isHorizontal,
   line,
+  isBye,
+  isHorizontal,
   handleLineClick,
 }: {
   pos?: BracketPos;
-  isHorizontal: boolean;
   line: Line;
-  handleLineClick: (pos: BracketPos, event: React.MouseEvent) => void;
+  isBye?: boolean;
+  isHorizontal: boolean;
+  handleLineClick?: (pos: BracketPos, event: React.MouseEvent) => void;
 }) => {
+  const [participant, setParticipant] = useState<string>("");
+  const [score, setScore] = useState<string>("-");
+
   const width = Math.abs(line.x2 - line.x1);
   const height = Math.abs(line.y2 - line.y1);
   const top = Math.min(line.y1, line.y2);
   const left = Math.min(line.x1, line.x2);
 
+  useEffect(() => {
+    console.log(score.length);
+  }, [score]);
+
+  const handleScoreChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value.replace(/[^0-9]/g, "");
+
+    if (value.length === 0) {
+      setScore("-");
+    } else if (value.length === 1) {
+      setScore(`${value}-`);
+    } else if (value.length === 2) {
+      setScore(`${value[0]}-${value[1]}`);
+    }
+  };
+
   return (
     <>
       {isHorizontal && pos && (
-        <input
-          value={`${line.seedId} - ${line.prevSeedId}`}
-          type="text"
-          placeholder={`Input ${pos.row + 1} - ${pos.column + 1}`}
-          style={{
-            position: "absolute",
-            top: `${top - 25}px`,
-            left: `${left + 10}px`,
-            width: "100px",
-            zIndex: 2, // Ensure the input is above the lines
-          }}
-        />
+        <>
+          <input
+            value={participant}
+            onChange={(e) => setParticipant(e.target.value)}
+            type="text"
+            style={{
+              position: "absolute",
+              top: `${top - 25}px`,
+              left: `${left + 10}px`,
+              width: "100px",
+              zIndex: 2, // Ensure the input is above the lines
+            }}
+          />
+          {line.prevSeedId && !isBye && (
+            <input
+              value={score}
+              onChange={handleScoreChange}
+              maxLength={3}
+              type="text"
+              style={{
+                position: "absolute",
+                top: `${top - 25}px`,
+                left: `${left + 115}px`,
+                width: "30px",
+                zIndex: 2, // Ensure the input is above the lines
+                textAlign: "center",
+              }}
+            />
+          )}
+        </>
       )}
       <div
+        className="line"
         style={{
           position: "absolute",
           top: `${top}px`,
@@ -67,9 +112,11 @@ const LineDiv = ({
           height: isHorizontal ? "5px" : `${height}px`,
           backgroundColor: "black",
           zIndex: 1, // Ensure the line is behind the inputs
-          cursor: "pointer",
+          cursor: handleLineClick && isHorizontal ? "pointer" : "default",
         }}
-        onClick={(event) => isHorizontal && pos && handleLineClick(pos, event)}
+        onClick={(event) =>
+          isHorizontal && pos && handleLineClick?.(pos, event)
+        }
       />
     </>
   );
@@ -142,7 +189,7 @@ const BracketPage = () => {
             seedId: roundSeedResponse.seedId,
             x1: x,
             y1: nextLineY,
-            x2: x + 120,
+            x2: x + LINE_WIDTH,
             y2: nextLineY,
           },
         ];
@@ -169,7 +216,7 @@ const BracketPage = () => {
           seedId: roundSeedResponse?.seedId,
           x1: line.x2,
           y1: line.y2,
-          x2: line.x2 + 120,
+          x2: line.x2 + LINE_WIDTH,
           y2: line.y2,
         },
       ];
@@ -212,9 +259,18 @@ const BracketPage = () => {
                     ? { row: currPos.row++, column: currPos.column }
                     : undefined
                 }
-                isHorizontal={isLineHorizontal}
                 line={line}
-                handleLineClick={handleLineClick}
+                isBye={
+                  colIndex !== 0
+                    ? isBye(lines[colIndex - 1], line.prevSeedId)
+                    : undefined
+                }
+                isHorizontal={isLineHorizontal}
+                handleLineClick={
+                  isClickable(lines, colIndex + 1, line.seedId)
+                    ? handleLineClick
+                    : undefined
+                }
               />
             );
           })}
@@ -237,7 +293,7 @@ const BracketPage = () => {
           strokeWidth="5"
         />
         <circle
-          cx={initialLine.x2 + 120}
+          cx={initialLine.x2 + LINE_WIDTH}
           cy={initialLine.y2}
           r={5}
           strokeWidth="1"
@@ -272,7 +328,7 @@ const BracketPage = () => {
           let y1;
           if (roundIndex !== 0) {
             const prevSeeds = processedLines[roundIndex - 1].filter(
-              (line) => line.seedId === seedParticipants[i].seed.prevSeed.id
+              (line) => line.seedId === seedParticipants[i].prevSeed.id
             );
 
             y1 =
@@ -286,14 +342,14 @@ const BracketPage = () => {
             }
           }
 
-          const x1 = 30 + roundIndex * 120; // Example calculation for x1
-          const x2 = x1 + 120; // Example calculation for x2
+          const x1 = 30 + roundIndex * LINE_WIDTH; // Example calculation for x1
+          const x2 = x1 + LINE_WIDTH;
           const y2 = y1; // Horizontal line for seeds in the same round
 
           lines.push({
             roundId: rounds[roundIndex].id,
             seedId: seeds[seedIndex].id,
-            prevSeedId: seedParticipants[0].seed.prevSeed?.id ?? undefined,
+            prevSeedId: seedParticipants[i].prevSeed?.id ?? undefined,
             x1,
             y1,
             x2,
@@ -310,11 +366,6 @@ const BracketPage = () => {
           y2 = lines[len - 1].y2 + 5;
           nextRoundLines.push({ x1, y1, x2, y2 });
         }
-        // else {
-        //   x1 = lines[len - 1].x2;
-        //   x2 = lines[len - 1].x2 + 120;
-        //   y1 = y2 = lines[len - 1].y2;
-        // }
       }
       if (!processedLines[roundIndex]) {
         processedLines.splice(roundIndex, 0, []);
@@ -332,6 +383,25 @@ const BracketPage = () => {
   };
 
   const isHorizontal = (line: Line) => line.y1 === line.y2;
+
+  const isBye = (round: Line[], prevSeedId: number | undefined) => {
+    return round.filter((line) => line.seedId === prevSeedId).length === 1;
+  };
+
+  const isClickable = (
+    rounds: Line[][],
+    roundId: number,
+    prevSeedId: number | undefined
+  ) => {
+    if (!rounds[roundId]) {
+      return true;
+    }
+
+    return (
+      rounds[roundId].filter((line) => line.prevSeedId === prevSeedId)
+        .length === 0
+    );
+  };
 
   const getLine = (lines: Line[][], row: number, column: number) => {
     return lines[column].filter((line) => isHorizontal(line))[row];
@@ -394,27 +464,6 @@ const BracketPage = () => {
     console.log("LINES", lines);
   }, [lines]);
 
-  // TODO: BUNU SADECE İLK ROUND İÇİN DEĞİL HEPSİ İÇİN YAPMALI
-  // useEffect(() => {
-  //   if (lines.length === 0 && containerHeight > 0) {
-  //     const numOfLines = bracket.rounds[0].seeds.length;
-  //     const lines = Array.from({ length: numOfLines }, (_, i) => {
-  //       const yPosition = Math.round(
-  //         (containerHeight / (numOfLines + 1)) * (i + 1)
-  //       );
-
-  //       return {
-  //         x1: 30,
-  //         y1: yPosition,
-  //         x2: 150,
-  //         y2: yPosition,
-  //       };
-  //     });
-
-  //     setLines([lines]);
-  //   }
-  // }, [containerHeight, bracket]);
-
   return (
     <div
       style={{
@@ -433,32 +482,53 @@ const BracketPage = () => {
         activeTab={ageActiveTab}
         setActiveTab={setAgeActiveTab}
       />
-      <div
-        ref={containerRef}
-        style={{
-          position: "relative",
-          flex: "1",
-          overflow: "hidden",
-          width: "100%",
-        }}
-        onClick={(event) => resetTempLine(event)}
+      <TransformWrapper
+        initialScale={1}
+        panning={{ excluded: ["input", "line"] }}
       >
-        {renderRounds()}
-        <svg
-          ref={svgRef}
-          width="100%"
-          height={containerHeight}
+        <div
           style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            zIndex: 1,
-            pointerEvents: "none",
+            display: "flex",
+            gap: "10px",
+            marginLeft: "auto",
+            marginRight: "4rem",
           }}
         >
-          {startLine !== null && tempLine && renderTempLine()}
-        </svg>
-      </div>
+          <button>Kaydet</button>
+          <button>Yenile</button>
+        </div>
+        <TransformComponent
+          wrapperStyle={{ width: "100%", height: "100%" }}
+          contentStyle={{ width: "100%", height: "100%" }}
+        >
+          <div
+            ref={containerRef}
+            style={{
+              position: "relative",
+              flex: "1",
+              overflow: "hidden",
+              width: "100%",
+            }}
+            onClick={(event) => resetTempLine(event)}
+          >
+            {renderRounds()}
+            <svg
+              ref={svgRef}
+              width="100%"
+              height={containerHeight}
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                zIndex: 1,
+                pointerEvents: "none",
+              }}
+            >
+              {startLine !== null && tempLine && renderTempLine()}
+            </svg>
+          </div>
+        </TransformComponent>
+      </TransformWrapper>
     </div>
   );
 };

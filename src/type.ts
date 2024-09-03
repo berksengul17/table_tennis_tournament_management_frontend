@@ -52,13 +52,13 @@ export enum AGE_CATEGORY {
 
 export type ISeed = {
   id: number;
-  prevSeed: ISeed;
   // participants: Participant[];
 };
 
 export type SeedParticipant = {
   id: number;
   seed: ISeed;
+  prevSeed: ISeed;
   participant: Participant;
   pindex: number;
   score: number;
