@@ -17,6 +17,25 @@ export const getSeedParticipants = async (
   return [];
 };
 
+export const saveParticipantName = async (
+  seedId: number,
+  pIndex: number,
+  participantName: string
+): Promise<string> => {
+  try {
+    const formData = new FormData();
+    formData.append("seedId", seedId.toString());
+    formData.append("pIndex", pIndex.toString());
+    formData.append("participantName", participantName);
+    const response = await axios.put(`${API_URL}/save-participant`, formData);
+    return response.data;
+  } catch (e: unknown | AxiosError) {
+    handleAxiosError(e);
+  }
+
+  return "";
+};
+
 export const saveScores = async (
   seedId: number,
   p1Score: string,

@@ -71,6 +71,8 @@ export type IRound = {
 
 export type IBracket = {
   id: number;
+  bracketType: "WINNERS" | "LOSERS";
+  ageCategory: AgeCategory;
   rounds: IRound[];
 };
 
@@ -130,25 +132,8 @@ export type Time = {
   endTime: string;
 };
 
-export type GLootSeed = {
-  id: number;
-  name: string;
-  nextMatchId: number | null;
-  tournamentRoundText: string;
-  startTime?: string;
-  state: "NO_SHOW" | "WALK_OVER" | "NO_PARTY" | "DONE" | "SCORE_DONE";
-  participants: GLootParticipant[];
-};
-
-export type GLootParticipant = {
-  id: number;
-  resultText: string;
-  isWinner: boolean;
-  status: "PLAYED" | "NO_SHOW" | "WALK_OVER" | "NO_PARTY" | null;
-  name: string;
-};
-
 export type RoundSeedResponse = {
   roundId: number;
   seedId: number;
+  prevSeedId: number;
 };

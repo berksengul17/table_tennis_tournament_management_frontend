@@ -23,9 +23,14 @@ export function byField(fieldName: string) {
 }
 
 export const getName = (participant: Participant) => {
-  const names = (participant.firstName + " " + participant.lastName).split(" ");
+  const names = (
+    participant.firstName.trim() +
+    " " +
+    participant.lastName.trim()
+  ).split(" ");
   return names
-    .map((name) => name.slice(0, 1).toUpperCase() + name.slice(1))
+    .map((name) => name.slice(0, 1).toUpperCase() + name.slice(1).toLowerCase())
+
     .join(" ");
 };
 

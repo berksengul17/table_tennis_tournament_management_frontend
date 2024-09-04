@@ -1,17 +1,35 @@
-.noBracket {
+.bracketContainer {
   display: flex;
+  flex: 1;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 2rem;
-  margin-top: 5rem;
 }
 
-.noBracket img {
-  width: 80px;
+.tabContainer {
+  display: flex;
+  gap: 30px;
 }
 
-.noBracket p {
-  font-size: 1.5rem;
-  font-weight: 600;
+.buttonContainer {
+  display: flex;
+  gap: 10px;
+  margin-left: auto;
+  margin-right: 4rem;
+  margin-top: 1rem;
+}
+
+.bracket {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+  width: 100%;
+}
+
+.svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  pointer-events: none;
 }

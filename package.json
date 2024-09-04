@@ -20,12 +20,14 @@
     "@tanstack/react-table": "^8.17.3",
     "axios": "^1.7.2",
     "html2canvas": "^1.4.1",
+    "jspdf": "^2.5.1",
     "react": "^18.3.1",
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.52.0",
     "react-router-dom": "^6.23.1",
+    "react-to-pdf": "^1.0.1",
     "react-zoom-pan-pinch": "^3.6.1"
   },
   "devDependencies": {

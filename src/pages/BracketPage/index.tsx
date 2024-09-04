@@ -6,14 +6,27 @@ import { useRef, useEffect, useState, Fragment } from "react";
 import { IBracket, RoundSeedResponse } from "../../type";
 import {
   connectSeeds,
+  createLosersBracket,
   createWinnersBracket,
+  getLosersBracket,
   getParticipantCount,
   getWinnersBracket,
+  refreshBracket,
 } from "../../api/bracketApi";
 import CategoryTabs from "../../components/CategoryTabs";
 import AgeCategoryTabs from "../../components/AgeCategoryTabs";
-import { getSeedParticipants } from "../../api/seedParticipantApi";
+import {
+  getSeedParticipants,
+  saveParticipantName,
+  saveScores,
+} from "../../api/seedParticipantApi";
 import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
+import { getName } from "../../utils";
+import BracketTabs from "../../components/BracketTabs";
+import styles from "./index.module.css";
+import jsPDF from "jspdf";
+import { setOpenAsFont } from "../../set-font";
+import { getAgeCategory } from "../../api/ageCategoryApi";
 
 type Line = {
   roundId?: number;
@@ -34,12 +47,14 @@ const LINE_WIDTH = 150;
 const LineDiv = ({
   pos,
   line,
+  pIndex,
   isBye,
   isHorizontal,
   handleLineClick,
 }: {
   pos?: BracketPos;
   line: Line;
+  pIndex: number;
   isBye?: boolean;
   isHorizontal: boolean;
   handleLineClick?: (pos: BracketPos, event: React.MouseEvent) => void;
@@ -53,10 +68,68 @@ const LineDiv = ({
   const left = Math.min(line.x1, line.x2);
 
   useEffect(() => {
-    console.log(score.length);
-  }, [score]);
+    const fetchSeedParticipant = async () => {
+      if (line.seedId) {
+        const seedParticipants = await getSeedParticipants(line.seedId);
+        if (seedParticipants[pIndex].participant) {
+          const participantName = getName(seedParticipants[pIndex].participant);
+          console.log("fetch", pIndex, participantName);
 
-  const handleScoreChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+          if (line.prevSeedId) {
+            const prevSeedParticipants = await getSeedParticipants(
+              line.prevSeedId
+            );
+            const p1 = prevSeedParticipants.filter(
+              (sp) => getName(sp.participant) === participantName
+            )[0];
+            const p2 = prevSeedParticipants.filter(
+              (sp) => getName(sp.participant) !== participantName
+            )[0];
+            setScore(`${p1.score}-${p2.score}`);
+          }
+          setParticipant(participantName);
+        } else {
+          setParticipant("");
+        }
+      }
+    };
+
+    fetchSeedParticipant();
+  }, [line]);
+
+  // isim boş işe null yap participant id i
+  const saveParticipant = async () => {
+    const newName = await saveParticipantName(
+      line.seedId!,
+      pIndex,
+      participant ?? ""
+    );
+    setParticipant(newName);
+    updateScores(newName, score[0], score[2]);
+  };
+
+  const updateScores = async (
+    participant: string,
+    p1Score: string,
+    p2Score: string
+  ) => {
+    if (line.prevSeedId) {
+      const prevSeedParticipants = await getSeedParticipants(line.prevSeedId);
+      // TODO sadece isim yerine participant ın
+      // kendisi tutulabilir burda da id kullanırım o zaman
+      const prevSeedParticipant = prevSeedParticipants.filter(
+        (sp) => getName(sp.participant) === participant
+      )[0];
+      const prevPIndex = prevSeedParticipant.pindex;
+      await saveScores(
+        line.prevSeedId!,
+        prevPIndex === 0 ? p1Score : p2Score,
+        prevPIndex === 0 ? p2Score : p1Score
+      );
+    }
+  };
+
+  const handleScoreChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value.replace(/[^0-9]/g, "");
 
     if (value.length === 0) {
@@ -65,6 +138,7 @@ const LineDiv = ({
       setScore(`${value}-`);
     } else if (value.length === 2) {
       setScore(`${value[0]}-${value[1]}`);
+      updateScores(participant, value[0], value[1]);
     }
   };
 
@@ -75,6 +149,7 @@ const LineDiv = ({
           <input
             value={participant}
             onChange={(e) => setParticipant(e.target.value)}
+            onBlur={saveParticipant}
             type="text"
             style={{
               position: "absolute",
@@ -128,6 +203,7 @@ const BracketPage = () => {
   const [bracket, setBracket] = useState<IBracket>({} as IBracket);
   const [categoryActiveTab, setCategoryActiveTab] = useState<number>(0);
   const [ageActiveTab, setAgeActiveTab] = useState<number>(0);
+  const [bracketActiveTab, setBracketActiveTab] = useState<number>(0);
   const [containerHeight, setContainerHeight] = useState(0);
   const [startLine, setStartLine] = useState<BracketPos | null>(null);
   const [tempLine, setTempLine] = useState<Coordinate | null>(null);
@@ -166,6 +242,7 @@ const BracketPage = () => {
       let nextLineY = (y1 + y2) / 2;
 
       let roundSeedResponse: RoundSeedResponse;
+
       if (startLineData.seedId && currPosData.seedId) {
         roundSeedResponse = await connectSeeds(
           startLineData.seedId,
@@ -185,8 +262,9 @@ const BracketPage = () => {
           ...(newLines[pos.column + 1] || []),
           { x1: x, y1: y1, x2: x, y2: y2 },
           {
-            roundId: roundSeedResponse.roundId,
-            seedId: roundSeedResponse.seedId,
+            roundId: roundSeedResponse?.roundId,
+            seedId: roundSeedResponse?.seedId,
+            prevSeedId: roundSeedResponse?.prevSeedId,
             x1: x,
             y1: nextLineY,
             x2: x + LINE_WIDTH,
@@ -214,6 +292,7 @@ const BracketPage = () => {
         {
           roundId: roundSeedResponse?.roundId,
           seedId: roundSeedResponse?.seedId,
+          prevSeedId: roundSeedResponse?.prevSeedId,
           x1: line.x2,
           y1: line.y2,
           x2: line.x2 + LINE_WIDTH,
@@ -260,6 +339,12 @@ const BracketPage = () => {
                     : undefined
                 }
                 line={line}
+                pIndex={
+                  rowIndex >= 1 &&
+                  roundLines[rowIndex - 1].seedId === line.seedId
+                    ? 1
+                    : 0
+                }
                 isBye={
                   colIndex !== 0
                     ? isBye(lines[colIndex - 1], line.prevSeedId)
@@ -306,7 +391,12 @@ const BracketPage = () => {
     );
   };
 
-  const processBracket = async (bracket: IBracket) => {
+  const processBracket = async (
+    bracket: IBracket,
+    height: number,
+    lineWidth: number = LINE_WIDTH,
+    lineThickness: number = 5
+  ) => {
     const processedLines: Array<Array<Line>> = [];
 
     const rounds = bracket.rounds;
@@ -317,9 +407,7 @@ const BracketPage = () => {
       const numOfParticipants = await getParticipantCount(bracket.id);
 
       let spaceBetweenSeeds =
-        roundIndex === 0
-          ? Math.round(containerHeight / (numOfParticipants + 1))
-          : 0;
+        roundIndex === 0 ? Math.round(height / (numOfParticipants + 1)) : 0;
 
       for (let seedIndex = 0; seedIndex < seeds.length; seedIndex++) {
         const seedParticipants = await getSeedParticipants(seeds[seedIndex].id);
@@ -342,8 +430,8 @@ const BracketPage = () => {
             }
           }
 
-          const x1 = 30 + roundIndex * LINE_WIDTH; // Example calculation for x1
-          const x2 = x1 + LINE_WIDTH;
+          const x1 = 30 + roundIndex * lineWidth; // Example calculation for x1
+          const x2 = x1 + lineWidth;
           const y2 = y1; // Horizontal line for seeds in the same round
 
           lines.push({
@@ -363,7 +451,7 @@ const BracketPage = () => {
           x1 = lines[len - 2].x2;
           y1 = lines[len - 2].y2;
           x2 = lines[len - 1].x2;
-          y2 = lines[len - 1].y2 + 5;
+          y2 = lines[len - 1].y2 + lineThickness;
           nextRoundLines.push({ x1, y1, x2, y2 });
         }
       }
@@ -407,6 +495,106 @@ const BracketPage = () => {
     return lines[column].filter((line) => isHorizontal(line))[row];
   };
 
+  const handleSave = async () => {
+    let bracketData;
+    if (bracketActiveTab === 0)
+      bracketData = await getWinnersBracket(categoryActiveTab, ageActiveTab);
+    else if (bracketActiveTab === 1)
+      bracketData = await getLosersBracket(categoryActiveTab, ageActiveTab);
+
+    if (bracketData) setBracket(bracketData);
+  };
+
+  const handleRefresh = async () => {
+    setBracket(await refreshBracket(bracket.id));
+  };
+
+  // TODO SONRAKİ SAYFAYA GEÇİŞİ DÜŞÜN
+  const handleDownload = async () => {
+    const pdf = new jsPDF({
+      orientation: "landscape",
+      unit: "px",
+      format: "a4",
+    });
+
+    const width = pdf.internal.pageSize.getWidth();
+    const height = pdf.internal.pageSize.getHeight();
+    const startY = 25;
+    const marginX = 35;
+
+    console.log("lines length", lines.length);
+
+    const pdfBracketLines = await processBracket(
+      bracket,
+      height - startY,
+      (width - marginX) / (lines.length - 1),
+      1
+    );
+
+    setOpenAsFont(pdf);
+    pdf.setLineWidth(2);
+
+    const ageCategoryString = await getAgeCategory(
+      categoryActiveTab,
+      ageActiveTab
+    );
+    const title = `${ageCategoryString} ${
+      bracketActiveTab === 0 ? "Final" : "Consolation"
+    }`;
+
+    pdf.setFontSize(20);
+    pdf.text(title, width / 2, 20, {
+      align: "center",
+    });
+
+    pdf.setFontSize(16);
+    for (
+      let roundIndex = 0;
+      roundIndex < pdfBracketLines.length;
+      roundIndex++
+    ) {
+      for (let i = 0; i < pdfBracketLines[roundIndex].length; i++) {
+        const line = pdfBracketLines[roundIndex][i];
+        let name = "";
+        let p1, p2;
+        if (line.seedId) {
+          const pIndex =
+            i >= 1 && pdfBracketLines[roundIndex][i - 1].seedId === line.seedId
+              ? 1
+              : 0;
+          const seedParticipants = await getSeedParticipants(line.seedId);
+          if (seedParticipants[pIndex].participant) {
+            name = getName(seedParticipants[pIndex].participant);
+            if (line.prevSeedId) {
+              const prevSeedParticipants = await getSeedParticipants(
+                line.prevSeedId
+              );
+              p1 = prevSeedParticipants.filter(
+                (sp) => getName(sp.participant) === name
+              )[0];
+              p2 = prevSeedParticipants.filter(
+                (sp) => getName(sp.participant) !== name
+              )[0];
+            }
+          }
+        }
+
+        pdf.text(name, line.x1 + 10, startY + line.y1 - 5);
+        if (p1 && p2) {
+          pdf.text(
+            `${p1.score}-${p2.score}`,
+            line.x2 - 20,
+            startY + line.y1 - 5
+          );
+        }
+        pdf.line(line.x1, startY + line.y1, line.x2, startY + line.y2);
+      }
+    }
+
+    pdf.setLanguage("tr");
+    pdf.save("ağaç.pdf");
+  };
+
   useEffect(() => {
     setTimeout(() => {
       if (containerRef.current) {
@@ -430,27 +618,33 @@ const BracketPage = () => {
 
   useEffect(() => {
     const processNewBracket = async () => {
-      const lines = await processBracket(bracket);
+      const lines = await processBracket(bracket, containerHeight);
       setLines(lines);
     };
 
     if (Object.keys(bracket).length !== 0) {
       processNewBracket();
     }
-  }, [bracket]);
+  }, [bracket, containerHeight]);
 
   useEffect(() => {
     const initBracket = async () => {
-      let b = await getWinnersBracket(categoryActiveTab, ageActiveTab);
+      let b =
+        bracketActiveTab === 0
+          ? await getWinnersBracket(categoryActiveTab, ageActiveTab)
+          : await getLosersBracket(categoryActiveTab, ageActiveTab);
       if (b === null) {
-        b = await createWinnersBracket(categoryActiveTab, ageActiveTab);
+        b =
+          bracketActiveTab === 0
+            ? await createWinnersBracket(categoryActiveTab, ageActiveTab)
+            : await createLosersBracket(categoryActiveTab, ageActiveTab);
       }
 
       setBracket(b);
     };
 
     initBracket();
-  }, [categoryActiveTab, ageActiveTab]);
+  }, [categoryActiveTab, ageActiveTab, bracketActiveTab]);
 
   useEffect(() => {
     if (startLine !== null) {
@@ -465,37 +659,29 @@ const BracketPage = () => {
   }, [lines]);
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flex: 1,
-        flexDirection: "column",
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
+    <div className={styles.bracketContainer}>
       <CategoryTabs
         activeTab={categoryActiveTab}
         setActiveTab={setCategoryActiveTab}
       />
-      <AgeCategoryTabs
-        activeTab={ageActiveTab}
-        setActiveTab={setAgeActiveTab}
-      />
+      <div className={styles.tabContainer}>
+        <AgeCategoryTabs
+          activeTab={ageActiveTab}
+          setActiveTab={setAgeActiveTab}
+        />
+        <BracketTabs
+          activeTab={bracketActiveTab}
+          setActiveTab={setBracketActiveTab}
+        />
+      </div>
       <TransformWrapper
         initialScale={1}
         panning={{ excluded: ["input", "line"] }}
       >
-        <div
-          style={{
-            display: "flex",
-            gap: "10px",
-            marginLeft: "auto",
-            marginRight: "4rem",
-          }}
-        >
-          <button>Kaydet</button>
-          <button>Yenile</button>
+        <div className={styles.buttonContainer}>
+          <button onClick={handleSave}>Kaydet</button>
+          <button onClick={handleRefresh}>Yenile</button>
+          <button onClick={handleDownload}>Agacı İndir</button>
         </div>
         <TransformComponent
           wrapperStyle={{ width: "100%", height: "100%" }}
@@ -503,12 +689,7 @@ const BracketPage = () => {
         >
           <div
             ref={containerRef}
-            style={{
-              position: "relative",
-              flex: "1",
-              overflow: "hidden",
-              width: "100%",
-            }}
+            className={styles.bracket}
             onClick={(event) => resetTempLine(event)}
           >
             {renderRounds()}
@@ -516,13 +697,7 @@ const BracketPage = () => {
               ref={svgRef}
               width="100%"
               height={containerHeight}
-              style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                zIndex: 1,
-                pointerEvents: "none",
-              }}
+              className={styles.svg}
             >
               {startLine !== null && tempLine && renderTempLine()}
             </svg>

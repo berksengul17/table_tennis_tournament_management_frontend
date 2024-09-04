@@ -20,21 +20,6 @@ export const getWinnersBracket = async (
   return null;
 };
 
-export const getParticipantCount = async (
-  bracketId: number
-): Promise<number> => {
-  try {
-    const response = await axios.get(
-      `${API_URL}/get-participant-count/${bracketId}`
-    );
-    return response.data;
-  } catch (e: unknown | AxiosError) {
-    handleAxiosError(e);
-  }
-
-  return 0;
-};
-
 export const createWinnersBracket = async (
   category: number,
   age: number
@@ -51,25 +36,29 @@ export const createWinnersBracket = async (
   return {} as IBracket;
 };
 
-export const advanceToNextRound = async (
-  participantId: string,
-  bracketId: number,
-  roundId: number
+export const getLosersBracket = async (
+  category: number,
+  age: number
+): Promise<IBracket | null> => {
+  try {
+    const response = await axios.get(
+      `${API_URL}/get-losers-bracket/${category}/${age}`
+    );
+    return response.data ? response.data : null;
+  } catch (error: unknown | AxiosError) {
+    handleAxiosError(error);
+  }
+
+  return null;
+};
+
+export const createLosersBracket = async (
+  category: number,
+  age: number
 ): Promise<IBracket> => {
   try {
-    const formData = new FormData();
-    formData.append("participantId", participantId);
-    formData.append("bracketId", bracketId.toString());
-    formData.append("roundId", roundId.toString());
-
-    const response = await axios.put(
-      `${API_URL}/advance-to-next-round`,
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      }
+    const response = await axios.post(
+      `${API_URL}/create-losers-bracket/${category}/${age}`
     );
     return response.data;
   } catch (error: unknown | AxiosError) {
@@ -79,15 +68,17 @@ export const advanceToNextRound = async (
   return {} as IBracket;
 };
 
-export const getNextSeedId = async (seedId: number) => {
+export const refreshBracket = async (bracketId: number): Promise<IBracket> => {
   try {
-    const response = await axios.get(`${API_URL}/get-next-seed-id`, {
-      params: { seedId },
-    });
+    const response = await axios.post(
+      `${API_URL}/refresh-bracket/${bracketId}`
+    );
     return response.data;
   } catch (e: unknown | AxiosError) {
     handleAxiosError(e);
   }
+
+  return {} as IBracket;
 };
 
 export const connectSeeds = async (
@@ -107,4 +98,19 @@ export const connectSeeds = async (
   }
 
   return {} as RoundSeedResponse;
+};
+
+export const getParticipantCount = async (
+  bracketId: number
+): Promise<number> => {
+  try {
+    const response = await axios.get(
+      `${API_URL}/get-participant-count/${bracketId}`
+    );
+    return response.data;
+  } catch (e: unknown | AxiosError) {
+    handleAxiosError(e);
+  }
+
+  return 0;
 };
