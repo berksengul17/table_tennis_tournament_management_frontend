@@ -2,8 +2,10 @@
 // yoksa rastgele sırada birleştirince bozuluyor
 // TODO: final maçı çizgisine tıklanabilir bir şekilde
 // buna nasıl bir kontrol yaparım bilmiyorum
-import { useRef, useEffect, useState, Fragment } from "react";
-import { IBracket, RoundSeedResponse } from "../../type";
+import jsPDF from "jspdf";
+import { Fragment, useEffect, useRef, useState } from "react";
+import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
+import { getAgeCategory } from "../../api/ageCategoryApi";
 import {
   connectSeeds,
   createLosersBracket,
@@ -13,20 +15,18 @@ import {
   getWinnersBracket,
   refreshBracket,
 } from "../../api/bracketApi";
-import CategoryTabs from "../../components/CategoryTabs";
-import AgeCategoryTabs from "../../components/AgeCategoryTabs";
 import {
   getSeedParticipants,
   saveParticipantName,
   saveScores,
 } from "../../api/seedParticipantApi";
-import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
-import { getName } from "../../utils";
+import AgeCategoryTabs from "../../components/AgeCategoryTabs";
 import BracketTabs from "../../components/BracketTabs";
-import styles from "./index.module.css";
-import jsPDF from "jspdf";
+import CategoryTabs from "../../components/CategoryTabs";
 import { setOpenAsFont } from "../../set-font";
-import { getAgeCategory } from "../../api/ageCategoryApi";
+import { IBracket, RoundSeedResponse } from "../../type";
+import { getName } from "../../utils";
+import styles from "./index.module.css";
 
 type Line = {
   roundId?: number;
