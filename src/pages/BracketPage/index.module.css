@@ -2,8 +2,8 @@
   display: flex;
   flex: 1;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
+  overflow: hidden;
 }
 
 .tabContainer {
@@ -22,7 +22,6 @@
 .bracket {
   position: relative;
   flex: 1;
-  overflow: hidden;
   width: 100%;
 }
 

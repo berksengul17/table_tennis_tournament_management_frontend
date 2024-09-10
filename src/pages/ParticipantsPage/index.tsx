@@ -1,20 +1,20 @@
 import { ColumnFiltersState, createColumnHelper } from "@tanstack/react-table";
 import React, { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { getAgeListByCategoryAndGender } from "../../api/ageCategoryApi";
+import { getHotelOptions } from "../../api/hotelApi";
 import {
   getParticipants,
   updateParticipant,
 } from "../../api/participantAgeCategoryApi";
+import { deleteParticipant, register } from "../../api/participantApi";
 import Table from "../../components/Table";
 import TableEditCell from "../../components/TableEditCell";
 import { useAgeCategory } from "../../context/AgeCategoryProvider";
 import { useAuth } from "../../context/AuthProvider";
 import { Hotel, Option, ParticipantAgeCategoryDTO } from "../../type";
-import styles from "./index.module.css";
-import { deleteParticipant, register } from "../../api/participantApi";
 import { genderOptions, participantInputsDefaultValues } from "../../utils";
-import { useNavigate } from "react-router-dom";
-import { getHotelOptions } from "../../api/hotelApi";
+import styles from "./index.module.css";
 
 type EditedRow = {
   [key: string]: {

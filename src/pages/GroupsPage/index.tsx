@@ -2,29 +2,28 @@ import React, { useCallback, useEffect, useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import {
-  createGroupsForAgeCategoryAndAge,
-  getGroupsForAgeCategoryAndAge,
-  saveGroups,
-} from "../../api/groupApi";
-import AgeCategoryTabs from "../../components/AgeCategoryTabs";
-import { useAuth } from "../../context/AuthProvider";
-import { Group, GroupTableTime, Table, Time } from "../../type";
-import GroupCard from "./components/GroupCard";
-import NewGroupDropArea from "./components/NewGroupDropArea";
-import styles from "./index.module.css";
-import noDataImg from "../../assets/images/ban-solid.svg";
-import CategoryTabs from "../../components/CategoryTabs";
-import {
   downloadAllGroupTableTimePdf,
   downloadGroupsPdf,
   downloadGroupTableTimePdf,
 } from "../../api/documentApi";
+import {
+  createGroupsForAgeCategoryAndAge,
+  getGroupsForAgeCategoryAndAge,
+  saveGroups,
+} from "../../api/groupApi";
 import {
   assignGroupsToTableAndTime,
   saveGroupTableTimeList,
 } from "../../api/groupTableTimeApi";
 import { getAllTables } from "../../api/tableApi";
 import { getAllTimes } from "../../api/timeApi";
+import AgeCategoryTabs from "../../components/AgeCategoryTabs";
+import CategoryTabs from "../../components/CategoryTabs";
+import { useAuth } from "../../context/AuthProvider";
+import { Group, GroupTableTime, Table, Time } from "../../type";
+import GroupCard from "./components/GroupCard";
+import NewGroupDropArea from "./components/NewGroupDropArea";
+import styles from "./index.module.css";
 
 const GroupsPage = ({
   setShowMatches,
@@ -129,8 +128,13 @@ const GroupsPage = ({
           const participants = [...group.participants];
           const [draggedParticipant] = participants.splice(dragIndex, 1);
           participants.splice(hoverIndex, 0, draggedParticipant);
+          console.log("move", participants);
 
-          participants.forEach((p, index) => (p.groupRanking = index + 1));
+          participants.forEach((p, index) => {
+            if (p) {
+              p.groupRanking = index + 1;
+            }
+          });
 
           return prevGroups.map((g) =>
             g.id === groupId

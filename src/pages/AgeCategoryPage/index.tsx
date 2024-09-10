@@ -1,14 +1,17 @@
 import { createColumnHelper } from "@tanstack/react-table";
 import { useEffect, useMemo, useState } from "react";
-import { getParticipants } from "../../api/participantAgeCategoryApi";
+import { downloadAgeCategoriesPdf } from "../../api/documentApi";
+import {
+  getParticipants,
+  removeParticipantFromAgeCategory,
+  updateParticipant,
+} from "../../api/participantAgeCategoryApi";
 import AgeCategoryTabs from "../../components/AgeCategoryTabs";
 import CategoryTabs from "../../components/CategoryTabs";
 import Table from "../../components/Table";
 import TableEditCell from "../../components/TableEditCell";
 import { ParticipantAgeCategoryDTO } from "../../type";
 import styles from "./index.module.css";
-import { downloadAgeCategoriesPdf } from "../../api/documentApi";
-import { useAuth } from "../../context/AuthProvider";
 
 const columnHelper = createColumnHelper<ParticipantAgeCategoryDTO>();
 
@@ -135,6 +138,43 @@ function AgeCategoryPage({
     await downloadAgeCategoriesPdf();
   };
 
+  const updateRow = async (
+    participantAgeCategory: any & { fullName: string }
+  ) => {
+    let firstName = participantAgeCategory.firstName.trim();
+    let lastName = participantAgeCategory.lastName.trim();
+    if (participantAgeCategory.fullName) {
+      participantAgeCategory.fullName = participantAgeCategory.fullName.trim();
+      const names = participantAgeCategory.fullName.split(" ");
+      firstName = names.slice(0, names.length - 1).join(" ");
+      lastName = names[names.length - 1];
+    }
+
+    const updatedData: ParticipantAgeCategoryDTO = {
+      ...participantAgeCategory,
+      firstName,
+      lastName,
+    };
+
+    const updatedParticipant = await updateParticipant(updatedData);
+
+    if (updatedParticipant != null) {
+      setParticipants((old) =>
+        old.map((p) => (p.id === updatedData.id ? updatedParticipant : p))
+      );
+    }
+  };
+
+  const removeRow = async (participantAgeCategoryId: number) => {
+    await removeParticipantFromAgeCategory(participantAgeCategoryId);
+
+    setParticipants((old) => [
+      ...old.filter(
+        (participant) => participant.id !== participantAgeCategoryId
+      ),
+    ]);
+  };
+
   // useEffect(() => {
   //   // fetch participants
   //   (async () => {
@@ -180,6 +220,8 @@ function AgeCategoryPage({
             columns={columns}
             data={participants}
             setData={setParticipants}
+            updateRow={updateRow}
+            removeRow={removeRow}
           />
         </div>
       )}

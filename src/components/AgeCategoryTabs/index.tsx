@@ -14,9 +14,18 @@ const AgeTabs = ({
   const { ageList } = useAgeCategory();
   const [tabs, setTabs] = useState<JSX.Element[]>([]);
   useEffect(() => {
+    console.log("ageList", ageList);
+
     setTabs([]);
     for (let i = 0; i < ageList.length; i++) {
-      setTabs((prevTabs) => [...prevTabs, <Tab key={i} label={ageList[i]} />]);
+      setTabs((prevTabs) => [
+        ...prevTabs,
+        <Tab
+          key={i}
+          label={ageList[i]}
+          style={{ display: ageList[i] === "" ? "none" : "block" }}
+        />,
+      ]);
     }
   }, [ageList]);
 

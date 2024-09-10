@@ -52,3 +52,15 @@ export const updateParticipant = async (
 
   return null;
 };
+
+export const removeParticipantFromAgeCategory = async (
+  participantAgeCategoryId: number
+): Promise<void> => {
+  try {
+    await axios.delete(
+      `${API_URL}/remove-from-age-category/${participantAgeCategoryId}`
+    );
+  } catch (e: unknown | AxiosError) {
+    handleAxiosError(e);
+  }
+};

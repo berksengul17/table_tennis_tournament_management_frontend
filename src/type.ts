@@ -22,8 +22,8 @@ export type ParticipantInputs = Omit<Participant, "id"> & {
 
 export type AgeCategory = {
   id: number;
-  category: number;
-  age: number;
+  category: string;
+  age: string;
 };
 
 export type ParticipantAgeCategoryDTO = {
@@ -41,14 +41,6 @@ export type Option = {
 export type TableEditedRows = {
   [key: string]: boolean;
 };
-
-export enum AGE_CATEGORY {
-  FORTY_TO_FORTY_NINE = "40-49",
-  FIFTY_TO_FIFTY_NINE = "50-59",
-  SIXTY_TO_SIXTY_FOUR = "60-64",
-  SIXTY_FIVE_TO_SIXTY_NINE = "65-69",
-  SEVENTY_PLUS = "70+",
-}
 
 export type ISeed = {
   id: number;

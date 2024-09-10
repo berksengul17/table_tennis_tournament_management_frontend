@@ -208,6 +208,8 @@ const BracketPage = () => {
   const [startLine, setStartLine] = useState<BracketPos | null>(null);
   const [tempLine, setTempLine] = useState<Coordinate | null>(null);
   const [lines, setLines] = useState<Line[][]>([]);
+  const [bracketWidth, setBracketWidth] = useState(0);
+  const [bracketHeight, setBracketHeight] = useState(0);
 
   const handleLineClick = async (pos: BracketPos, event: React.MouseEvent) => {
     //event.stopPropagation();
@@ -393,7 +395,7 @@ const BracketPage = () => {
 
   const processBracket = async (
     bracket: IBracket,
-    height: number,
+    space: number = 50,
     lineWidth: number = LINE_WIDTH,
     lineThickness: number = 5
   ) => {
@@ -406,8 +408,7 @@ const BracketPage = () => {
       const seeds = rounds[roundIndex].seeds;
       const numOfParticipants = await getParticipantCount(bracket.id);
 
-      let spaceBetweenSeeds =
-        roundIndex === 0 ? Math.round(height / (numOfParticipants + 1)) : 0;
+      let spaceBetweenSeeds = roundIndex === 0 ? space : 0; //Math.round(height / (numOfParticipants + 1)) : 0;
 
       for (let seedIndex = 0; seedIndex < seeds.length; seedIndex++) {
         const seedParticipants = await getSeedParticipants(seeds[seedIndex].id);
@@ -518,18 +519,22 @@ const BracketPage = () => {
     });
 
     const width = pdf.internal.pageSize.getWidth();
-    const height = pdf.internal.pageSize.getHeight();
-    const startY = 25;
+    const firstPageStartY = 25;
+    const startY = 5;
     const marginX = 35;
+    // [{seedId: 275, page: 2, y1: 30, y2: 30}, {seedId: 275, page: 2, y1: 50, y2: 50}]
+    const lineYMappings = [];
 
     console.log("lines length", lines.length);
 
     const pdfBracketLines = await processBracket(
       bracket,
-      height - startY,
+      30,
       (width - marginX) / (lines.length - 1),
       1
     );
+
+    console.log("pdf lines", pdfBracketLines);
 
     setOpenAsFont(pdf);
     pdf.setLineWidth(2);
@@ -548,12 +553,20 @@ const BracketPage = () => {
     });
 
     pdf.setFontSize(16);
+
+    let currPage = 1;
+    const initialMaxLinesPerPage = 12;
+    const maxLinesPerPage = 14;
+    let linesPerPage = initialMaxLinesPerPage;
+
     for (
       let roundIndex = 0;
       roundIndex < pdfBracketLines.length;
       roundIndex++
     ) {
       for (let i = 0; i < pdfBracketLines[roundIndex].length; i++) {
+        if (currPage > 1 && linesPerPage === initialMaxLinesPerPage)
+          linesPerPage = 14;
         const line = pdfBracketLines[roundIndex][i];
         let name = "";
         let p1, p2;
@@ -587,8 +600,82 @@ const BracketPage = () => {
             startY + line.y1 - 5
           );
         }
-        pdf.line(line.x1, startY + line.y1, line.x2, startY + line.y2);
+        let y1 = line.y1;
+        let y2 = line.y2;
+
+        if (roundIndex > 0) {
+          const prevSeeds = pdfBracketLines[roundIndex - 1]
+            .map((prevLine, index) => {
+              if (prevLine.seedId === line.prevSeedId) {
+                return { index, line };
+              }
+            })
+            .filter((prevSeed) => prevSeed !== undefined);
+
+          console.log("prev seeds", prevSeeds);
+
+          if (prevSeeds[0]) {
+            let index = prevSeeds[0].index + 1 - initialMaxLinesPerPage;
+            let prevSeedPage = index > 0 ? 2 : 1;
+            while (index > maxLinesPerPage) {
+              index -= maxLinesPerPage;
+              prevSeedPage++;
+            }
+            pdf.setPage(prevSeedPage);
+
+            const lineIndex =
+              prevSeedPage > 1
+                ? initialMaxLinesPerPage - 1 + (prevSeedPage - 2) * linesPerPage
+                : 0;
+
+            console.log("line index", lineIndex);
+
+            y1 = y1 - pdfBracketLines[roundIndex - 1][lineIndex].y1;
+            y2 = y2 - pdfBracketLines[roundIndex - 1][lineIndex].y2;
+
+            console.log(
+              "prev y1 y2",
+              pdfBracketLines[roundIndex - 1][lineIndex].y1,
+              pdfBracketLines[roundIndex - 1][lineIndex].y2
+            );
+
+            if (prevSeedPage > 1) {
+              y1 += startY;
+              y2 += startY;
+            } else {
+              y1 += firstPageStartY;
+              y2 += firstPageStartY;
+            }
+          }
+        } else {
+          if (currPage > 1) {
+            const lineIndex =
+              currPage > 1
+                ? initialMaxLinesPerPage - 1 + (currPage - 2) * linesPerPage
+                : 0;
+
+            y1 = y1 - pdfBracketLines[roundIndex][lineIndex].y1 + startY;
+            y2 = y2 - pdfBracketLines[roundIndex][lineIndex].y2 + startY;
+          } else {
+            y1 += firstPageStartY;
+            y2 += firstPageStartY;
+          }
+        }
+
+        pdf.line(line.x1, y1, line.x2, y2);
+
+        const lineIndexInCurrPage =
+          currPage > 1
+            ? i - initialMaxLinesPerPage - (currPage - 2) * maxLinesPerPage
+            : i;
+        if ((lineIndexInCurrPage + 1) % linesPerPage == 0) {
+          pdf.addPage();
+          currPage++;
+        }
       }
+      currPage = 1;
+      linesPerPage = initialMaxLinesPerPage;
+      pdf.setPage(currPage);
     }
 
     pdf.setLanguage("tr");
@@ -618,7 +705,7 @@ const BracketPage = () => {
 
   useEffect(() => {
     const processNewBracket = async () => {
-      const lines = await processBracket(bracket, containerHeight);
+      const lines = await processBracket(bracket);
       setLines(lines);
     };
 
@@ -655,7 +742,10 @@ const BracketPage = () => {
   }, [startLine]);
 
   useEffect(() => {
-    console.log("LINES", lines);
+    if (lines.length > 0) {
+      setBracketWidth((lines.length + 1) * LINE_WIDTH);
+      setBracketHeight((lines[0].length + 1) * 50);
+    }
   }, [lines]);
 
   return (
@@ -684,8 +774,15 @@ const BracketPage = () => {
           <button onClick={handleDownload}>Agacı İndir</button>
         </div>
         <TransformComponent
-          wrapperStyle={{ width: "100%", height: "100%" }}
-          contentStyle={{ width: "100%", height: "100%" }}
+          wrapperStyle={{
+            width: bracketWidth,
+            height: bracketHeight,
+            marginRight: "auto",
+          }}
+          contentStyle={{
+            width: bracketWidth,
+            height: bracketHeight,
+          }}
         >
           <div
             ref={containerRef}
