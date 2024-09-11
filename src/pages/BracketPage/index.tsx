@@ -11,7 +11,6 @@ import {
   createLosersBracket,
   createWinnersBracket,
   getLosersBracket,
-  getParticipantCount,
   getWinnersBracket,
   refreshBracket,
 } from "../../api/bracketApi";
@@ -208,10 +207,11 @@ const BracketPage = () => {
   const [startLine, setStartLine] = useState<BracketPos | null>(null);
   const [tempLine, setTempLine] = useState<Coordinate | null>(null);
   const [lines, setLines] = useState<Line[][]>([]);
-  const [bracketWidth, setBracketWidth] = useState(0);
   const [bracketHeight, setBracketHeight] = useState(0);
 
   const handleLineClick = async (pos: BracketPos, event: React.MouseEvent) => {
+    console.log("line clicked");
+
     //event.stopPropagation();
     const rect = containerRef.current!.getBoundingClientRect();
 
@@ -223,6 +223,8 @@ const BracketPage = () => {
         y: event.clientY - rect.top,
       });
     } else {
+      console.log("else", pos, startLine);
+
       if (
         pos.column !== startLine.column ||
         (pos.column === startLine.column &&
@@ -230,6 +232,8 @@ const BracketPage = () => {
           pos.row !== startLine.row - 1)
       )
         return;
+
+      console.log("after if");
 
       const startLineData = getLine(lines, startLine.row, startLine.column);
       const currPosData = getLine(lines, pos.row, pos.column);
@@ -406,9 +410,8 @@ const BracketPage = () => {
       const lines: Line[] = [];
       const nextRoundLines: Line[] = [];
       const seeds = rounds[roundIndex].seeds;
-      const numOfParticipants = await getParticipantCount(bracket.id);
 
-      let spaceBetweenSeeds = roundIndex === 0 ? space : 0; //Math.round(height / (numOfParticipants + 1)) : 0;
+      let spaceBetweenSeeds = roundIndex === 0 ? space : 0;
 
       for (let seedIndex = 0; seedIndex < seeds.length; seedIndex++) {
         const seedParticipants = await getSeedParticipants(seeds[seedIndex].id);
@@ -519,13 +522,10 @@ const BracketPage = () => {
     });
 
     const width = pdf.internal.pageSize.getWidth();
-    const firstPageStartY = 25;
-    const startY = 5;
+    const height = pdf.internal.pageSize.getHeight();
+    const firstPageStartY = 20;
+    const startY = 20;
     const marginX = 35;
-    // [{seedId: 275, page: 2, y1: 30, y2: 30}, {seedId: 275, page: 2, y1: 50, y2: 50}]
-    const lineYMappings = [];
-
-    console.log("lines length", lines.length);
 
     const pdfBracketLines = await processBracket(
       bracket,
@@ -555,7 +555,7 @@ const BracketPage = () => {
     pdf.setFontSize(16);
 
     let currPage = 1;
-    const initialMaxLinesPerPage = 12;
+    const initialMaxLinesPerPage = 14;
     const maxLinesPerPage = 14;
     let linesPerPage = initialMaxLinesPerPage;
 
@@ -603,55 +603,75 @@ const BracketPage = () => {
         let y1 = line.y1;
         let y2 = line.y2;
 
+        console.log(`${roundIndex} : ${i}`, line);
+
+        let prevSeedPage = 1;
         if (roundIndex > 0) {
-          const prevSeeds = pdfBracketLines[roundIndex - 1]
-            .map((prevLine, index) => {
-              if (prevLine.seedId === line.prevSeedId) {
-                return { index, line };
+          // vertical line
+          if (y1 !== y2) {
+            if (y1 > height) {
+              let page = 1;
+              while (y1 > height) {
+                y1 -= height;
+                page++;
               }
-            })
-            .filter((prevSeed) => prevSeed !== undefined);
-
-          console.log("prev seeds", prevSeeds);
-
-          if (prevSeeds[0]) {
-            let index = prevSeeds[0].index + 1 - initialMaxLinesPerPage;
-            let prevSeedPage = index > 0 ? 2 : 1;
-            while (index > maxLinesPerPage) {
-              index -= maxLinesPerPage;
-              prevSeedPage++;
+              y1 -= 3.5;
+              y2 = y2 - height * (page - 1) - 3.5;
+              pdf.setPage(page);
             }
-            pdf.setPage(prevSeedPage);
+          } else {
+            const prevSeeds = pdfBracketLines[roundIndex - 1]
+              .map((prevLine, index) => {
+                if (prevLine.seedId === line.prevSeedId) {
+                  return { index, prevLine };
+                }
+              })
+              .filter((prevSeed) => prevSeed !== undefined);
 
-            const lineIndex =
-              prevSeedPage > 1
-                ? initialMaxLinesPerPage - 1 + (prevSeedPage - 2) * linesPerPage
-                : 0;
+            if (prevSeeds[0]) {
+              let index = prevSeeds[0].index + 1 - initialMaxLinesPerPage;
+              prevSeedPage = index > 0 ? 2 : 1;
+              while (index > maxLinesPerPage) {
+                index -= maxLinesPerPage;
+                prevSeedPage++;
+              }
 
-            console.log("line index", lineIndex);
+              pdf.setPage(prevSeedPage);
 
-            y1 = y1 - pdfBracketLines[roundIndex - 1][lineIndex].y1;
-            y2 = y2 - pdfBracketLines[roundIndex - 1][lineIndex].y2;
+              let y;
 
-            console.log(
-              "prev y1 y2",
-              pdfBracketLines[roundIndex - 1][lineIndex].y1,
-              pdfBracketLines[roundIndex - 1][lineIndex].y2
-            );
+              if (prevSeeds.length === 2) {
+                y = (prevSeeds[0].prevLine.y1 + prevSeeds[1].prevLine.y1) / 2;
+              } else if (prevSeeds.length === 1) {
+                y = prevSeeds[0].prevLine.y1;
+              }
 
-            if (prevSeedPage > 1) {
-              y1 += startY;
-              y2 += startY;
-            } else {
-              y1 += firstPageStartY;
-              y2 += firstPageStartY;
+              if (y !== undefined) {
+                y =
+                  y + startY > height
+                    ? Math.ceil(y - 4 - (prevSeedPage - 1) * height)
+                    : y;
+
+                y1 = y2 = y;
+              }
             }
+          }
+          if (prevSeedPage > 1) {
+            y1 += startY;
+            y2 += startY;
+          } else {
+            y1 += firstPageStartY;
+            y2 += firstPageStartY;
+          }
+
+          if (roundIndex === 4 && i === 0) {
+            console.log("v", y1, y2);
           }
         } else {
           if (currPage > 1) {
             const lineIndex =
               currPage > 1
-                ? initialMaxLinesPerPage - 1 + (currPage - 2) * linesPerPage
+                ? initialMaxLinesPerPage + (currPage - 2) * linesPerPage
                 : 0;
 
             y1 = y1 - pdfBracketLines[roundIndex][lineIndex].y1 + startY;
@@ -668,7 +688,8 @@ const BracketPage = () => {
           currPage > 1
             ? i - initialMaxLinesPerPage - (currPage - 2) * maxLinesPerPage
             : i;
-        if ((lineIndexInCurrPage + 1) % linesPerPage == 0) {
+
+        if (roundIndex === 0 && (lineIndexInCurrPage + 1) % linesPerPage == 0) {
           pdf.addPage();
           currPage++;
         }
@@ -743,7 +764,6 @@ const BracketPage = () => {
 
   useEffect(() => {
     if (lines.length > 0) {
-      setBracketWidth((lines.length + 1) * LINE_WIDTH);
       setBracketHeight((lines[0].length + 1) * 50);
     }
   }, [lines]);
@@ -775,12 +795,12 @@ const BracketPage = () => {
         </div>
         <TransformComponent
           wrapperStyle={{
-            width: bracketWidth,
+            width: "100%",
             height: bracketHeight,
             marginRight: "auto",
           }}
           contentStyle={{
-            width: bracketWidth,
+            width: "100%",
             height: bracketHeight,
           }}
         >
