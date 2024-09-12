@@ -54,8 +54,8 @@ export const participantInputsDefaultValues: Omit<ParticipantInputs, "rating"> =
   };
 
 export const genderOptions = [
-  { value: "0", label: "Erkek", categories: ["Erkek", "Karışık"] },
-  { value: "1", label: "Kadın", categories: ["Kadın", "Karışık"] },
+  { value: "0", label: "Erkek", categories: ["Erkek", "Çiftler"] },
+  { value: "1", label: "Kadın", categories: ["Kadın", "Çiftler"] },
 ];
 
 export const yesNoOptions = [

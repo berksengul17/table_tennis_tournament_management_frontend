@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useDrag, useDrop } from "react-dnd";
+import { isCategoryDouble } from "../../../../api/ageCategoryApi";
+import { getParticipant } from "../../../../api/participantAgeCategoryApi";
 import { useAuth } from "../../../../context/AuthProvider";
 import { Group, Participant } from "../../../../type";
-import { getParticipant } from "../../../../api/participantAgeCategoryApi";
 
 type GroupMemberProps = {
   participant: Participant;
@@ -24,6 +25,7 @@ const GroupMember: React.FC<GroupMemberProps> = ({
   const { isAdminDashboard } = useAuth();
   const ref = useRef<HTMLParagraphElement>(null);
   const [pairName, setPairName] = useState<string>("");
+  const [isDouble, setDouble] = useState<boolean>(false);
   const [{ isDragging }, drag] = useDrag({
     type: "participant",
     item: { id: participant.id, group, index },
@@ -77,9 +79,18 @@ const GroupMember: React.FC<GroupMemberProps> = ({
 
       setPairName(fetchedName ?? "");
     };
+    if (isDouble) {
+      fetchPairName();
+    }
+  }, [participant.id, isDouble]);
 
-    fetchPairName();
-  }, [participant.id]);
+  useEffect(() => {
+    const fetchIsDouble = async () => {
+      setDouble(await isCategoryDouble(group.ageCategory.category));
+    };
+
+    fetchIsDouble();
+  }, [group]);
 
   const name = useMemo(() => {
     const names = (participant?.firstName + " " + participant?.lastName).split(

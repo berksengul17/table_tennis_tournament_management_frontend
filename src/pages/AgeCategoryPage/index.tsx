@@ -44,6 +44,7 @@ function AgeCategoryPage({
             .join(" ");
         },
         {
+          id: "fullName",
           header: "Ad-Soyad",
           meta: {
             type: "text",
@@ -84,26 +85,6 @@ function AgeCategoryPage({
           type: "text",
         },
       }),
-      // columnHelper.accessor("category", {
-      //   header: "Kategorisi",
-      //   meta: {
-      //     type: "select",
-      //     options: categories.map((category, index) => ({
-      //       value: index.toString(),
-      //       label: category,
-      //     })),
-      //   },
-      // }),
-      // columnHelper.accessor("age", {
-      //   header: "Yaş",
-      //   meta: {
-      //     type: "select",
-      //     options: ageList.map((age, index) => ({
-      //       value: index.toString(),
-      //       label: age,
-      //     })),
-      //   },
-      // }),
       columnHelper.accessor(
         (row) => {
           const names = row.pairName.split(" ");
@@ -112,6 +93,7 @@ function AgeCategoryPage({
             .join(" ");
         },
         {
+          id: "pairName",
           header: "Eşi",
           meta: {
             type: "text",
@@ -141,6 +123,8 @@ function AgeCategoryPage({
   const updateRow = async (
     participantAgeCategory: any & { fullName: string }
   ) => {
+    console.log("participant age category", participantAgeCategory);
+
     let firstName = participantAgeCategory.firstName.trim();
     let lastName = participantAgeCategory.lastName.trim();
     if (participantAgeCategory.fullName) {
@@ -174,22 +158,6 @@ function AgeCategoryPage({
       ),
     ]);
   };
-
-  // useEffect(() => {
-  //   // fetch participants
-  //   (async () => {
-  //     let categories = await getAgeCategories();
-  //     if (categories.length == 0) {
-  //       categories = await createAgeCategories();
-  //     }
-
-  //     setAgeCategories(categories);
-  //   })();
-
-  //   return () => {
-  //     setAgeCategories([]);
-  //   };
-  // }, []);
 
   useEffect(() => {
     (async () => {

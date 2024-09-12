@@ -69,3 +69,18 @@ export const getAgeListByCategoryAndGender = async (
 
   return [];
 };
+
+export const isCategoryDouble = async (category: string): Promise<boolean> => {
+  try {
+    const response = await axios.get(`${API_URL}/is-double`, {
+      params: {
+        category,
+      },
+    });
+    return response.data;
+  } catch (error: unknown | AxiosError) {
+    handleAxiosError(error);
+  }
+
+  return false;
+};

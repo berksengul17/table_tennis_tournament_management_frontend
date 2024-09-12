@@ -43,6 +43,64 @@ type BracketPos = { row: number; column: number };
 
 const LINE_WIDTH = 150;
 
+function greatestSmallerPowerOf2(num: number) {
+  let power = 1;
+
+  // Keep multiplying by 2 until it exceeds the number
+  while (power * 2 <= num) {
+    power *= 2;
+  }
+
+  return power;
+}
+
+function splitBracket(bracket: IBracket) {
+  const firstBracket: IBracket = {
+    id: bracket.id,
+    bracketType: bracket.bracketType,
+    ageCategory: bracket.ageCategory,
+    rounds: [],
+  };
+
+  const secondBracket: IBracket = {
+    id: bracket.id,
+    bracketType: bracket.bracketType,
+    ageCategory: bracket.ageCategory,
+    rounds: [],
+  };
+
+  for (const round of bracket.rounds) {
+    const halfwayPoint = Math.ceil(round.seeds.length / 2);
+    const firstHalf = round.seeds.slice(0, halfwayPoint);
+    const secondHalf = round.seeds.slice(halfwayPoint);
+
+    // Exit if secondHalf is empty
+    if (secondHalf.length === 0) {
+      break; // Exits the function, stopping further processing
+    }
+
+    firstBracket.rounds.push({
+      id: round.id,
+      seeds: firstHalf,
+    });
+
+    secondBracket.rounds.push({
+      id: round.id,
+      seeds: secondHalf,
+    });
+  }
+
+  return { firstBracket, secondBracket };
+}
+
+async function drawBracket(
+  pdf: jsPDF,
+  pdfBracketLines: Line[][],
+  page: number
+) {
+  pdf.setPage(page);
+}
+
 const LineDiv = ({
   pos,
   line,
@@ -84,7 +142,7 @@ const LineDiv = ({
             const p2 = prevSeedParticipants.filter(
               (sp) => getName(sp.participant) !== participantName
             )[0];
-            setScore(`${p1.score}-${p2.score}`);
+            setScore(`${p1?.score}-${p2?.score}`);
           }
           setParticipant(participantName);
         } else {
@@ -98,13 +156,16 @@ const LineDiv = ({
 
   // isim boş işe null yap participant id i
   const saveParticipant = async () => {
+    if (!participant || participant.length === 0) return;
     const newName = await saveParticipantName(
       line.seedId!,
       pIndex,
       participant ?? ""
     );
     setParticipant(newName);
-    updateScores(newName, score[0], score[2]);
+    if (score.length === 3) {
+      updateScores(newName, score[0], score[2]);
+    }
   };
 
   const updateScores = async (
@@ -518,23 +579,27 @@ const BracketPage = () => {
     const pdf = new jsPDF({
       orientation: "landscape",
       unit: "px",
-      format: "a4",
+      format: "a4", // [1000, 1950]
     });
 
     const width = pdf.internal.pageSize.getWidth();
-    const height = pdf.internal.pageSize.getHeight();
-    const firstPageStartY = 20;
-    const startY = 20;
     const marginX = 35;
+    const lineWidth = (width - marginX) / (lines.length - 1);
 
-    const pdfBracketLines = await processBracket(
-      bracket,
-      30,
-      (width - marginX) / (lines.length - 1),
+    const { firstBracket, secondBracket } = splitBracket(bracket);
+    const firstBracketLines = await processBracket(
+      firstBracket,
+      20,
+      lineWidth,
       1
     );
 
-    console.log("pdf lines", pdfBracketLines);
+    const secondBracketLines = await processBracket(
+      secondBracket,
+      20,
+      lineWidth,
+      1
+    );
 
     setOpenAsFont(pdf);
     pdf.setLineWidth(2);
@@ -552,27 +617,21 @@ const BracketPage = () => {
       align: "center",
     });
 
-    pdf.setFontSize(16);
-
-    let currPage = 1;
-    const initialMaxLinesPerPage = 14;
-    const maxLinesPerPage = 14;
-    let linesPerPage = initialMaxLinesPerPage;
+    pdf.setFontSize(12);
 
     for (
       let roundIndex = 0;
-      roundIndex < pdfBracketLines.length;
+      roundIndex < firstBracketLines.length;
       roundIndex++
     ) {
-      for (let i = 0; i < pdfBracketLines[roundIndex].length; i++) {
-        if (currPage > 1 && linesPerPage === initialMaxLinesPerPage)
-          linesPerPage = 14;
-        const line = pdfBracketLines[roundIndex][i];
+      for (let i = 0; i < firstBracketLines[roundIndex].length; i++) {
+        const line = firstBracketLines[roundIndex][i];
         let name = "";
         let p1, p2;
         if (line.seedId) {
           const pIndex =
-            i >= 1 && pdfBracketLines[roundIndex][i - 1].seedId === line.seedId
+            i >= 1 &&
+            firstBracketLines[roundIndex][i - 1].seedId === line.seedId
               ? 1
               : 0;
           const seedParticipants = await getSeedParticipants(line.seedId);
@@ -592,111 +651,68 @@ const BracketPage = () => {
           }
         }
 
-        pdf.text(name, line.x1 + 10, startY + line.y1 - 5);
-        if (p1 && p2) {
-          pdf.text(
-            `${p1.score}-${p2.score}`,
-            line.x2 - 20,
-            startY + line.y1 - 5
-          );
-        }
         let y1 = line.y1;
         let y2 = line.y2;
 
-        console.log(`${roundIndex} : ${i}`, line);
+        let textY = y2 - 5;
 
-        let prevSeedPage = 1;
-        if (roundIndex > 0) {
-          // vertical line
-          if (y1 !== y2) {
-            if (y1 > height) {
-              let page = 1;
-              while (y1 > height) {
-                y1 -= height;
-                page++;
-              }
-              y1 -= 3.5;
-              y2 = y2 - height * (page - 1) - 3.5;
-              pdf.setPage(page);
-            }
-          } else {
-            const prevSeeds = pdfBracketLines[roundIndex - 1]
-              .map((prevLine, index) => {
-                if (prevLine.seedId === line.prevSeedId) {
-                  return { index, prevLine };
-                }
-              })
-              .filter((prevSeed) => prevSeed !== undefined);
+        pdf.text(name, line.x1 + 10, textY);
 
-            if (prevSeeds[0]) {
-              let index = prevSeeds[0].index + 1 - initialMaxLinesPerPage;
-              prevSeedPage = index > 0 ? 2 : 1;
-              while (index > maxLinesPerPage) {
-                index -= maxLinesPerPage;
-                prevSeedPage++;
-              }
-
-              pdf.setPage(prevSeedPage);
-
-              let y;
-
-              if (prevSeeds.length === 2) {
-                y = (prevSeeds[0].prevLine.y1 + prevSeeds[1].prevLine.y1) / 2;
-              } else if (prevSeeds.length === 1) {
-                y = prevSeeds[0].prevLine.y1;
-              }
-
-              if (y !== undefined) {
-                y =
-                  y + startY > height
-                    ? Math.ceil(y - 4 - (prevSeedPage - 1) * height)
-                    : y;
-
-                y1 = y2 = y;
-              }
-            }
-          }
-          if (prevSeedPage > 1) {
-            y1 += startY;
-            y2 += startY;
-          } else {
-            y1 += firstPageStartY;
-            y2 += firstPageStartY;
-          }
-
-          if (roundIndex === 4 && i === 0) {
-            console.log("v", y1, y2);
-          }
-        } else {
-          if (currPage > 1) {
-            const lineIndex =
-              currPage > 1
-                ? initialMaxLinesPerPage + (currPage - 2) * linesPerPage
-                : 0;
-
-            y1 = y1 - pdfBracketLines[roundIndex][lineIndex].y1 + startY;
-            y2 = y2 - pdfBracketLines[roundIndex][lineIndex].y2 + startY;
-          } else {
-            y1 += firstPageStartY;
-            y2 += firstPageStartY;
-          }
+        if (p1 && p2) {
+          pdf.text(`${p1.score}-${p2.score}`, line.x2 - 20, textY);
         }
 
         pdf.line(line.x1, y1, line.x2, y2);
-
-        const lineIndexInCurrPage =
-          currPage > 1
-            ? i - initialMaxLinesPerPage - (currPage - 2) * maxLinesPerPage
-            : i;
-
-        if (roundIndex === 0 && (lineIndexInCurrPage + 1) % linesPerPage == 0) {
-          pdf.addPage();
-          currPage++;
-        }
       }
-      currPage = 1;
-      linesPerPage = initialMaxLinesPerPage;
-      pdf.setPage(currPage);
+    }
+
+    pdf.addPage();
+
+    for (
+      let roundIndex = 0;
+      roundIndex < secondBracketLines.length;
+      roundIndex++
+    ) {
+      for (let i = 0; i < secondBracketLines[roundIndex].length; i++) {
+        const line = secondBracketLines[roundIndex][i];
+        let name = "";
+        let p1, p2;
+        if (line.seedId) {
+          const pIndex =
+            i >= 1 &&
+            secondBracketLines[roundIndex][i - 1].seedId === line.seedId
+              ? 1
+              : 0;
+          const seedParticipants = await getSeedParticipants(line.seedId);
+          if (seedParticipants[pIndex].participant) {
+            name = getName(seedParticipants[pIndex].participant);
+            if (line.prevSeedId) {
+              const prevSeedParticipants = await getSeedParticipants(
+                line.prevSeedId
+              );
+              p1 = prevSeedParticipants.filter(
+                (sp) => getName(sp.participant) === name
+              )[0];
+              p2 = prevSeedParticipants.filter(
+                (sp) => getName(sp.participant) !== name
+              )[0];
+            }
+          }
+        }
+
+        let y1 = line.y1;
+        let y2 = line.y2;
+
+        let textY = y2 - 5;
+
+        pdf.text(name, line.x1 + 10, textY);
+
+        if (p1 && p2) {
+          pdf.text(`${p1.score}-${p2.score}`, line.x2 - 20, textY);
+        }
+
+        pdf.line(line.x1, y1, line.x2, y2);
+      }
     }
 
     pdf.setLanguage("tr");
@@ -786,6 +802,7 @@ const BracketPage = () => {
       </div>
       <TransformWrapper
         initialScale={1}
+        minScale={0.5}
         panning={{ excluded: ["input", "line"] }}
       >
         <div className={styles.buttonContainer}>

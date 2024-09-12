@@ -84,7 +84,7 @@ export type Hotel = {
 
 export type Group = {
   id: number | null;
-  ageCategory: number;
+  ageCategory: AgeCategory;
   participants: Participant[];
 };
 

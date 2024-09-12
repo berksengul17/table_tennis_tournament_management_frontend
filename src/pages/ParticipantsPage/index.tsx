@@ -161,6 +161,7 @@ function ParticipantsPage({
           );
         },
         {
+          id: "phoneNumber",
           header: "Telefon Numarası",
           filterFn: "includesString",
           meta: {
@@ -276,6 +277,7 @@ function ParticipantsPage({
             .join(" ");
         },
         {
+          id: "pairName",
           header: "Eşi",
           filterFn: "includesString",
           meta: {
@@ -370,6 +372,8 @@ function ParticipantsPage({
   const updateRow = async (
     participantAgeCategory: any & { fullName: string }
   ) => {
+    console.log("participant age category", participantAgeCategory);
+
     let firstName = participantAgeCategory.firstName.trim();
     let lastName = participantAgeCategory.lastName.trim();
     if (participantAgeCategory.fullName) {
@@ -466,44 +470,6 @@ function ParticipantsPage({
   useEffect(() => {
     console.log(participants);
   }, [participants]);
-
-  // useEffect(() => {
-  //   if (selectedGender) {
-  //     const gender = genderOptions.find(
-  //       (option) => option.value === selectedGender
-  //     );
-
-  //     const filteredCategories = categories.filter((category) =>
-  //       gender?.categories.some((gCategory) => category.includes(gCategory))
-  //     );
-
-  //     console.log(filteredCategories);
-
-  //     setCategoryOptions(
-  //       filteredCategories.map((category, index) => ({
-  //         value: index.toString(),
-  //         label: category,
-  //       }))
-  //     );
-  //   }
-  // }, [selectedGender, categories]);
-
-  // useEffect(() => {
-  //   if (categoryOptions.length > 0) {
-  //     (async () => {
-  //       const ageList = await getAgeListByCategoryAndGender(
-  //         parseInt(selectedCategory),
-  //         selectedGender
-  //       );
-  //       setAgeListOptions(
-  //         ageList.map((age, index) => ({
-  //           value: index.toString(),
-  //           label: age,
-  //         }))
-  //       );
-  //     })();
-  //   }
-  // }, [categoryOptions, selectedCategory]);
 
   return (
     participants && (
