@@ -14,6 +14,7 @@ import ManageParticipantsPage from "./pages/ManageParticipantsPage/index.tsx";
 import NotFoundPage from "./pages/NotFoundPage";
 import ParticipantsPage from "./pages/ParticipantsPage";
 import RegisterPage from "./pages/RegisterPage/index.tsx";
+import SettingsPage from "./pages/SettingsPage/index.tsx";
 
 const router = createBrowserRouter([
   {
@@ -56,6 +57,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <ManageParticipantsPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "settings",
+        element: (
+          <ProtectedRoute>
+            <SettingsPage />
           </ProtectedRoute>
         ),
       },
