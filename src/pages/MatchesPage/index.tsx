@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
-import { Match } from "../../type";
-import { createMatches, getMatches } from "../../api/matchApi";
-import AgeCategoryTabs from "../../components/AgeCategoryTabs";
-import CategoryTabs from "../../components/CategoryTabs";
-import styles from "./index.module.css";
-import GroupMatch from "../../components/GroupMatch";
 import {
   downloadAllGroupTableTimePdf,
   downloadGroupTableTimePdf,
 } from "../../api/documentApi";
+import { createMatches, getMatches } from "../../api/matchApi";
+import AgeCategoryTabs from "../../components/AgeCategoryTabs";
+import CategoryTabs from "../../components/CategoryTabs";
+import GroupMatch from "../../components/GroupMatch";
+import { Match } from "../../type";
+import styles from "./index.module.css";
 
 function MatchesPage() {
   const [allGroupMatches, setAllGroupMatches] = useState<Match[][]>([]);
@@ -39,7 +39,7 @@ function MatchesPage() {
   };
 
   const downloadMatchScores = async () => {
-    await downloadGroupTableTimePdf(categoryActiveTab, ageActiveTab);
+    await downloadGroupTableTimePdf(categoryActiveTab, ageActiveTab, true);
   };
 
   return (

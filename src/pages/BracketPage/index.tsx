@@ -656,10 +656,10 @@ const BracketPage = () => {
 
         let textY = y2 - 5;
 
-        pdf.text(name, line.x1 + 10, textY);
+        pdf.text(name, line.x1 + 3, textY);
 
         if (p1 && p2) {
-          pdf.text(`${p1.score}-${p2.score}`, line.x2 - 20, textY);
+          pdf.text(`${p1.score}-${p2.score}`, line.x2 - 15, textY);
         }
 
         pdf.line(line.x1, y1, line.x2, y2);
